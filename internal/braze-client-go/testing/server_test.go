@@ -43,7 +43,7 @@ func TestServerServeHTTP(t *testing.T) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		t.Fatalf("http.DefaultClient.Do() error = %v", err)
+		t.Fatalf("http.Client.Do() error = %v", err)
 	}
 	defer resp.Body.Close()
 

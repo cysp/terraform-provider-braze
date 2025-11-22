@@ -1,0 +1,30 @@
+CreateContentBlockRequest:
+  type: object
+  required:
+    - name
+    - content
+  properties:
+    name:
+      type: string
+      description: Name of the Content Block. Must be less than 100 characters.
+      maxLength: 100
+    description:
+      type: string
+      description: Description of the Content Block. Must be less than 250 characters.
+      maxLength: 250
+    content:
+      type: string
+      description: HTML or text content within Content Block
+      maxLength: 51200
+    state:
+      type: string
+      enum:
+        - active
+        - draft
+      default: active
+      description: Choose active or draft. Defaults to active if not specified.
+    tags:
+      type: array
+      items:
+        type: string
+      description: Tags must already exist

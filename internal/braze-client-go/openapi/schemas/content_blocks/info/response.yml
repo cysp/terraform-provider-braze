@@ -1,0 +1,24 @@
+GetContentBlockInfoResponse:
+  type: object
+  required:
+    - content_block_id
+    - name
+    - content
+  properties:
+    content_block_id:
+      type: string
+      description: The Content Block identifier
+    name:
+      type: string
+      description: The name of the Content Block
+    content:
+      type: string
+      description: The content in the Content Block
+    description:
+      type: string
+      description: The Content Block description
+    tags:
+      type: array
+      items:
+        type: string
+      description: An array of tags formatted as strings

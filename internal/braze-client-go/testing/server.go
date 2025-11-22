@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"context"
 	"net/http"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
@@ -14,10 +15,17 @@ type Server struct {
 
 var _ http.Handler = (*Server)(nil)
 
+type noOpSecurityHandler struct{}
+
+//revive:disable:var-naming
+func (noOpSecurityHandler) HandleBrazeApiKey(ctx context.Context, _ brazeclient.OperationName, _ brazeclient.BrazeApiKey) (context.Context, error) {
+	return ctx, nil
+}
+
 func NewBrazeServer() (*Server, error) {
 	handler := NewBrazeHandler()
 
-	server, err := brazeclient.NewServer(handler)
+	server, err := brazeclient.NewServer(handler, noOpSecurityHandler{})
 	if err != nil {
 		//nolint:wrapcheck
 		return nil, err
@@ -34,5 +42,5 @@ func (s *Server) Handler() *Handler {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	http.NotFound(w, r)
+	s.server.ServeHTTP(w, r)
 }

@@ -1,0 +1,17 @@
+ErrorResponse:
+  description: Error response
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - message
+        properties:
+          message:
+            type: string
+            description: Error message describing what went wrong
+          errors:
+            type: array
+            items:
+              type: string
+            description: Array of minor error messages
