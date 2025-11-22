@@ -6,8 +6,12 @@ package brazeclient
 type OperationName = string
 
 const (
-	CreateContentBlockOperation  OperationName = "CreateContentBlock"
-	GetContentBlockInfoOperation OperationName = "GetContentBlockInfo"
-	ListContentBlocksOperation   OperationName = "ListContentBlocks"
-	UpdateContentBlockOperation  OperationName = "UpdateContentBlock"
+	CreateContentBlockOperation   OperationName = "CreateContentBlock"
+	CreateEmailTemplateOperation  OperationName = "CreateEmailTemplate"
+	GetContentBlockInfoOperation  OperationName = "GetContentBlockInfo"
+	GetEmailTemplateInfoOperation OperationName = "GetEmailTemplateInfo"
+	ListContentBlocksOperation    OperationName = "ListContentBlocks"
+	ListEmailTemplatesOperation   OperationName = "ListEmailTemplates"
+	UpdateContentBlockOperation   OperationName = "UpdateContentBlock"
+	UpdateEmailTemplateOperation  OperationName = "UpdateEmailTemplate"
 )

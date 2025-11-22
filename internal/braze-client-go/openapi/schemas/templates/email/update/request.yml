@@ -1,0 +1,38 @@
+UpdateEmailTemplateRequest:
+  type: object
+  required:
+    - email_template_id
+  properties:
+    email_template_id:
+      type: string
+      description: Your email template's API Identifier
+    template_name:
+      type: string
+      description: The name of your email template
+    description:
+      type: string
+      description: The email template description
+      nullable: true
+    subject:
+      type: string
+      description: The email template subject line
+    preheader:
+      type: string
+      description: The email preheader used to generate previews in some clients
+      nullable: true
+    body:
+      type: string
+      description: The email template body that may include HTML
+    plaintext_body:
+      type: string
+      description: A plaintext version of the email template body
+      nullable: true
+    should_inline_css:
+      type: boolean
+      description: If true, the inline_css feature will be applied to the template
+    tags:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: Tags must already exist

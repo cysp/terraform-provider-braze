@@ -48,9 +48,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/content_blocks/"
+		case '/': // Prefix: "/"
 
-			if l := len("/content_blocks/"); len(elem) >= l && elem[0:l] == "/content_blocks/" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -60,84 +60,192 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'c': // Prefix: "create"
+			case 'c': // Prefix: "content_blocks/"
 
-				if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+				if l := len("content_blocks/"); len(elem) >= l && elem[0:l] == "content_blocks/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "POST":
-						s.handleCreateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "POST")
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "create"
+
+					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleCreateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
+				case 'i': // Prefix: "info"
+
+					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetContentBlockInfoRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+				case 'l': // Prefix: "list"
+
+					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleListContentBlocksRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+				case 'u': // Prefix: "update"
+
+					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleUpdateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
 				}
 
-			case 'i': // Prefix: "info"
+			case 't': // Prefix: "templates/email/"
 
-				if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+				if l := len("templates/email/"); len(elem) >= l && elem[0:l] == "templates/email/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetContentBlockInfoRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
-				}
-
-			case 'l': // Prefix: "list"
-
-				if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
-					elem = elem[l:]
-				} else {
 					break
 				}
+				switch elem[0] {
+				case 'c': // Prefix: "create"
 
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleListContentBlocksRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
+					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+						elem = elem[l:]
+					} else {
+						break
 					}
 
-					return
-				}
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleCreateEmailTemplateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
 
-			case 'u': // Prefix: "update"
-
-				if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "POST":
-						s.handleUpdateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "POST")
+						return
 					}
 
-					return
+				case 'i': // Prefix: "info"
+
+					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleGetEmailTemplateInfoRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+				case 'l': // Prefix: "list"
+
+					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "GET":
+							s.handleListEmailTemplatesRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET")
+						}
+
+						return
+					}
+
+				case 'u': // Prefix: "update"
+
+					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch r.Method {
+						case "POST":
+							s.handleUpdateEmailTemplateRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "POST")
+						}
+
+						return
+					}
+
 				}
 
 			}
@@ -228,9 +336,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/content_blocks/"
+		case '/': // Prefix: "/"
 
-			if l := len("/content_blocks/"); len(elem) >= l && elem[0:l] == "/content_blocks/" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
@@ -240,104 +348,232 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'c': // Prefix: "create"
+			case 'c': // Prefix: "content_blocks/"
 
-				if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+				if l := len("content_blocks/"); len(elem) >= l && elem[0:l] == "content_blocks/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "POST":
-						r.name = CreateContentBlockOperation
-						r.summary = "Create Content Block"
-						r.operationID = "createContentBlock"
-						r.operationGroup = ""
-						r.pathPattern = "/content_blocks/create"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					break
+				}
+				switch elem[0] {
+				case 'c': // Prefix: "create"
+
+					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+						elem = elem[l:]
+					} else {
+						break
 					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = CreateContentBlockOperation
+							r.summary = "Create Content Block"
+							r.operationID = "createContentBlock"
+							r.operationGroup = ""
+							r.pathPattern = "/content_blocks/create"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'i': // Prefix: "info"
+
+					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = GetContentBlockInfoOperation
+							r.summary = "See Content Block information"
+							r.operationID = "getContentBlockInfo"
+							r.operationGroup = ""
+							r.pathPattern = "/content_blocks/info"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'l': // Prefix: "list"
+
+					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = ListContentBlocksOperation
+							r.summary = "List available Content Blocks"
+							r.operationID = "listContentBlocks"
+							r.operationGroup = ""
+							r.pathPattern = "/content_blocks/list"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'u': // Prefix: "update"
+
+					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = UpdateContentBlockOperation
+							r.summary = "Update Content Block"
+							r.operationID = "updateContentBlock"
+							r.operationGroup = ""
+							r.pathPattern = "/content_blocks/update"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
 				}
 
-			case 'i': // Prefix: "info"
+			case 't': // Prefix: "templates/email/"
 
-				if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+				if l := len("templates/email/"); len(elem) >= l && elem[0:l] == "templates/email/" {
 					elem = elem[l:]
 				} else {
 					break
 				}
 
 				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "GET":
-						r.name = GetContentBlockInfoOperation
-						r.summary = "See Content Block information"
-						r.operationID = "getContentBlockInfo"
-						r.operationGroup = ""
-						r.pathPattern = "/content_blocks/info"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-
-			case 'l': // Prefix: "list"
-
-				if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
-					elem = elem[l:]
-				} else {
 					break
 				}
+				switch elem[0] {
+				case 'c': // Prefix: "create"
 
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "GET":
-						r.name = ListContentBlocksOperation
-						r.summary = "List available Content Blocks"
-						r.operationID = "listContentBlocks"
-						r.operationGroup = ""
-						r.pathPattern = "/content_blocks/list"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+						elem = elem[l:]
+					} else {
+						break
 					}
-				}
 
-			case 'u': // Prefix: "update"
-
-				if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "POST":
-						r.name = UpdateContentBlockOperation
-						r.summary = "Update Content Block"
-						r.operationID = "updateContentBlock"
-						r.operationGroup = ""
-						r.pathPattern = "/content_blocks/update"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = CreateEmailTemplateOperation
+							r.summary = "Create email template"
+							r.operationID = "createEmailTemplate"
+							r.operationGroup = ""
+							r.pathPattern = "/templates/email/create"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
 					}
+
+				case 'i': // Prefix: "info"
+
+					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = GetEmailTemplateInfoOperation
+							r.summary = "See email template information"
+							r.operationID = "getEmailTemplateInfo"
+							r.operationGroup = ""
+							r.pathPattern = "/templates/email/info"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'l': // Prefix: "list"
+
+					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "GET":
+							r.name = ListEmailTemplatesOperation
+							r.summary = "List available email templates"
+							r.operationID = "listEmailTemplates"
+							r.operationGroup = ""
+							r.pathPattern = "/templates/email/list"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
+				case 'u': // Prefix: "update"
+
+					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						// Leaf node.
+						switch method {
+						case "POST":
+							r.name = UpdateEmailTemplateOperation
+							r.summary = "Update email template"
+							r.operationID = "updateEmailTemplate"
+							r.operationGroup = ""
+							r.pathPattern = "/templates/email/update"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+
 				}
 
 			}

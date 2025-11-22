@@ -1,0 +1,32 @@
+ListEmailTemplatesResponse:
+  type: object
+  required:
+    - count
+    - templates
+  properties:
+    count:
+      type: integer
+      description: The number of templates returned
+    templates:
+      type: array
+      items:
+        $ref: '#/ListEmailTemplatesResponseTemplate'
+
+ListEmailTemplatesResponseTemplate:
+  type: object
+  required:
+    - email_template_id
+    - template_name
+  properties:
+    email_template_id:
+      type: string
+      description: Your email template's API Identifier
+    template_name:
+      type: string
+      description: The name of your email template
+    tags:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: Tags appended to the template

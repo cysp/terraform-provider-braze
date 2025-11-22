@@ -23,7 +23,41 @@ func encodeCreateContentBlockResponse(response *CreateContentBlockResponse, w ht
 	return nil
 }
 
+func encodeCreateEmailTemplateResponse(response *CreateEmailTemplateResponse, w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(201)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeGetContentBlockInfoResponse(response *GetContentBlockInfoResponse, w http.ResponseWriter) error {
+	if err := func() error {
+		if err := response.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "validate")
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeGetEmailTemplateInfoResponse(response *GetEmailTemplateInfoResponse, w http.ResponseWriter) error {
 	if err := func() error {
 		if err := response.Validate(); err != nil {
 			return err
@@ -65,7 +99,41 @@ func encodeListContentBlocksResponse(response *ListContentBlocksResponse, w http
 	return nil
 }
 
+func encodeListEmailTemplatesResponse(response *ListEmailTemplatesResponse, w http.ResponseWriter) error {
+	if err := func() error {
+		if err := response.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "validate")
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeUpdateContentBlockResponse(response *UpdateContentBlockResponse, w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(200)
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
+func encodeUpdateEmailTemplateResponse(response *UpdateEmailTemplateResponse, w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 
