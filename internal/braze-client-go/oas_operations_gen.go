@@ -5,4 +5,9 @@ package brazeclient
 // OperationName is the ogen operation name
 type OperationName = string
 
-const ()
+const (
+	CreateContentBlockOperation  OperationName = "CreateContentBlock"
+	GetContentBlockInfoOperation OperationName = "GetContentBlockInfo"
+	ListContentBlocksOperation   OperationName = "ListContentBlocks"
+	UpdateContentBlockOperation  OperationName = "UpdateContentBlock"
+)

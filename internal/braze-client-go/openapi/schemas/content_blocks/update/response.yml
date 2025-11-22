@@ -1,0 +1,13 @@
+UpdateContentBlockResponse:
+  type: object
+  required:
+    - content_block_id
+    - message
+  properties:
+    content_block_id:
+      type: string
+      description: Your newly generated block ID
+    message:
+      type: string
+      description: Success message
+      example: success

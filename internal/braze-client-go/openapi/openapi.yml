@@ -8,6 +8,133 @@ components:
       type: http
       scheme: bearer
       bearerFormat: Braze
+
 security:
   - brazeApiKey: []
-paths: {}
+
+paths:
+  /content_blocks/list:
+    get:
+      summary: List available Content Blocks
+      description: List your existing Content Blocks information
+      operationId: listContentBlocks
+      tags:
+        - Content Blocks
+      parameters:
+        - name: modified_after
+          in: query
+          description: Retrieve only Content Blocks updated at or after the given time
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modified_before
+          in: query
+          description: Retrieve only Content Blocks updated at or before the given time
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of Content Blocks to retrieve (default 100, max 1000)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Number of Content Blocks to skip before returning results
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/content_blocks/list/response.yml#/ListContentBlocksResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /content_blocks/info:
+    get:
+      summary: See Content Block information
+      description: Call information for your existing Content Blocks
+      operationId: getContentBlockInfo
+      tags:
+        - Content Blocks
+      parameters:
+        - name: content_block_id
+          in: query
+          description: Content Block identifier
+          required: true
+          schema:
+            type: string
+        - name: include_inclusion_data
+          in: query
+          description: When set to true, returns Message Variation API identifiers where this Content Block is included
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/content_blocks/info/response.yml#/GetContentBlockInfoResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /content_blocks/create:
+    post:
+      summary: Create Content Block
+      description: Create a Content Block on the Braze dashboard
+      operationId: createContentBlock
+      tags:
+        - Content Blocks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/content_blocks/create/request.yml#/CreateContentBlockRequest'
+      responses:
+        '201':
+          description: Content Block created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/content_blocks/create/response.yml#/CreateContentBlockResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /content_blocks/update:
+    post:
+      summary: Update Content Block
+      description: Update a Content Block on the Braze dashboard
+      operationId: updateContentBlock
+      tags:
+        - Content Blocks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/content_blocks/update/request.yml#/UpdateContentBlockRequest'
+      responses:
+        '200':
+          description: Content Block updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/content_blocks/update/response.yml#/UpdateContentBlockResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'

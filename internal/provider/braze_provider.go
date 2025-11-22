@@ -109,8 +109,6 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		apiKey = p.apiKey
 	}
 
-	_ = apiKey
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -126,6 +124,7 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	brazeClient, err := brazeclient.NewClient(
 		baseURL,
+		NewBrazeAPIKeySecuritySource(apiKey),
 		brazeclient.WithClient(NewHTTPClientWithUserAgent(retryableClient.StandardClient(), "terraform-provider-braze/"+p.version)),
 	)
 	if err != nil {
@@ -148,9 +147,13 @@ func (p *brazeProvider) DataSources(_ context.Context) []func() datasource.DataS
 }
 
 func (p *brazeProvider) ListResources(context.Context) []func() list.ListResource {
-	return []func() list.ListResource{}
+	return []func() list.ListResource{
+		NewBrazeContentBlockListResource,
+	}
 }
 
 func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewBrazeContentBlockResource,
+	}
 }

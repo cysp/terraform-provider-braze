@@ -1,0 +1,31 @@
+ListContentBlocksResponse:
+  type: object
+  required:
+    - count
+    - content_blocks
+  properties:
+    count:
+      type: integer
+      description: The number of Content Blocks returned
+    content_blocks:
+      type: array
+      items:
+        $ref: '#/ListContentBlocksResponseContentBlock'
+
+ListContentBlocksResponseContentBlock:
+  type: object
+  required:
+    - content_block_id
+    - name
+  properties:
+    content_block_id:
+      type: string
+      description: The Content Block identifier
+    name:
+      type: string
+      description: The name of the Content Block
+    tags:
+      type: array
+      items:
+        type: string
+      description: Tags formatted as strings

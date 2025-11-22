@@ -2,25 +2,59 @@
 
 package brazeclient
 
+import (
+	"context"
+)
+
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// CreateContentBlock implements createContentBlock operation.
+	//
+	// Create a Content Block on the Braze dashboard.
+	//
+	// POST /content_blocks/create
+	CreateContentBlock(ctx context.Context, req *CreateContentBlockRequest) (*CreateContentBlockResponse, error)
+	// GetContentBlockInfo implements getContentBlockInfo operation.
+	//
+	// Call information for your existing Content Blocks.
+	//
+	// GET /content_blocks/info
+	GetContentBlockInfo(ctx context.Context, params GetContentBlockInfoParams) (*GetContentBlockInfoResponse, error)
+	// ListContentBlocks implements listContentBlocks operation.
+	//
+	// List your existing Content Blocks information.
+	//
+	// GET /content_blocks/list
+	ListContentBlocks(ctx context.Context, params ListContentBlocksParams) (*ListContentBlocksResponse, error)
+	// UpdateContentBlock implements updateContentBlock operation.
+	//
+	// Update a Content Block on the Braze dashboard.
+	//
+	// POST /content_blocks/update
+	UpdateContentBlock(ctx context.Context, req *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error)
+	// NewError creates *ErrorResponseStatusCode from error returned by handler.
+	//
+	// Used for common default response.
+	NewError(ctx context.Context, err error) *ErrorResponseStatusCode
 }
 
 // Server implements http server based on OpenAPI v3 specification and
 // calls Handler to handle requests.
 type Server struct {
-	h Handler
+	h   Handler
+	sec SecurityHandler
 	baseServer
 }
 
 // NewServer creates new Server.
-func NewServer(h Handler, opts ...ServerOption) (*Server, error) {
+func NewServer(h Handler, sec SecurityHandler, opts ...ServerOption) (*Server, error) {
 	s, err := newServerConfig(opts...).baseServer()
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
 		h:          h,
+		sec:        sec,
 		baseServer: s,
 	}, nil
 }
