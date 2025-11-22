@@ -1,0 +1,58 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    - depguard
+    - exhaustruct
+    - funlen
+    - lll
+    - wsl
+  settings:
+    cyclop:
+      max-complexity: 20
+      package-average: 0
+    varnamelen:
+      ignore-names:
+        - i
+        - k
+        - r
+        - v
+        - w
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+    rules:
+      - linters:
+          - revive
+        path: "util/*"
+        text: "var-naming: avoid meaningless package names"
+      - linters:
+          - revive
+        path: ".*_test.go"
+        text: "dot-imports: should not use dot imports"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

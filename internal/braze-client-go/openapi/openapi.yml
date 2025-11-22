@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Braze REST API
+  version: "0.1"
+components:
+  securitySchemes:
+    brazeApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: Braze
+security:
+  - brazeApiKey: []
+paths: {}

@@ -1,0 +1,19 @@
+parser:
+  allow_remote: true
+  infer_types: true
+
+generator:
+  features:
+    enable:
+      - "paths/client"
+      - "paths/server"
+      - "client/security/reentrant"
+      - "client/request/validation"
+      - "server/response/validation"
+    disable:
+      - "debug/example_tests"
+      - "ogen/otel"
+      - "ogen/unimplemented"
+      - "webhooks/client"
+      - "webhooks/server"
+  convenient_errors: "on"
