@@ -1,0 +1,27 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 65%
+        threshold: 0%
+    patch:
+      default:
+        informational: true
+
+comment:
+  layout: "condensed_header,condensed_files,diff,flags,components"
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 65%
+        threshold: 0%
+  individual_components:
+    - component_id: provider
+      name: provider
+      paths:
+        - internal/provider/**
+
+ignore:
+  - "main.go"
