@@ -32,3 +32,4 @@ component_management:
 
 ignore:
   - "main.go"
+  - "internal/braze-client-go/*_gen.go"
