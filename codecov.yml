@@ -18,6 +18,13 @@ component_management:
         target: 65%
         threshold: 0%
   individual_components:
+    - component_id: braze-client-go
+      name: braze-client-go
+      paths:
+        - internal/braze-client-go/**
+      statuses:
+        - type: project
+          informational: true
     - component_id: provider
       name: provider
       paths:
