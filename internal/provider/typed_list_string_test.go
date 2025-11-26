@@ -20,7 +20,7 @@ func TestNewTypedListFromStringSlice(t *testing.T) {
 	}{
 		"nil slice": {
 			input:    nil,
-			expected: NewTypedList([]types.String{}),
+			expected: NewTypedListNull[types.String](),
 		},
 		"empty slice": {
 			input:    []string{},
@@ -112,6 +112,14 @@ func TestTypedListToStringSlice(t *testing.T) {
 				types.StringValue("after"),
 			}),
 			expected: []string{"before", "", "after"},
+		},
+		"null list": {
+			input:    NewTypedListNull[types.String](),
+			expected: nil,
+		},
+		"unknown list": {
+			input:    NewTypedListUnknown[types.String](),
+			expected: nil,
 		},
 	}
 
