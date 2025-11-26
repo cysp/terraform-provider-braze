@@ -20,7 +20,7 @@ func TestNewTypedListFromStringSlice(t *testing.T) {
 	}{
 		"nil slice": {
 			input:    nil,
-			expected: NewTypedList([]types.String{}),
+			expected: NewTypedListNull[types.String](),
 		},
 		"empty slice": {
 			input:    []string{},

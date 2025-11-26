@@ -6,7 +6,7 @@ import (
 
 func NewTypedListFromStringSlice(slice []string) TypedList[types.String] {
 	if slice == nil {
-		return NewTypedList([]types.String{})
+		return NewTypedListNull[types.String]()
 	}
 
 	listElementValues := make([]types.String, len(slice))
@@ -18,6 +18,10 @@ func NewTypedListFromStringSlice(slice []string) TypedList[types.String] {
 }
 
 func TypedListToStringSlice(l TypedList[types.String]) []string {
+	if l.IsNull() || l.IsUnknown() {
+		return nil
+	}
+
 	elements := l.Elements()
 	knownCount := 0
 
