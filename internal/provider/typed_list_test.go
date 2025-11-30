@@ -432,11 +432,10 @@ func TestTypedListLen(t *testing.T) {
 func TestTypedListTypeAndCustomType(t *testing.T) {
 	t.Parallel()
 
-	ctx := t.Context()
-
 	t.Run("Type returns correct type", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := t.Context()
 		value := NewTypedList([]types.String{types.StringValue("test")})
 		attrType := value.Type(ctx)
 
@@ -447,6 +446,7 @@ func TestTypedListTypeAndCustomType(t *testing.T) {
 	t.Run("CustomType returns correct type", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := t.Context()
 		value := NewTypedList([]types.String{types.StringValue("test")})
 		customType := value.CustomType(ctx)
 
@@ -457,6 +457,7 @@ func TestTypedListTypeAndCustomType(t *testing.T) {
 	t.Run("Type and CustomType are equal", func(t *testing.T) {
 		t.Parallel()
 
+		ctx := t.Context()
 		value := NewTypedList([]types.String{})
 		assert.True(t, value.Type(ctx).Equal(value.CustomType(ctx)))
 	})
