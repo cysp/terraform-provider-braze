@@ -96,6 +96,10 @@ func (t TypedListType[T]) Equal(o attr.Type) bool {
 		return true
 	}
 
+	if elementType == nil || otherElementType == nil {
+		return false
+	}
+
 	return elementType.Equal(otherElementType)
 }
 

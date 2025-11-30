@@ -90,9 +90,7 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	var baseURL string
 	if !data.BaseURL.IsNull() {
 		baseURL = data.BaseURL.ValueString()
-	}
-
-	if baseURL == "" {
+	} else {
 		baseURL = p.baseURL
 	}
 
@@ -102,15 +100,9 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	} else {
 		if apiKeyFromEnv, found := os.LookupEnv("BRAZE_API_KEY"); found {
 			apiKey = apiKeyFromEnv
+		} else if p.apiKey != "" {
+			apiKey = p.apiKey
 		}
-	}
-
-	if apiKey == "" {
-		apiKey = p.apiKey
-	}
-
-	if resp.Diagnostics.HasError() {
-		return
 	}
 
 	retryableClient := retryablehttp.NewClient()
@@ -129,6 +121,8 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create Braze client", err.Error())
+
+		return
 	}
 
 	providerData := brazeProviderData{

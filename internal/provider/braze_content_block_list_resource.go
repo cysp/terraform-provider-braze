@@ -136,6 +136,8 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 					if !yield(result) {
 						return
 					}
+
+					continue
 				}
 
 				data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
