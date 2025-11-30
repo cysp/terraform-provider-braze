@@ -54,7 +54,9 @@ func TestAccBrazeContentBlockListWithFailedGetInfo(t *testing.T) {
 	// Set up a valid content block
 	server.SetContentBlock("valid-block-id", "valid-content-block", "<p>Valid content</p>", "", []string{})
 
-	// Set up an orphaned block that appears in list but fails when getting details
+	// Set up an orphaned block that appears in list but fails when getting details.
+	// This simulates a race condition where a block is deleted between listing and fetching details,
+	// or any other scenario where GetContentBlockInfo returns nil/error.
 	server.SetOrphanedContentBlock("orphaned-block-id", "orphaned-content-block", []string{})
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
@@ -76,8 +78,10 @@ func TestAccBrazeContentBlockListWithFailedGetInfo(t *testing.T) {
 					include_resource = true
 				}
 				`,
-				// The test should complete without panic even though one block fails to retrieve details
-				// We expect to see the valid block but not the orphaned one
+				// The test verifies that the provider handles GetContentBlockInfo failures gracefully:
+				// 1. No panic occurs when getResponse is nil
+				// 2. The valid block is still returned successfully
+				// 3. An error diagnostic is added for the failed block
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("braze_content_block.test", "id", "valid-block-id"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "name", "valid-content-block"),
