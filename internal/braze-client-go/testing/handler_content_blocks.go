@@ -14,13 +14,16 @@ func (h *Handler) ListContentBlocks(_ context.Context, _ brazeclient.ListContent
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	blocks := make([]brazeclient.ListContentBlocksResponseContentBlock, 0, len(h.contentBlocks))
+	blocks := make([]brazeclient.ListContentBlocksResponseContentBlock, 0, len(h.contentBlocks)+len(h.orphanedBlocks))
 	for _, block := range h.contentBlocks {
 		blocks = append(blocks, brazeclient.ListContentBlocksResponseContentBlock{
 			ContentBlockID: block.ContentBlockID,
 			Name:           block.Name,
 			Tags:           block.Tags,
 		})
+	}
+	for _, block := range h.orphanedBlocks {
+		blocks = append(blocks, block)
 	}
 
 	return &brazeclient.ListContentBlocksResponse{
@@ -125,4 +128,17 @@ func (h *Handler) setContentBlock(contentBlockID, name, content, description str
 	}
 
 	h.contentBlocks[contentBlockID] = block
+}
+
+func (h *Handler) setOrphanedContentBlock(contentBlockID, name string, tags []string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	block := brazeclient.ListContentBlocksResponseContentBlock{
+		ContentBlockID: contentBlockID,
+		Name:           name,
+		Tags:           slices.Clone(tags),
+	}
+
+	h.orphanedBlocks[contentBlockID] = block
 }
