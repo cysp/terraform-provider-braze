@@ -92,7 +92,7 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		baseURL = data.BaseURL.ValueString()
 	}
 
-	if baseURL == "" {
+	if baseURL == "" && data.BaseURL.IsNull() {
 		baseURL = p.baseURL
 	}
 
@@ -102,11 +102,9 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	} else {
 		if apiKeyFromEnv, found := os.LookupEnv("BRAZE_API_KEY"); found {
 			apiKey = apiKeyFromEnv
+		} else if p.apiKey != "" {
+			apiKey = p.apiKey
 		}
-	}
-
-	if apiKey == "" {
-		apiKey = p.apiKey
 	}
 
 	if resp.Diagnostics.HasError() {
