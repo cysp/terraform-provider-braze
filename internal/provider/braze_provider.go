@@ -107,10 +107,6 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		}
 	}
 
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	retryableClient := retryablehttp.NewClient()
 	retryableClient.RetryWaitMin = time.Duration(1) * time.Second
 	retryableClient.RetryWaitMax = time.Duration(3) * time.Second //nolint:mnd
@@ -127,6 +123,8 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create Braze client", err.Error())
+
+		return
 	}
 
 	providerData := brazeProviderData{
