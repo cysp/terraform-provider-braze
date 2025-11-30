@@ -256,3 +256,22 @@ func TestTypedListTypeEqual(t *testing.T) {
 		})
 	}
 }
+
+func TestTypedListTypeEqualOneNilElementType(t *testing.T) {
+	t.Parallel()
+
+	typedListNil := NewTypedListNull[attrValueTypeNil]().Type(t.Context())
+	typedListString := NewTypedListNull[types.String]().Type(t.Context())
+
+	t.Run("left", func(t *testing.T) {
+		t.Parallel()
+
+		assert.False(t, typedListNil.Equal(typedListString))
+	})
+
+	t.Run("right", func(t *testing.T) {
+		t.Parallel()
+
+		assert.False(t, typedListString.Equal(typedListNil))
+	})
+}
