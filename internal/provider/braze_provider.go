@@ -90,9 +90,7 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	var baseURL string
 	if !data.BaseURL.IsNull() {
 		baseURL = data.BaseURL.ValueString()
-	}
-
-	if baseURL == "" && data.BaseURL.IsNull() {
+	} else {
 		baseURL = p.baseURL
 	}
 
