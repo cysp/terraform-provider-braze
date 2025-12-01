@@ -41,13 +41,9 @@ func (s *CreateContentBlockRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Tags != nil {
+		if s.Tags.Set {
 			e.FieldStart("tags")
-			e.ArrStart()
-			for _, elem := range s.Tags {
-				e.Str(elem)
-			}
-			e.ArrEnd()
+			s.Tags.Encode(e)
 		}
 	}
 }
@@ -116,17 +112,8 @@ func (s *CreateContentBlockRequest) Decode(d *jx.Decoder) error {
 			}
 		case "tags":
 			if err := func() error {
-				s.Tags = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.Tags = append(s.Tags, elem)
-					return nil
-				}); err != nil {
+				s.Tags.Reset()
+				if err := s.Tags.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -496,13 +483,9 @@ func (s *GetContentBlockInfoResponse) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Tags != nil {
+		if s.Tags.Set {
 			e.FieldStart("tags")
-			e.ArrStart()
-			for _, elem := range s.Tags {
-				e.Str(elem)
-			}
-			e.ArrEnd()
+			s.Tags.Encode(e)
 		}
 	}
 }
@@ -572,17 +555,8 @@ func (s *GetContentBlockInfoResponse) Decode(d *jx.Decoder) error {
 			}
 		case "tags":
 			if err := func() error {
-				s.Tags = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.Tags = append(s.Tags, elem)
-					return nil
-				}); err != nil {
+				s.Tags.Reset()
+				if err := s.Tags.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -786,13 +760,9 @@ func (s *ListContentBlocksResponseContentBlock) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
-		if s.Tags != nil {
+		if s.Tags.Set {
 			e.FieldStart("tags")
-			e.ArrStart()
-			for _, elem := range s.Tags {
-				e.Str(elem)
-			}
-			e.ArrEnd()
+			s.Tags.Encode(e)
 		}
 	}
 }
@@ -838,17 +808,8 @@ func (s *ListContentBlocksResponseContentBlock) Decode(d *jx.Decoder) error {
 			}
 		case "tags":
 			if err := func() error {
-				s.Tags = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.Tags = append(s.Tags, elem)
-					return nil
-				}); err != nil {
+				s.Tags.Reset()
+				if err := s.Tags.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -995,6 +956,69 @@ func (s *OptNilString) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes []string as json.
+func (o OptNilStringArray) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.ArrStart()
+	for _, elem := range o.Value {
+		e.Str(elem)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes []string from json.
+func (o *OptNilStringArray) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilStringArray to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v []string
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	o.Value = make([]string, 0)
+	if err := d.Arr(func(d *jx.Decoder) error {
+		var elem string
+		v, err := d.Str()
+		elem = string(v)
+		if err != nil {
+			return err
+		}
+		o.Value = append(o.Value, elem)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilStringArray) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilStringArray) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -1101,13 +1125,9 @@ func (s *UpdateContentBlockRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.Tags != nil {
+		if s.Tags.Set {
 			e.FieldStart("tags")
-			e.ArrStart()
-			for _, elem := range s.Tags {
-				e.Str(elem)
-			}
-			e.ArrEnd()
+			s.Tags.Encode(e)
 		}
 	}
 }
@@ -1184,17 +1204,8 @@ func (s *UpdateContentBlockRequest) Decode(d *jx.Decoder) error {
 			}
 		case "tags":
 			if err := func() error {
-				s.Tags = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.Tags = append(s.Tags, elem)
-					return nil
-				}); err != nil {
+				s.Tags.Reset()
+				if err := s.Tags.Decode(d); err != nil {
 					return err
 				}
 				return nil

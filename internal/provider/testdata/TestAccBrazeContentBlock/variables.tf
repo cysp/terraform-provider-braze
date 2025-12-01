@@ -15,5 +15,5 @@ variable "content_block_content" {
 
 variable "content_block_tags" {
   type    = list(string)
-  default = []
+  default = null
 }

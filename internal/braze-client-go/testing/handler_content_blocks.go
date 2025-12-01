@@ -61,8 +61,12 @@ func (h *Handler) CreateContentBlock(_ context.Context, req *brazeclient.CreateC
 		block.Description = req.Description
 	}
 
-	if req.Tags != nil {
-		block.Tags = slices.Clone(req.Tags)
+	if req.Tags.IsSet() {
+		if req.Tags.IsNull() {
+			block.Tags.SetToNull()
+		} else {
+			block.Tags.SetTo(slices.Clone(req.Tags.Value))
+		}
 	}
 
 	h.contentBlocks[blockID] = block
@@ -103,8 +107,12 @@ func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateC
 		}
 	}
 
-	if req.Tags != nil {
-		block.Tags = slices.Clone(req.Tags)
+	if req.Tags.IsSet() {
+		if req.Tags.IsNull() {
+			block.Tags.SetToNull()
+		} else {
+			block.Tags.SetTo(slices.Clone(req.Tags.Value))
+		}
 	}
 
 	return &brazeclient.UpdateContentBlockResponse{
@@ -121,11 +129,16 @@ func (h *Handler) setContentBlock(contentBlockID, name, content, description str
 		ContentBlockID: contentBlockID,
 		Name:           name,
 		Content:        content,
-		Tags:           slices.Clone(tags),
 	}
 
 	if description != "" {
 		block.Description = brazeclient.NewOptNilString(description)
+	}
+
+	if tags != nil {
+		block.Tags.SetTo(slices.Clone(tags))
+	} else {
+		block.Tags.SetToNull()
 	}
 
 	h.contentBlocks[contentBlockID] = block

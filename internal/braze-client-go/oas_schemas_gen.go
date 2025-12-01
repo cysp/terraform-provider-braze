@@ -49,7 +49,7 @@ type CreateContentBlockRequest struct {
 	// Choose active or draft. Defaults to active if not specified.
 	State OptCreateContentBlockRequestState `json:"state"`
 	// Tags must already exist.
-	Tags []string `json:"tags"`
+	Tags OptNilStringArray `json:"tags"`
 }
 
 // GetName returns the value of Name.
@@ -73,7 +73,7 @@ func (s *CreateContentBlockRequest) GetState() OptCreateContentBlockRequestState
 }
 
 // GetTags returns the value of Tags.
-func (s *CreateContentBlockRequest) GetTags() []string {
+func (s *CreateContentBlockRequest) GetTags() OptNilStringArray {
 	return s.Tags
 }
 
@@ -98,7 +98,7 @@ func (s *CreateContentBlockRequest) SetState(val OptCreateContentBlockRequestSta
 }
 
 // SetTags sets the value of Tags.
-func (s *CreateContentBlockRequest) SetTags(val []string) {
+func (s *CreateContentBlockRequest) SetTags(val OptNilStringArray) {
 	s.Tags = val
 }
 
@@ -236,7 +236,7 @@ type GetContentBlockInfoResponse struct {
 	// The Content Block description.
 	Description OptNilString `json:"description"`
 	// An array of tags formatted as strings.
-	Tags []string `json:"tags"`
+	Tags OptNilStringArray `json:"tags"`
 }
 
 // GetContentBlockID returns the value of ContentBlockID.
@@ -260,7 +260,7 @@ func (s *GetContentBlockInfoResponse) GetDescription() OptNilString {
 }
 
 // GetTags returns the value of Tags.
-func (s *GetContentBlockInfoResponse) GetTags() []string {
+func (s *GetContentBlockInfoResponse) GetTags() OptNilStringArray {
 	return s.Tags
 }
 
@@ -285,7 +285,7 @@ func (s *GetContentBlockInfoResponse) SetDescription(val OptNilString) {
 }
 
 // SetTags sets the value of Tags.
-func (s *GetContentBlockInfoResponse) SetTags(val []string) {
+func (s *GetContentBlockInfoResponse) SetTags(val OptNilStringArray) {
 	s.Tags = val
 }
 
@@ -323,7 +323,7 @@ type ListContentBlocksResponseContentBlock struct {
 	// The name of the Content Block.
 	Name string `json:"name"`
 	// Tags formatted as strings.
-	Tags []string `json:"tags"`
+	Tags OptNilStringArray `json:"tags"`
 }
 
 // GetContentBlockID returns the value of ContentBlockID.
@@ -337,7 +337,7 @@ func (s *ListContentBlocksResponseContentBlock) GetName() string {
 }
 
 // GetTags returns the value of Tags.
-func (s *ListContentBlocksResponseContentBlock) GetTags() []string {
+func (s *ListContentBlocksResponseContentBlock) GetTags() OptNilStringArray {
 	return s.Tags
 }
 
@@ -352,7 +352,7 @@ func (s *ListContentBlocksResponseContentBlock) SetName(val string) {
 }
 
 // SetTags sets the value of Tags.
-func (s *ListContentBlocksResponseContentBlock) SetTags(val []string) {
+func (s *ListContentBlocksResponseContentBlock) SetTags(val OptNilStringArray) {
 	s.Tags = val
 }
 
@@ -603,6 +603,69 @@ func (o OptNilString) Or(d string) string {
 	return d
 }
 
+// NewOptNilStringArray returns new OptNilStringArray with value set to v.
+func NewOptNilStringArray(v []string) OptNilStringArray {
+	return OptNilStringArray{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilStringArray is optional nullable []string.
+type OptNilStringArray struct {
+	Value []string
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilStringArray was set.
+func (o OptNilStringArray) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilStringArray) Reset() {
+	var v []string
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilStringArray) SetTo(v []string) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilStringArray) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilStringArray) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v []string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilStringArray) Get() (v []string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilStringArray) Or(d []string) []string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -708,7 +771,7 @@ type UpdateContentBlockRequest struct {
 	// Choose active or draft. Defaults to active if not specified.
 	State OptUpdateContentBlockRequestState `json:"state"`
 	// Tags must already exist.
-	Tags []string `json:"tags"`
+	Tags OptNilStringArray `json:"tags"`
 }
 
 // GetContentBlockID returns the value of ContentBlockID.
@@ -737,7 +800,7 @@ func (s *UpdateContentBlockRequest) GetState() OptUpdateContentBlockRequestState
 }
 
 // GetTags returns the value of Tags.
-func (s *UpdateContentBlockRequest) GetTags() []string {
+func (s *UpdateContentBlockRequest) GetTags() OptNilStringArray {
 	return s.Tags
 }
 
@@ -767,7 +830,7 @@ func (s *UpdateContentBlockRequest) SetState(val OptUpdateContentBlockRequestSta
 }
 
 // SetTags sets the value of Tags.
-func (s *UpdateContentBlockRequest) SetTags(val []string) {
+func (s *UpdateContentBlockRequest) SetTags(val OptNilStringArray) {
 	s.Tags = val
 }
 
