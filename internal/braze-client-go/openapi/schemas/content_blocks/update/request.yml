@@ -11,6 +11,7 @@ UpdateContentBlockRequest:
       description: Name of the Content Block. Must be less than 100 characters.
     description:
       type: string
+      nullable: true
       description: Description of the Content Block. Must be less than 250 characters.
     content:
       type: string

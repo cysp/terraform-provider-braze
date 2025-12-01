@@ -8,7 +8,7 @@ func (m brazeContentBlockModel) ToUpdateContentBlockRequest() brazeclient.Update
 	req := brazeclient.UpdateContentBlockRequest{
 		ContentBlockID: m.ID.ValueString(),
 		Name:           brazeclient.NewOptString(m.Name.ValueString()),
-		Description:    brazeclient.NewOptPointerString(m.Description.ValueStringPointer()),
+		Description:    brazeclient.NewOptNilPointerString(m.Description.ValueStringPointer()),
 		Content:        brazeclient.NewOptString(m.Content.ValueString()),
 		Tags:           TypedListToStringSlice(m.Tags),
 	}

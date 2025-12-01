@@ -33,6 +33,7 @@ func TestAccBrazeContentBlock(t *testing.T) {
 				ConfigVariables: configVariables1,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "description"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "content", "lorem ipsum"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
 				),
@@ -56,6 +57,7 @@ func TestAccBrazeContentBlock(t *testing.T) {
 				ConfigVariables: configVariables2,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "description"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "content", "lorem ipsum"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "2"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.0", "tag1"),

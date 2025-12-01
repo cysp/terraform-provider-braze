@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -49,8 +48,6 @@ func BrazeContentBlockResourceSchema(ctx context.Context) (schema.Schema, diag.D
 			"description": schema.StringAttribute{
 				Description: "An optional description of the content block.",
 				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(""),
 			},
 			"content": schema.StringAttribute{
 				Description: "The content of the content block.",

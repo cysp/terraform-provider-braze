@@ -43,7 +43,7 @@ type CreateContentBlockRequest struct {
 	// Name of the Content Block. Must be less than 100 characters.
 	Name string `json:"name"`
 	// Description of the Content Block. Must be less than 250 characters.
-	Description OptString `json:"description"`
+	Description OptNilString `json:"description"`
 	// HTML or text content within Content Block.
 	Content string `json:"content"`
 	// Choose active or draft. Defaults to active if not specified.
@@ -58,7 +58,7 @@ func (s *CreateContentBlockRequest) GetName() string {
 }
 
 // GetDescription returns the value of Description.
-func (s *CreateContentBlockRequest) GetDescription() OptString {
+func (s *CreateContentBlockRequest) GetDescription() OptNilString {
 	return s.Description
 }
 
@@ -83,7 +83,7 @@ func (s *CreateContentBlockRequest) SetName(val string) {
 }
 
 // SetDescription sets the value of Description.
-func (s *CreateContentBlockRequest) SetDescription(val OptString) {
+func (s *CreateContentBlockRequest) SetDescription(val OptNilString) {
 	s.Description = val
 }
 
@@ -234,7 +234,7 @@ type GetContentBlockInfoResponse struct {
 	// The content in the Content Block.
 	Content string `json:"content"`
 	// The Content Block description.
-	Description OptString `json:"description"`
+	Description OptNilString `json:"description"`
 	// An array of tags formatted as strings.
 	Tags []string `json:"tags"`
 }
@@ -255,7 +255,7 @@ func (s *GetContentBlockInfoResponse) GetContent() string {
 }
 
 // GetDescription returns the value of Description.
-func (s *GetContentBlockInfoResponse) GetDescription() OptString {
+func (s *GetContentBlockInfoResponse) GetDescription() OptNilString {
 	return s.Description
 }
 
@@ -280,7 +280,7 @@ func (s *GetContentBlockInfoResponse) SetContent(val string) {
 }
 
 // SetDescription sets the value of Description.
-func (s *GetContentBlockInfoResponse) SetDescription(val OptString) {
+func (s *GetContentBlockInfoResponse) SetDescription(val OptNilString) {
 	s.Description = val
 }
 
@@ -540,6 +540,69 @@ func (o OptInt) Or(d int) int {
 	return d
 }
 
+// NewOptNilString returns new OptNilString with value set to v.
+func NewOptNilString(v string) OptNilString {
+	return OptNilString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilString is optional nullable string.
+type OptNilString struct {
+	Value string
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilString was set.
+func (o OptNilString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilString) SetTo(v string) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilString) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilString) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -639,7 +702,7 @@ type UpdateContentBlockRequest struct {
 	// Name of the Content Block. Must be less than 100 characters.
 	Name OptString `json:"name"`
 	// Description of the Content Block. Must be less than 250 characters.
-	Description OptString `json:"description"`
+	Description OptNilString `json:"description"`
 	// HTML or text content within Content Block.
 	Content OptString `json:"content"`
 	// Choose active or draft. Defaults to active if not specified.
@@ -659,7 +722,7 @@ func (s *UpdateContentBlockRequest) GetName() OptString {
 }
 
 // GetDescription returns the value of Description.
-func (s *UpdateContentBlockRequest) GetDescription() OptString {
+func (s *UpdateContentBlockRequest) GetDescription() OptNilString {
 	return s.Description
 }
 
@@ -689,7 +752,7 @@ func (s *UpdateContentBlockRequest) SetName(val OptString) {
 }
 
 // SetDescription sets the value of Description.
-func (s *UpdateContentBlockRequest) SetDescription(val OptString) {
+func (s *UpdateContentBlockRequest) SetDescription(val OptNilString) {
 	s.Description = val
 }
 
