@@ -16,6 +16,7 @@ GetContentBlockInfoResponse:
       description: The content in the Content Block
     description:
       type: string
+      nullable: true
       description: The Content Block description
     tags:
       type: array

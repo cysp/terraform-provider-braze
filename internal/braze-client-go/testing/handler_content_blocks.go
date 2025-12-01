@@ -96,7 +96,11 @@ func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateC
 	}
 
 	if req.Description.IsSet() {
-		block.Description = req.Description
+		if req.Description.IsNull() {
+			block.Description.SetToNull()
+		} else {
+			block.Description = req.Description
+		}
 	}
 
 	if req.Tags != nil {
@@ -121,7 +125,7 @@ func (h *Handler) setContentBlock(contentBlockID, name, content, description str
 	}
 
 	if description != "" {
-		block.Description = brazeclient.NewOptString(description)
+		block.Description = brazeclient.NewOptNilString(description)
 	}
 
 	h.contentBlocks[contentBlockID] = block
