@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,11 +23,6 @@ func BrazeContentBlockResourceIdentitySchema() identityschema.Schema {
 
 func BrazeContentBlockResourceSchema(ctx context.Context) (schema.Schema, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-
-	emptyTypedListOfString := NewTypedList([]types.String{})
-
-	emptyTypedListOfStringListValue, emptyTypedListOfStringListValueDiags := emptyTypedListOfString.ToListValue(ctx)
-	diags.Append(emptyTypedListOfStringListValueDiags...)
 
 	schema := schema.Schema{
 		Description: "Manage Braze Content Blocks, reusable snippets for messaging campaigns.",
@@ -58,8 +52,6 @@ func BrazeContentBlockResourceSchema(ctx context.Context) (schema.Schema, diag.D
 				CustomType:  NewTypedListNull[types.String]().CustomType(ctx),
 				ElementType: types.StringType,
 				Optional:    true,
-				Computed:    true,
-				Default:     listdefault.StaticValue(emptyTypedListOfStringListValue),
 			},
 		},
 	}

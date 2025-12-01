@@ -15,7 +15,13 @@ func NewBrazeContentBlockModelFromGetContentBlockInfoResponse(response brazeclie
 		Name:        types.StringValue(response.GetName()),
 		Description: types.StringPointerValue(response.GetDescription().GetPointer()),
 		Content:     types.StringValue(response.GetContent()),
-		Tags:        NewTypedListFromStringSlice(response.GetTags()),
+	}
+
+	tags, tagsOk := response.Tags.Get()
+	if tagsOk {
+		model.Tags = NewTypedListFromStringSlice(tags)
+	} else {
+		model.Tags = NewTypedListNull[types.String]()
 	}
 
 	return model

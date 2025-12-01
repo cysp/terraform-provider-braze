@@ -10,7 +10,13 @@ func (m brazeContentBlockModel) ToUpdateContentBlockRequest() brazeclient.Update
 		Name:           brazeclient.NewOptString(m.Name.ValueString()),
 		Description:    brazeclient.NewOptNilPointerString(m.Description.ValueStringPointer()),
 		Content:        brazeclient.NewOptString(m.Content.ValueString()),
-		Tags:           TypedListToStringSlice(m.Tags),
+	}
+
+	tags := TypedListToStringSlice(m.Tags)
+	if tags != nil {
+		req.Tags.SetTo(tags)
+	} else {
+		req.Tags.SetToNull()
 	}
 
 	return req

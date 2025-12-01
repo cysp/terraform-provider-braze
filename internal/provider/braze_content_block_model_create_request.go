@@ -6,16 +6,16 @@ import (
 
 func (m brazeContentBlockModel) ToCreateContentBlockRequest() brazeclient.CreateContentBlockRequest {
 	req := brazeclient.CreateContentBlockRequest{
-		Name:    m.Name.ValueString(),
-		Content: m.Content.ValueString(),
-		Tags:    TypedListToStringSlice(m.Tags),
+		Name:        m.Name.ValueString(),
+		Description: brazeclient.NewOptNilPointerString(m.Description.ValueStringPointer()),
+		Content:     m.Content.ValueString(),
 	}
 
-	description := m.Description.ValueStringPointer()
-	if description != nil {
-		req.Description.SetTo(*description)
+	tags := TypedListToStringSlice(m.Tags)
+	if tags != nil {
+		req.Tags.SetTo(tags)
 	} else {
-		req.Description.SetToNull()
+		req.Tags.SetToNull()
 	}
 
 	return req
