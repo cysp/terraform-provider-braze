@@ -16,15 +16,27 @@ func TestAccBrazeContentBlock(t *testing.T) {
 
 	server, _ := brazeclienttesting.NewBrazeServer()
 
-	configVariables := config.Variables{
-		"content_block_name": config.StringVariable("test-content-block"),
+	configVariables1 := config.Variables{
+		"content_block_name":    config.StringVariable("test-content-block"),
+		"content_block_content": config.StringVariable("lorem ipsum"),
 	}
 
-	configVariables1 := maps.Clone(configVariables)
-	configVariables1["content_block_content"] = config.StringVariable("lorem ipsum")
+	configVariables2 := config.Variables{
+		"content_block_name":    config.StringVariable("test-content-block"),
+		"content_block_content": config.StringVariable("lorem ipsum"),
+		"content_block_tags":    config.ListVariable(config.StringVariable("tag1"), config.StringVariable("tag2")),
+	}
 
-	configVariables2 := maps.Clone(configVariables1)
-	configVariables2["content_block_tags"] = config.ListVariable(config.StringVariable("tag1"), config.StringVariable("tag2"))
+	configVariables3 := config.Variables{
+		"content_block_name":    config.StringVariable("test-content-block"),
+		"content_block_content": config.StringVariable("lorem ipsum"),
+		"content_block_tags":    config.ListVariable(),
+	}
+
+	configVariables4 := config.Variables{
+		"content_block_name":    config.StringVariable("test-content-block"),
+		"content_block_content": config.StringVariable("lorem ipsum"),
+	}
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		Steps: []resource.TestStep{
@@ -35,7 +47,7 @@ func TestAccBrazeContentBlock(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
 					resource.TestCheckNoResourceAttr("braze_content_block.test", "description"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "content", "lorem ipsum"),
-					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "tags"),
 				),
 			},
 			{
@@ -62,6 +74,26 @@ func TestAccBrazeContentBlock(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "2"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.0", "tag1"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.1", "tag2"),
+				),
+			},
+			{
+				ConfigDirectory: config.TestNameDirectory(),
+				ConfigVariables: configVariables3,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "description"),
+					resource.TestCheckResourceAttr("braze_content_block.test", "content", "lorem ipsum"),
+					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
+				),
+			},
+			{
+				ConfigDirectory: config.TestNameDirectory(),
+				ConfigVariables: configVariables4,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "description"),
+					resource.TestCheckResourceAttr("braze_content_block.test", "content", "lorem ipsum"),
+					resource.TestCheckNoResourceAttr("braze_content_block.test", "tags"),
 				),
 			},
 			{
