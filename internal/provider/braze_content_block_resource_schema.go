@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -21,10 +20,8 @@ func BrazeContentBlockResourceIdentitySchema() identityschema.Schema {
 	}
 }
 
-func BrazeContentBlockResourceSchema(ctx context.Context) (schema.Schema, diag.Diagnostics) {
-	diags := diag.Diagnostics{}
-
-	schema := schema.Schema{
+func BrazeContentBlockResourceSchema(ctx context.Context) schema.Schema {
+	return schema.Schema{
 		Description: "Manage Braze Content Blocks, reusable snippets for messaging campaigns.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -55,6 +52,4 @@ func BrazeContentBlockResourceSchema(ctx context.Context) (schema.Schema, diag.D
 			},
 		},
 	}
-
-	return schema, diags
 }
