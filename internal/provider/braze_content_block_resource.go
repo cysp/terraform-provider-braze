@@ -36,10 +36,7 @@ func (r *brazeContentBlockResource) IdentitySchema(_ context.Context, _ resource
 }
 
 func (r *brazeContentBlockResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
-	schema, schemaDiags := BrazeContentBlockResourceSchema(ctx)
-	resp.Diagnostics.Append(schemaDiags...)
-
-	resp.Schema = schema
+	resp.Schema = BrazeContentBlockResourceSchema(ctx)
 }
 
 func (r *brazeContentBlockResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
