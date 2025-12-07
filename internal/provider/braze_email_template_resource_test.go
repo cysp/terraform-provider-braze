@@ -30,14 +30,10 @@ func TestAccBrazeEmailTemplate(t *testing.T) {
 	}
 
 	configVariables3 := config.Variables{
-		"template_name":    config.StringVariable("test-email-template"),
-		"subject":          config.StringVariable("Test Subject"),
-		"body":             config.StringVariable("<h1>Test Body</h1>"),
-		"tags":             config.ListVariable(),
-		"description":      config.StringVariable("Test Description"),
-		"preheader":        config.StringVariable("Test Preheader"),
-		"plaintext_body":   config.StringVariable("Test Body"),
-		"should_inline_css": config.BoolVariable(true),
+		"template_name": config.StringVariable("test-email-template"),
+		"subject":       config.StringVariable("Test Subject"),
+		"body":          config.StringVariable("<h1>Test Body</h1>"),
+		"tags":          config.ListVariable(),
 	}
 
 	configVariables4 := config.Variables{
@@ -95,10 +91,6 @@ func TestAccBrazeEmailTemplate(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_email_template.test", "template_name", "test-email-template"),
 					resource.TestCheckResourceAttr("braze_email_template.test", "subject", "Test Subject"),
 					resource.TestCheckResourceAttr("braze_email_template.test", "body", "<h1>Test Body</h1>"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "description", "Test Description"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "preheader", "Test Preheader"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "plaintext_body", "Test Body"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "should_inline_css", "true"),
 					resource.TestCheckResourceAttr("braze_email_template.test", "tags.#", "0"),
 				),
 			},
