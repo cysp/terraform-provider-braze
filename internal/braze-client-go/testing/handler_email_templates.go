@@ -3,6 +3,7 @@ package testing
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"slices"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
@@ -44,6 +45,10 @@ func (h *Handler) CreateEmailTemplate(ctx context.Context, req *brazeclient.Crea
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
+	if req.TemplateName == "" {
+		return nil, newStatusCodeError(http.StatusUnprocessableEntity)
+	}
+
 	templateID := uuid.NewString()
 
 	template := &brazeclient.GetEmailTemplateInfoResponse{
@@ -51,6 +56,10 @@ func (h *Handler) CreateEmailTemplate(ctx context.Context, req *brazeclient.Crea
 		TemplateName:    req.TemplateName,
 		Subject:         req.Subject,
 		Body:            brazeclient.NewOptNilString(req.Body),
+	}
+
+	if req.Description.IsSet() {
+		template.Description = req.Description
 	}
 
 	if req.PlaintextBody.IsSet() {
@@ -91,7 +100,14 @@ func (h *Handler) UpdateEmailTemplate(ctx context.Context, req *brazeclient.Upda
 	}
 
 	if req.TemplateName.IsSet() {
+		if req.TemplateName.Value == "" {
+			return nil, newStatusCodeError(http.StatusUnprocessableEntity)
+		}
 		template.TemplateName = req.TemplateName.Value
+	}
+
+	if req.Description.IsSet() {
+		template.Description = req.Description
 	}
 
 	if req.Subject.IsSet() {
