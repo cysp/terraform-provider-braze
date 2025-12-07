@@ -7,30 +7,12 @@ import (
 func (m brazeEmailTemplateModel) ToUpdateEmailTemplateRequest() brazeclient.UpdateEmailTemplateRequest {
 	req := brazeclient.UpdateEmailTemplateRequest{
 		EmailTemplateID: m.ID.ValueString(),
-	}
-
-	if !m.TemplateName.IsNull() {
-		req.TemplateName.SetTo(m.TemplateName.ValueString())
-	}
-
-	if !m.Description.IsNull() {
-		req.Description = brazeclient.NewOptNilString(m.Description.ValueString())
-	}
-
-	if !m.Subject.IsNull() {
-		req.Subject.SetTo(m.Subject.ValueString())
-	}
-
-	if !m.Preheader.IsNull() {
-		req.Preheader = brazeclient.NewOptNilString(m.Preheader.ValueString())
-	}
-
-	if !m.Body.IsNull() {
-		req.Body.SetTo(m.Body.ValueString())
-	}
-
-	if !m.PlaintextBody.IsNull() {
-		req.PlaintextBody = brazeclient.NewOptNilString(m.PlaintextBody.ValueString())
+		TemplateName:    brazeclient.NewOptString(m.TemplateName.ValueString()),
+		Description:     brazeclient.NewOptNilPointerString(m.Description.ValueStringPointer()),
+		Subject:         brazeclient.NewOptString(m.Subject.ValueString()),
+		Preheader:       brazeclient.NewOptNilPointerString(m.Preheader.ValueStringPointer()),
+		Body:            brazeclient.NewOptString(m.Body.ValueString()),
+		PlaintextBody:   brazeclient.NewOptNilPointerString(m.PlaintextBody.ValueStringPointer()),
 	}
 
 	if !m.ShouldInlineCSS.IsNull() {

@@ -12,24 +12,17 @@ func NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(response brazecl
 			ID: types.StringValue(response.EmailTemplateID),
 		},
 
-		TemplateName: types.StringValue(response.TemplateName),
-		Subject:      types.StringValue(response.Subject),
+		TemplateName:  types.StringValue(response.TemplateName),
+		Description:   types.StringPointerValue(response.Description.GetPointer()),
+		Subject:       types.StringValue(response.Subject),
+		Preheader:     types.StringPointerValue(response.Preheader.GetPointer()),
+		PlaintextBody: types.StringPointerValue(response.PlaintextBody.GetPointer()),
 	}
 
-	if description, ok := response.Description.Get(); ok {
-		model.Description = types.StringPointerValue(&description)
-	}
-
-	if preheader, ok := response.Preheader.Get(); ok {
-		model.Preheader = types.StringPointerValue(&preheader)
-	}
-
-	if body, ok := response.Body.Get(); ok {
-		model.Body = types.StringPointerValue(&body)
-	}
-
-	if plaintextBody, ok := response.PlaintextBody.Get(); ok {
-		model.PlaintextBody = types.StringPointerValue(&plaintextBody)
+	if body := response.Body.GetPointer(); body != nil {
+		model.Body = types.StringValue(*body)
+	} else {
+		model.Body = types.StringValue("")
 	}
 
 	if shouldInlineCSS, ok := response.ShouldInlineCSS.Get(); ok {
