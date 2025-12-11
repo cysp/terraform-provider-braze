@@ -27,24 +27,48 @@ type Invoker interface {
 	//
 	// POST /content_blocks/create
 	CreateContentBlock(ctx context.Context, request *CreateContentBlockRequest) (*CreateContentBlockResponse, error)
+	// CreateEmailTemplate invokes createEmailTemplate operation.
+	//
+	// Create email templates on the Braze dashboard.
+	//
+	// POST /templates/email/create
+	CreateEmailTemplate(ctx context.Context, request *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
 	// GetContentBlockInfo invokes getContentBlockInfo operation.
 	//
 	// Call information for your existing Content Blocks.
 	//
 	// GET /content_blocks/info
 	GetContentBlockInfo(ctx context.Context, params GetContentBlockInfoParams) (*GetContentBlockInfoResponse, error)
+	// GetEmailTemplateInfo invokes getEmailTemplateInfo operation.
+	//
+	// Get information on your email templates.
+	//
+	// GET /templates/email/info
+	GetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (*GetEmailTemplateInfoResponse, error)
 	// ListContentBlocks invokes listContentBlocks operation.
 	//
 	// List your existing Content Blocks information.
 	//
 	// GET /content_blocks/list
 	ListContentBlocks(ctx context.Context, params ListContentBlocksParams) (*ListContentBlocksResponse, error)
+	// ListEmailTemplates invokes listEmailTemplates operation.
+	//
+	// Get a list of available email templates in your Braze account.
+	//
+	// GET /templates/email/list
+	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
 	// UpdateContentBlock invokes updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.
 	//
 	// POST /content_blocks/update
 	UpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error)
+	// UpdateEmailTemplate invokes updateEmailTemplate operation.
+	//
+	// Update email templates on the Braze dashboard.
+	//
+	// POST /templates/email/update
+	UpdateEmailTemplate(ctx context.Context, request *UpdateEmailTemplateRequest) (*UpdateEmailTemplateResponse, error)
 }
 
 // Client implements OAS client.
@@ -177,6 +201,87 @@ func (c *Client) sendCreateContentBlock(ctx context.Context, request *CreateCont
 	return result, nil
 }
 
+// CreateEmailTemplate invokes createEmailTemplate operation.
+//
+// Create email templates on the Braze dashboard.
+//
+// POST /templates/email/create
+func (c *Client) CreateEmailTemplate(ctx context.Context, request *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error) {
+	res, err := c.sendCreateEmailTemplate(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateEmailTemplate(ctx context.Context, request *CreateEmailTemplateRequest) (res *CreateEmailTemplateResponse, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/templates/email/create"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateEmailTemplateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, CreateEmailTemplateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeCreateEmailTemplateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetContentBlockInfo invokes getContentBlockInfo operation.
 //
 // Call information for your existing Content Blocks.
@@ -273,6 +378,92 @@ func (c *Client) sendGetContentBlockInfo(ctx context.Context, params GetContentB
 	defer resp.Body.Close()
 
 	result, err := decodeGetContentBlockInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetEmailTemplateInfo invokes getEmailTemplateInfo operation.
+//
+// Get information on your email templates.
+//
+// GET /templates/email/info
+func (c *Client) GetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (*GetEmailTemplateInfoResponse, error) {
+	res, err := c.sendGetEmailTemplateInfo(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (res *GetEmailTemplateInfoResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/templates/email/info"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "email_template_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "email_template_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.EmailTemplateID))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, GetEmailTemplateInfoOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeGetEmailTemplateInfoResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -420,6 +611,146 @@ func (c *Client) sendListContentBlocks(ctx context.Context, params ListContentBl
 	return result, nil
 }
 
+// ListEmailTemplates invokes listEmailTemplates operation.
+//
+// Get a list of available email templates in your Braze account.
+//
+// GET /templates/email/list
+func (c *Client) ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error) {
+	res, err := c.sendListEmailTemplates(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (res *ListEmailTemplatesResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/templates/email/list"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "modified_after" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "modified_after",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ModifiedAfter.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "modified_before" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "modified_before",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.ModifiedBefore.Get(); ok {
+				return e.EncodeValue(conv.DateTimeToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, ListEmailTemplatesOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeListEmailTemplatesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateContentBlock invokes updateContentBlock operation.
 //
 // Update a Content Block on the Braze dashboard.
@@ -494,6 +825,87 @@ func (c *Client) sendUpdateContentBlock(ctx context.Context, request *UpdateCont
 	defer resp.Body.Close()
 
 	result, err := decodeUpdateContentBlockResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateEmailTemplate invokes updateEmailTemplate operation.
+//
+// Update email templates on the Braze dashboard.
+//
+// POST /templates/email/update
+func (c *Client) UpdateEmailTemplate(ctx context.Context, request *UpdateEmailTemplateRequest) (*UpdateEmailTemplateResponse, error) {
+	res, err := c.sendUpdateEmailTemplate(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendUpdateEmailTemplate(ctx context.Context, request *UpdateEmailTemplateRequest) (res *UpdateEmailTemplateResponse, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/templates/email/update"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateEmailTemplateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, UpdateEmailTemplateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeUpdateEmailTemplateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
