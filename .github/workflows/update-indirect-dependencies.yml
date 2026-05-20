@@ -19,7 +19,7 @@ jobs:
           egress-policy: audit
 
       - id: cyspbot
-        uses: cysp/cyspbot-action@d37b872a37297da1ca5a9d15fa89d62028bff773 # v0.0.1
+        uses: cysp/cyspbot-action@d879d41c65cc2cc85387bc0f483f33f97d9001ae # v0.0.1
 
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
