@@ -50,7 +50,7 @@ jobs:
       - run: go mod download
       - run: go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... ./...
         timeout-minutes: 10
-      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+      - uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: test
@@ -85,7 +85,7 @@ jobs:
           TF_ACC: "1"
           BRAZE_API_KEY: ${{ secrets.BRAZE_API_KEY }}
         timeout-minutes: 10
-      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+      - uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: testacc-${{ matrix.terraform }}
