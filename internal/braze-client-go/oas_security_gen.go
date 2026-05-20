@@ -32,11 +32,33 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 	return "", false
 }
 
+// operationRolesBrazeApiKey is a private map storing roles per operation.
 var operationRolesBrazeApiKey = map[string][]string{
 	CreateContentBlockOperation:  []string{},
 	GetContentBlockInfoOperation: []string{},
 	ListContentBlocksOperation:   []string{},
 	UpdateContentBlockOperation:  []string{},
+}
+
+// GetRolesForBrazeApiKey returns the required roles for the given operation.
+//
+// This is useful for authorization scenarios where you need to know which roles
+// are required for an operation.
+//
+// Example:
+//
+//	requiredRoles := GetRolesForBrazeApiKey(AddPetOperation)
+//
+// Returns nil if the operation has no role requirements or if the operation is unknown.
+func GetRolesForBrazeApiKey(operation string) []string {
+	roles, ok := operationRolesBrazeApiKey[operation]
+	if !ok {
+		return nil
+	}
+	// Return a copy to prevent external modification
+	result := make([]string, len(roles))
+	copy(result, roles)
+	return result
 }
 
 func (s *Server) securityBrazeApiKey(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {

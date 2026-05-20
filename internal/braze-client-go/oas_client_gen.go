@@ -53,14 +53,6 @@ type Client struct {
 	sec       SecuritySource
 	baseClient
 }
-type errorHandler interface {
-	NewError(ctx context.Context, err error) *ErrorResponseStatusCode
-}
-
-var _ Handler = struct {
-	errorHandler
-	*Client
-}{}
 
 // NewClient initializes new Client defined by OAS.
 func NewClient(serverURL string, sec SecuritySource, opts ...ClientOption) (*Client, error) {
@@ -167,7 +159,8 @@ func (c *Client) sendCreateContentBlock(ctx context.Context, request *CreateCont
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	result, err := decodeCreateContentBlockResponse(resp)
 	if err != nil {
@@ -270,7 +263,8 @@ func (c *Client) sendGetContentBlockInfo(ctx context.Context, params GetContentB
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	result, err := decodeGetContentBlockInfoResponse(resp)
 	if err != nil {
@@ -410,7 +404,8 @@ func (c *Client) sendListContentBlocks(ctx context.Context, params ListContentBl
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	result, err := decodeListContentBlocksResponse(resp)
 	if err != nil {
@@ -491,7 +486,8 @@ func (c *Client) sendUpdateContentBlock(ctx context.Context, request *UpdateCont
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer body.Close()
 
 	result, err := decodeUpdateContentBlockResponse(resp)
 	if err != nil {
