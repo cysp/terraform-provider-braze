@@ -14,24 +14,48 @@ type Handler interface {
 	//
 	// POST /content_blocks/create
 	CreateContentBlock(ctx context.Context, req *CreateContentBlockRequest) (*CreateContentBlockResponse, error)
+	// CreateEmailTemplate implements createEmailTemplate operation.
+	//
+	// Create email templates on the Braze dashboard.
+	//
+	// POST /templates/email/create
+	CreateEmailTemplate(ctx context.Context, req *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
 	// GetContentBlockInfo implements getContentBlockInfo operation.
 	//
 	// Call information for your existing Content Blocks.
 	//
 	// GET /content_blocks/info
 	GetContentBlockInfo(ctx context.Context, params GetContentBlockInfoParams) (*GetContentBlockInfoResponse, error)
+	// GetEmailTemplateInfo implements getEmailTemplateInfo operation.
+	//
+	// Get information on your email templates.
+	//
+	// GET /templates/email/info
+	GetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (*GetEmailTemplateInfoResponse, error)
 	// ListContentBlocks implements listContentBlocks operation.
 	//
 	// List your existing Content Blocks information.
 	//
 	// GET /content_blocks/list
 	ListContentBlocks(ctx context.Context, params ListContentBlocksParams) (*ListContentBlocksResponse, error)
+	// ListEmailTemplates implements listEmailTemplates operation.
+	//
+	// Get a list of available email templates in your Braze account.
+	//
+	// GET /templates/email/list
+	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
 	// UpdateContentBlock implements updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.
 	//
 	// POST /content_blocks/update
 	UpdateContentBlock(ctx context.Context, req *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error)
+	// UpdateEmailTemplate implements updateEmailTemplate operation.
+	//
+	// Update email templates on the Braze dashboard.
+	//
+	// POST /templates/email/update
+	UpdateEmailTemplate(ctx context.Context, req *UpdateEmailTemplateRequest) (*UpdateEmailTemplateResponse, error)
 	// NewError creates *ErrorResponseStatusCode from error returned by handler.
 	//
 	// Used for common default response.

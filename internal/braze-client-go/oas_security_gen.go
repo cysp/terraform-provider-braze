@@ -33,10 +33,14 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 }
 
 var operationRolesBrazeApiKey = map[string][]string{
-	CreateContentBlockOperation:  []string{},
-	GetContentBlockInfoOperation: []string{},
-	ListContentBlocksOperation:   []string{},
-	UpdateContentBlockOperation:  []string{},
+	CreateContentBlockOperation:   []string{},
+	CreateEmailTemplateOperation:  []string{},
+	GetContentBlockInfoOperation:  []string{},
+	GetEmailTemplateInfoOperation: []string{},
+	ListContentBlocksOperation:    []string{},
+	ListEmailTemplatesOperation:   []string{},
+	UpdateContentBlockOperation:   []string{},
+	UpdateEmailTemplateOperation:  []string{},
 }
 
 func (s *Server) securityBrazeApiKey(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {

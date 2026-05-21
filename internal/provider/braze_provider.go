@@ -155,5 +155,6 @@ func (p *brazeProvider) ListResources(context.Context) []func() list.ListResourc
 func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewBrazeContentBlockResource,
+		NewBrazeEmailTemplateResource,
 	}
 }

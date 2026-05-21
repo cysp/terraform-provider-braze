@@ -129,6 +129,64 @@ func decodeGetContentBlockInfoParams(args [0]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
+// GetEmailTemplateInfoParams is parameters of getEmailTemplateInfo operation.
+type GetEmailTemplateInfoParams struct {
+	// Email template API identifier.
+	EmailTemplateID string
+}
+
+func unpackGetEmailTemplateInfoParams(packed middleware.Parameters) (params GetEmailTemplateInfoParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "email_template_id",
+			In:   "query",
+		}
+		params.EmailTemplateID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetEmailTemplateInfoParams(args [0]string, argsEscaped bool, r *http.Request) (params GetEmailTemplateInfoParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: email_template_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "email_template_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.EmailTemplateID = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "email_template_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ListContentBlocksParams is parameters of listContentBlocks operation.
 type ListContentBlocksParams struct {
 	// Retrieve only Content Blocks updated at or after the given time.
@@ -182,6 +240,287 @@ func unpackListContentBlocksParams(packed middleware.Parameters) (params ListCon
 }
 
 func decodeListContentBlocksParams(args [0]string, argsEscaped bool, r *http.Request) (params ListContentBlocksParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: modified_after.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "modified_after",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotModifiedAfterVal time.Time
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToDateTime(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotModifiedAfterVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ModifiedAfter.SetTo(paramsDotModifiedAfterVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "modified_after",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: modified_before.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "modified_before",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotModifiedBeforeVal time.Time
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToDateTime(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotModifiedBeforeVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.ModifiedBefore.SetTo(paramsDotModifiedBeforeVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "modified_before",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: limit.
+	{
+		val := int(100)
+		params.Limit.SetTo(val)
+	}
+	// Decode query: limit.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Limit.SetTo(paramsDotLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Limit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           1000,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "limit",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Set default value for query: offset.
+	{
+		val := int(0)
+		params.Offset.SetTo(val)
+	}
+	// Decode query: offset.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotOffsetVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOffsetVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Offset.SetTo(paramsDotOffsetVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.Offset.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           0,
+							MaxSet:        false,
+							Max:           0,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+							Pattern:       nil,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListEmailTemplatesParams is parameters of listEmailTemplates operation.
+type ListEmailTemplatesParams struct {
+	// Retrieve only templates updated at or after the given time.
+	ModifiedAfter OptDateTime `json:",omitempty,omitzero"`
+	// Retrieve only templates updated at or before the given time.
+	ModifiedBefore OptDateTime `json:",omitempty,omitzero"`
+	// Maximum number of templates to retrieve (default 100, max 1000).
+	Limit OptInt `json:",omitempty,omitzero"`
+	// Number of templates to skip before returning results.
+	Offset OptInt `json:",omitempty,omitzero"`
+}
+
+func unpackListEmailTemplatesParams(packed middleware.Parameters) (params ListEmailTemplatesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "modified_after",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ModifiedAfter = v.(OptDateTime)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "modified_before",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.ModifiedBefore = v.(OptDateTime)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "limit",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Limit = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "offset",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Offset = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeListEmailTemplatesParams(args [0]string, argsEscaped bool, r *http.Request) (params ListEmailTemplatesParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode query: modified_after.
 	if err := func() error {

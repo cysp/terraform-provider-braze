@@ -1,0 +1,13 @@
+UpdateEmailTemplateResponse:
+  type: object
+  required:
+    - email_template_id
+    - message
+  properties:
+    email_template_id:
+      type: string
+      description: Your newly generated template ID
+    message:
+      type: string
+      description: Success message
+      example: success
