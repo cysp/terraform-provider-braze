@@ -2,13 +2,9 @@ package provider
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
-	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -55,55 +51,18 @@ func (r *brazeContentBlockResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	createRequest := plan.ToCreateContentBlockRequest()
-
-	createResponse, createErr := r.providerData.client.CreateContentBlock(ctx, &createRequest)
-
-	tflog.Info(ctx, "braze_content_block.create", map[string]any{
-		"request":  createRequest,
-		"response": createResponse,
-		"err":      createErr,
-	})
-
-	if createResponse == nil || createErr != nil {
-		resp.Diagnostics.AddError("Failed to create Content Block", detailFromError(createErr))
-
-		return
-	}
-
-	contentBlockID := createResponse.GetContentBlockID()
-
-	resp.Diagnostics.Append(setIdentity(ctx, resp.Identity, &resp.State, contentBlockID)...)
-
-	getParams := brazeclient.GetContentBlockInfoParams{
-		ContentBlockID: contentBlockID,
-	}
-
-	getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_content_block.create.get", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddError("Content Block not found after creation", ersc.Error())
-
-			return
+	data, err := r.providerData.contentBlocks.Create(ctx, plan)
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddError("Content Block not found after creation", detailFromError(err))
+		} else {
+			resp.Diagnostics.AddError("Failed to create Content Block", detailFromError(err))
 		}
 
-		resp.Diagnostics.AddError("Failed to retrieve Content Block after creation", detailFromError(getErr))
-
 		return
 	}
 
-	contentBlockID = getResponse.GetContentBlockID()
-	data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, contentBlockID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeContentBlockResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -115,36 +74,21 @@ func (r *brazeContentBlockResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	getParams := brazeclient.GetContentBlockInfoParams{
-		ContentBlockID: state.ID.ValueString(),
-	}
-
-	getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_content_block.read", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddWarning("Content Block not found", ersc.Error())
+	data, err := r.providerData.contentBlocks.Read(ctx, state.ID.ValueString())
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddWarning("Content Block not found", detailFromError(err))
 			resp.State.RemoveResource(ctx)
 
 			return
 		}
 
-		resp.Diagnostics.AddError("Failed to read Content Block", detailFromError(getErr))
+		resp.Diagnostics.AddError("Failed to read Content Block", detailFromError(err))
 
 		return
 	}
 
-	contentBlockID := getResponse.GetContentBlockID()
-	data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, contentBlockID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeContentBlockResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -156,55 +100,18 @@ func (r *brazeContentBlockResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	updateRequest := plan.ToUpdateContentBlockRequest()
-
-	updateResponse, updateErr := r.providerData.client.UpdateContentBlock(ctx, &updateRequest)
-
-	tflog.Info(ctx, "braze_content_block.update", map[string]any{
-		"request":  updateRequest,
-		"response": updateResponse,
-		"err":      updateErr,
-	})
-
-	if updateResponse == nil || updateErr != nil {
-		resp.Diagnostics.AddError("Failed to update Content Block", detailFromError(updateErr))
-
-		return
-	}
-
-	contentBlockID := updateResponse.GetContentBlockID()
-
-	resp.Diagnostics.Append(setIdentity(ctx, resp.Identity, &resp.State, contentBlockID)...)
-
-	getParams := brazeclient.GetContentBlockInfoParams{
-		ContentBlockID: contentBlockID,
-	}
-
-	getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_content_block.update.get", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddError("Content Block not found after update", ersc.Error())
-
-			return
+	data, err := r.providerData.contentBlocks.Update(ctx, plan)
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddError("Content Block not found after update", detailFromError(err))
+		} else {
+			resp.Diagnostics.AddError("Failed to update Content Block", detailFromError(err))
 		}
 
-		resp.Diagnostics.AddError("Failed to retrieve Content Block after update", detailFromError(getErr))
-
 		return
 	}
 
-	contentBlockID = getResponse.GetContentBlockID()
-	data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, contentBlockID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeContentBlockResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

@@ -2,13 +2,9 @@ package provider
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
-	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -55,55 +51,18 @@ func (r *brazeEmailTemplateResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	createRequest := plan.ToCreateEmailTemplateRequest()
-
-	createResponse, createErr := r.providerData.client.CreateEmailTemplate(ctx, &createRequest)
-
-	tflog.Info(ctx, "braze_email_template.create", map[string]any{
-		"request":  createRequest,
-		"response": createResponse,
-		"err":      createErr,
-	})
-
-	if createResponse == nil || createErr != nil {
-		resp.Diagnostics.AddError("Failed to create Email Template", detailFromError(createErr))
-
-		return
-	}
-
-	emailTemplateID := createResponse.GetEmailTemplateID()
-
-	resp.Diagnostics.Append(setIdentity(ctx, resp.Identity, &resp.State, emailTemplateID)...)
-
-	getParams := brazeclient.GetEmailTemplateInfoParams{
-		EmailTemplateID: emailTemplateID,
-	}
-
-	getResponse, getErr := r.providerData.client.GetEmailTemplateInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_email_template.create.get", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddError("Email Template not found after creation", ersc.Error())
-
-			return
+	data, err := r.providerData.emailTemplates.Create(ctx, plan)
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddError("Email Template not found after creation", detailFromError(err))
+		} else {
+			resp.Diagnostics.AddError("Failed to create Email Template", detailFromError(err))
 		}
 
-		resp.Diagnostics.AddError("Failed to retrieve Email Template after creation", detailFromError(getErr))
-
 		return
 	}
 
-	emailTemplateID = getResponse.GetEmailTemplateID()
-	data := NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, emailTemplateID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeEmailTemplateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -115,36 +74,21 @@ func (r *brazeEmailTemplateResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	getParams := brazeclient.GetEmailTemplateInfoParams{
-		EmailTemplateID: state.ID.ValueString(),
-	}
-
-	getResponse, getErr := r.providerData.client.GetEmailTemplateInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_email_template.read", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddWarning("Email Template not found", ersc.Error())
+	data, err := r.providerData.emailTemplates.Read(ctx, state.ID.ValueString())
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddWarning("Email Template not found", detailFromError(err))
 			resp.State.RemoveResource(ctx)
 
 			return
 		}
 
-		resp.Diagnostics.AddError("Failed to read Email Template", detailFromError(getErr))
+		resp.Diagnostics.AddError("Failed to read Email Template", detailFromError(err))
 
 		return
 	}
 
-	emailTemplateID := getResponse.GetEmailTemplateID()
-	data := NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, emailTemplateID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeEmailTemplateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -155,55 +99,18 @@ func (r *brazeEmailTemplateResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	updateRequest := plan.ToUpdateEmailTemplateRequest()
-
-	updateResponse, updateErr := r.providerData.client.UpdateEmailTemplate(ctx, &updateRequest)
-
-	tflog.Info(ctx, "braze_email_template.update", map[string]any{
-		"request":  updateRequest,
-		"response": updateResponse,
-		"err":      updateErr,
-	})
-
-	if updateResponse == nil || updateErr != nil {
-		resp.Diagnostics.AddError("Failed to update Email Template", detailFromError(updateErr))
-
-		return
-	}
-
-	emailTemplateID := updateResponse.GetEmailTemplateID()
-
-	resp.Diagnostics.Append(setIdentity(ctx, resp.Identity, &resp.State, emailTemplateID)...)
-
-	getParams := brazeclient.GetEmailTemplateInfoParams{
-		EmailTemplateID: emailTemplateID,
-	}
-
-	getResponse, getErr := r.providerData.client.GetEmailTemplateInfo(ctx, getParams)
-
-	tflog.Info(ctx, "braze_email_template.update.get", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		var ersc *brazeclient.ErrorResponseStatusCode
-		if errors.As(getErr, &ersc) && ersc.StatusCode == http.StatusNotFound {
-			resp.Diagnostics.AddError("Email Template not found after update", ersc.Error())
-
-			return
+	data, err := r.providerData.emailTemplates.Update(ctx, plan)
+	if err != nil {
+		if isBrazeObjectNotFound(err) {
+			resp.Diagnostics.AddError("Email Template not found after update", detailFromError(err))
+		} else {
+			resp.Diagnostics.AddError("Failed to update Email Template", detailFromError(err))
 		}
 
-		resp.Diagnostics.AddError("Failed to retrieve Email Template after update", detailFromError(getErr))
-
 		return
 	}
 
-	emailTemplateID = getResponse.GetEmailTemplateID()
-	data := NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(*getResponse)
-
-	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, emailTemplateID, &data)...)
+	resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
 }
 
 func (r *brazeEmailTemplateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

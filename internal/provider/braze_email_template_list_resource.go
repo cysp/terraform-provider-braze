@@ -3,14 +3,12 @@ package provider
 import (
 	"context"
 
-	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 //nolint:ireturn
@@ -31,8 +29,6 @@ type brazeEmailTemplateListResourceConfig struct {
 	ModifiedAfter  timetypes.RFC3339 `tfsdk:"modified_after"`
 	ModifiedBefore timetypes.RFC3339 `tfsdk:"modified_before"`
 }
-
-const brazeEmailTemplateListPageLimit = 100
 
 func (r *brazeEmailTemplateListResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_email_template"
@@ -75,8 +71,9 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 		return
 	}
 
-	params := brazeclient.ListEmailTemplatesParams{
-		Limit: brazeclient.NewOptInt(brazeEmailTemplateListPageLimit),
+	query := brazeObjectListQuery{
+		Limit:           req.Limit,
+		IncludeResource: req.IncludeResource,
 	}
 	paramsDiags := diag.Diagnostics{}
 
@@ -84,14 +81,14 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 		modifiedAfter, modifiedAfterDiags := config.ModifiedAfter.ValueRFC3339Time()
 		paramsDiags.Append(modifiedAfterDiags...)
 
-		params.ModifiedAfter = brazeclient.NewOptDateTime(modifiedAfter)
+		query.ModifiedAfter = &modifiedAfter
 	}
 
 	if !config.ModifiedBefore.IsNull() {
 		modifiedBefore, modifiedBeforeDiags := config.ModifiedBefore.ValueRFC3339Time()
 		paramsDiags.Append(modifiedBeforeDiags...)
 
-		params.ModifiedBefore = brazeclient.NewOptDateTime(modifiedBefore)
+		query.ModifiedBefore = &modifiedBefore
 	}
 
 	if paramsDiags.HasError() {
@@ -101,111 +98,43 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		r.listEmailTemplates(ctx, req, params, yield)
+		r.listEmailTemplates(ctx, req, query, yield)
 	}
 }
 
 func (r *brazeEmailTemplateListResource) listEmailTemplates(
 	ctx context.Context,
 	req list.ListRequest,
-	baseParams brazeclient.ListEmailTemplatesParams,
+	query brazeObjectListQuery,
 	yield func(list.ListResult) bool,
 ) {
-	offset := 0
-	remaining := req.Limit
-
-	for {
-		params := baseParams
-		if offset > 0 {
-			params.Offset = brazeclient.NewOptInt(offset)
-		}
-
-		listResponse, listErr := r.providerData.client.ListEmailTemplates(ctx, params)
-
-		tflog.Info(ctx, "braze_email_template.list", map[string]any{
-			"params":   params,
-			"response": listResponse,
-			"err":      listErr,
-		})
-
-		if listErr != nil {
-			result := req.NewListResult(ctx)
-			result.Diagnostics.AddError("Failed to list email templates", listErr.Error())
-
-			yield(result)
-
-			return
-		}
-
-		emailTemplates := listResponse.GetTemplates()
-		if !r.yieldEmailTemplateResults(ctx, req, emailTemplates, &remaining, yield) {
-			return
-		}
-
-		if remaining <= 0 || len(emailTemplates) < brazeEmailTemplateListPageLimit {
-			return
-		}
-
-		offset += brazeEmailTemplateListPageLimit
-	}
-}
-
-func (r *brazeEmailTemplateListResource) yieldEmailTemplateResults(
-	ctx context.Context,
-	req list.ListRequest,
-	emailTemplates []brazeclient.ListEmailTemplatesResponseTemplatesItem,
-	remaining *int64,
-	yield func(list.ListResult) bool,
-) bool {
-	for _, template := range emailTemplates {
-		if *remaining <= 0 {
-			return false
-		}
-
+	entries, listErr := r.providerData.emailTemplates.List(ctx, query)
+	if listErr != nil {
 		result := req.NewListResult(ctx)
+		result.Diagnostics.AddError("Failed to list email templates", detailFromError(listErr))
 
-		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), template.GetEmailTemplateID())...)
-
-		result.DisplayName = template.GetTemplateName()
-
-		if req.IncludeResource {
-			r.setEmailTemplateResource(ctx, template, &result)
-		}
-
-		if !yield(result) {
-			return false
-		}
-
-		*remaining--
-	}
-
-	return true
-}
-
-func (r *brazeEmailTemplateListResource) setEmailTemplateResource(
-	ctx context.Context,
-	template brazeclient.ListEmailTemplatesResponseTemplatesItem,
-	result *list.ListResult,
-) {
-	params := brazeclient.GetEmailTemplateInfoParams{
-		EmailTemplateID: template.GetEmailTemplateID(),
-	}
-
-	getResponse, getErr := r.providerData.client.GetEmailTemplateInfo(ctx, params)
-
-	tflog.Info(ctx, "braze_email_template.list.get", map[string]any{
-		"params":   params,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		result.Diagnostics.AddError("Failed to get email template", detailFromError(getErr))
+		yield(result)
 
 		return
 	}
 
-	data := NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(*getResponse)
+	for _, entry := range entries {
+		result := req.NewListResult(ctx)
 
-	result.Diagnostics.Append(result.Resource.Set(ctx, data)...)
+		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), entry.ID)...)
+
+		result.DisplayName = entry.DisplayName
+
+		if req.IncludeResource {
+			if entry.ResourceErr != nil {
+				result.Diagnostics.AddError("Failed to get email template", detailFromError(entry.ResourceErr))
+			} else {
+				result.Diagnostics.Append(result.Resource.Set(ctx, *entry.Resource)...)
+			}
+		}
+
+		if !yield(result) {
+			return
+		}
+	}
 }

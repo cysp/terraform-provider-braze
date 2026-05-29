@@ -3,14 +3,12 @@ package provider
 import (
 	"context"
 
-	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 //nolint:ireturn
@@ -31,8 +29,6 @@ type brazeContentBlockListResourceConfig struct {
 	ModifiedAfter  timetypes.RFC3339 `tfsdk:"modified_after"`
 	ModifiedBefore timetypes.RFC3339 `tfsdk:"modified_before"`
 }
-
-const brazeContentBlockListPageLimit = 100
 
 func (r *brazeContentBlockListResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_content_block"
@@ -75,8 +71,9 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 		return
 	}
 
-	params := brazeclient.ListContentBlocksParams{
-		Limit: brazeclient.NewOptInt(brazeContentBlockListPageLimit),
+	query := brazeObjectListQuery{
+		Limit:           req.Limit,
+		IncludeResource: req.IncludeResource,
 	}
 	paramsDiags := diag.Diagnostics{}
 
@@ -84,14 +81,14 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 		modifiedAfter, modifiedAfterDiags := config.ModifiedAfter.ValueRFC3339Time()
 		paramsDiags.Append(modifiedAfterDiags...)
 
-		params.ModifiedAfter = brazeclient.NewOptDateTime(modifiedAfter)
+		query.ModifiedAfter = &modifiedAfter
 	}
 
 	if !config.ModifiedBefore.IsNull() {
 		modifiedBefore, modifiedBeforeDiags := config.ModifiedBefore.ValueRFC3339Time()
 		paramsDiags.Append(modifiedBeforeDiags...)
 
-		params.ModifiedBefore = brazeclient.NewOptDateTime(modifiedBefore)
+		query.ModifiedBefore = &modifiedBefore
 	}
 
 	if paramsDiags.HasError() {
@@ -101,111 +98,43 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		r.listContentBlocks(ctx, req, params, yield)
+		r.listContentBlocks(ctx, req, query, yield)
 	}
 }
 
 func (r *brazeContentBlockListResource) listContentBlocks(
 	ctx context.Context,
 	req list.ListRequest,
-	baseParams brazeclient.ListContentBlocksParams,
+	query brazeObjectListQuery,
 	yield func(list.ListResult) bool,
 ) {
-	offset := 0
-	remaining := req.Limit
-
-	for {
-		params := baseParams
-		if offset > 0 {
-			params.Offset = brazeclient.NewOptInt(offset)
-		}
-
-		listResponse, listErr := r.providerData.client.ListContentBlocks(ctx, params)
-
-		tflog.Info(ctx, "braze_content_block.list", map[string]any{
-			"params":   params,
-			"response": listResponse,
-			"err":      listErr,
-		})
-
-		if listErr != nil {
-			result := req.NewListResult(ctx)
-			result.Diagnostics.AddError("Failed to list content blocks", listErr.Error())
-
-			yield(result)
-
-			return
-		}
-
-		contentBlocks := listResponse.GetContentBlocks()
-		if !r.yieldContentBlockResults(ctx, req, contentBlocks, &remaining, yield) {
-			return
-		}
-
-		if remaining <= 0 || len(contentBlocks) < brazeContentBlockListPageLimit {
-			return
-		}
-
-		offset += brazeContentBlockListPageLimit
-	}
-}
-
-func (r *brazeContentBlockListResource) yieldContentBlockResults(
-	ctx context.Context,
-	req list.ListRequest,
-	contentBlocks []brazeclient.ListContentBlocksResponseContentBlock,
-	remaining *int64,
-	yield func(list.ListResult) bool,
-) bool {
-	for _, block := range contentBlocks {
-		if *remaining <= 0 {
-			return false
-		}
-
+	entries, listErr := r.providerData.contentBlocks.List(ctx, query)
+	if listErr != nil {
 		result := req.NewListResult(ctx)
+		result.Diagnostics.AddError("Failed to list content blocks", detailFromError(listErr))
 
-		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), block.GetContentBlockID())...)
-
-		result.DisplayName = block.GetName()
-
-		if req.IncludeResource {
-			r.setContentBlockResource(ctx, block, &result)
-		}
-
-		if !yield(result) {
-			return false
-		}
-
-		*remaining--
-	}
-
-	return true
-}
-
-func (r *brazeContentBlockListResource) setContentBlockResource(
-	ctx context.Context,
-	block brazeclient.ListContentBlocksResponseContentBlock,
-	result *list.ListResult,
-) {
-	params := brazeclient.GetContentBlockInfoParams{
-		ContentBlockID: block.GetContentBlockID(),
-	}
-
-	getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, params)
-
-	tflog.Info(ctx, "braze_content_block.list.get", map[string]any{
-		"params":   params,
-		"response": getResponse,
-		"err":      getErr,
-	})
-
-	if getResponse == nil || getErr != nil {
-		result.Diagnostics.AddError("Failed to get content block", detailFromError(getErr))
+		yield(result)
 
 		return
 	}
 
-	data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
+	for _, entry := range entries {
+		result := req.NewListResult(ctx)
 
-	result.Diagnostics.Append(result.Resource.Set(ctx, data)...)
+		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), entry.ID)...)
+
+		result.DisplayName = entry.DisplayName
+
+		if req.IncludeResource {
+			if entry.ResourceErr != nil {
+				result.Diagnostics.AddError("Failed to get content block", detailFromError(entry.ResourceErr))
+			} else {
+				result.Diagnostics.Append(result.Resource.Set(ctx, *entry.Resource)...)
+			}
+		}
+
+		if !yield(result) {
+			return
+		}
+	}
 }
