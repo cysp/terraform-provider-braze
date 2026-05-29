@@ -4,8 +4,8 @@ A Terraform provider for managing Braze configuration.
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.12
-- [Go](https://golang.org/doc/install) >= 1.25
+- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.12
+- [Go](https://go.dev/doc/install) >= 1.25
 
 ## Building the Provider
 
