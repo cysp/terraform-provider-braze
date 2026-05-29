@@ -32,6 +32,8 @@ type brazeContentBlockListResourceConfig struct {
 	ModifiedBefore timetypes.RFC3339 `tfsdk:"modified_before"`
 }
 
+const brazeContentBlockListPageLimit = 100
+
 func (r *brazeContentBlockListResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_content_block"
 }
@@ -67,8 +69,14 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 		return
 	}
 
+	if req.Limit <= 0 {
+		resp.Results = func(_ func(list.ListResult) bool) {}
+
+		return
+	}
+
 	params := brazeclient.ListContentBlocksParams{
-		Limit: brazeclient.NewOptInt(int(req.Limit)),
+		Limit: brazeclient.NewOptInt(brazeContentBlockListPageLimit),
 	}
 	paramsDiags := diag.Diagnostics{}
 
@@ -93,6 +101,25 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
+		r.listContentBlocks(ctx, req, params, yield)
+	}
+}
+
+func (r *brazeContentBlockListResource) listContentBlocks(
+	ctx context.Context,
+	req list.ListRequest,
+	baseParams brazeclient.ListContentBlocksParams,
+	yield func(list.ListResult) bool,
+) {
+	offset := 0
+	remaining := req.Limit
+
+	for {
+		params := baseParams
+		if offset > 0 {
+			params.Offset = brazeclient.NewOptInt(offset)
+		}
+
 		listResponse, listErr := r.providerData.client.ListContentBlocks(ctx, params)
 
 		tflog.Info(ctx, "braze_content_block.list", map[string]any{
@@ -110,44 +137,75 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 			return
 		}
 
-		for _, block := range listResponse.GetContentBlocks() {
-			result := req.NewListResult(ctx)
-
-			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), block.GetContentBlockID())...)
-
-			result.DisplayName = block.GetName()
-
-			if req.IncludeResource {
-				params := brazeclient.GetContentBlockInfoParams{
-					ContentBlockID: block.GetContentBlockID(),
-				}
-
-				getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, params)
-
-				tflog.Info(ctx, "braze_content_block.list.get", map[string]any{
-					"params":   params,
-					"response": getResponse,
-					"err":      getErr,
-				})
-
-				if getResponse == nil || getErr != nil {
-					result.Diagnostics.AddError("Failed to get content block", detailFromError(getErr))
-
-					if !yield(result) {
-						return
-					}
-
-					continue
-				}
-
-				data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
-
-				result.Diagnostics.Append(result.Resource.Set(ctx, data)...)
-			}
-
-			if !yield(result) {
-				return
-			}
+		contentBlocks := listResponse.GetContentBlocks()
+		if !r.yieldContentBlockResults(ctx, req, contentBlocks, &remaining, yield) {
+			return
 		}
+
+		if remaining <= 0 || len(contentBlocks) < brazeContentBlockListPageLimit {
+			return
+		}
+
+		offset += brazeContentBlockListPageLimit
 	}
+}
+
+func (r *brazeContentBlockListResource) yieldContentBlockResults(
+	ctx context.Context,
+	req list.ListRequest,
+	contentBlocks []brazeclient.ListContentBlocksResponseContentBlock,
+	remaining *int64,
+	yield func(list.ListResult) bool,
+) bool {
+	for _, block := range contentBlocks {
+		if *remaining <= 0 {
+			return false
+		}
+
+		result := req.NewListResult(ctx)
+
+		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), block.GetContentBlockID())...)
+
+		result.DisplayName = block.GetName()
+
+		if req.IncludeResource {
+			r.setContentBlockResource(ctx, block, &result)
+		}
+
+		if !yield(result) {
+			return false
+		}
+
+		*remaining--
+	}
+
+	return true
+}
+
+func (r *brazeContentBlockListResource) setContentBlockResource(
+	ctx context.Context,
+	block brazeclient.ListContentBlocksResponseContentBlock,
+	result *list.ListResult,
+) {
+	params := brazeclient.GetContentBlockInfoParams{
+		ContentBlockID: block.GetContentBlockID(),
+	}
+
+	getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, params)
+
+	tflog.Info(ctx, "braze_content_block.list.get", map[string]any{
+		"params":   params,
+		"response": getResponse,
+		"err":      getErr,
+	})
+
+	if getResponse == nil || getErr != nil {
+		result.Diagnostics.AddError("Failed to get content block", detailFromError(getErr))
+
+		return
+	}
+
+	data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
+
+	result.Diagnostics.Append(result.Resource.Set(ctx, data)...)
 }

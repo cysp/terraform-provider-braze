@@ -5,17 +5,26 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"sort"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/google/uuid"
 )
 
-func (h *Handler) ListContentBlocks(_ context.Context, _ brazeclient.ListContentBlocksParams) (*brazeclient.ListContentBlocksResponse, error) {
+func (h *Handler) ListContentBlocks(_ context.Context, params brazeclient.ListContentBlocksParams) (*brazeclient.ListContentBlocksResponse, error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
+	ids := make([]string, 0, len(h.contentBlocks))
+	for id := range h.contentBlocks {
+		ids = append(ids, id)
+	}
+
+	sort.Strings(ids)
+
 	blocks := make([]brazeclient.ListContentBlocksResponseContentBlock, 0, len(h.contentBlocks))
-	for _, block := range h.contentBlocks {
+	for _, id := range ids {
+		block := h.contentBlocks[id]
 		blocks = append(blocks, brazeclient.ListContentBlocksResponseContentBlock{
 			ContentBlockID: block.ContentBlockID,
 			Name:           block.Name,
@@ -25,7 +34,7 @@ func (h *Handler) ListContentBlocks(_ context.Context, _ brazeclient.ListContent
 
 	return &brazeclient.ListContentBlocksResponse{
 		Count:         len(blocks),
-		ContentBlocks: blocks,
+		ContentBlocks: paginatedItems(blocks, params.Limit, params.Offset),
 	}, nil
 }
 
