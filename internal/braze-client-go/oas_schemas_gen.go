@@ -172,6 +172,121 @@ func (s *CreateContentBlockResponse) SetMessage(val string) {
 	s.Message = val
 }
 
+// Ref: #/CreateEmailTemplateRequest
+type CreateEmailTemplateRequest struct {
+	// The name of your email template.
+	TemplateName string `json:"template_name"`
+	// The email template subject line.
+	Subject NilString `json:"subject"`
+	// The email template body that may include HTML.
+	Body NilString `json:"body"`
+	// A plaintext version of the email template body.
+	PlaintextBody OptNilString `json:"plaintext_body"`
+	// The email preheader used to generate previews in some clients.
+	Preheader OptNilString `json:"preheader"`
+	// Tags must already exist.
+	Tags OptNilStringArray `json:"tags"`
+	// Enables or disables the inline CSS feature per template.
+	ShouldInlineCSS OptNilBool `json:"should_inline_css"`
+}
+
+// GetTemplateName returns the value of TemplateName.
+func (s *CreateEmailTemplateRequest) GetTemplateName() string {
+	return s.TemplateName
+}
+
+// GetSubject returns the value of Subject.
+func (s *CreateEmailTemplateRequest) GetSubject() NilString {
+	return s.Subject
+}
+
+// GetBody returns the value of Body.
+func (s *CreateEmailTemplateRequest) GetBody() NilString {
+	return s.Body
+}
+
+// GetPlaintextBody returns the value of PlaintextBody.
+func (s *CreateEmailTemplateRequest) GetPlaintextBody() OptNilString {
+	return s.PlaintextBody
+}
+
+// GetPreheader returns the value of Preheader.
+func (s *CreateEmailTemplateRequest) GetPreheader() OptNilString {
+	return s.Preheader
+}
+
+// GetTags returns the value of Tags.
+func (s *CreateEmailTemplateRequest) GetTags() OptNilStringArray {
+	return s.Tags
+}
+
+// GetShouldInlineCSS returns the value of ShouldInlineCSS.
+func (s *CreateEmailTemplateRequest) GetShouldInlineCSS() OptNilBool {
+	return s.ShouldInlineCSS
+}
+
+// SetTemplateName sets the value of TemplateName.
+func (s *CreateEmailTemplateRequest) SetTemplateName(val string) {
+	s.TemplateName = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *CreateEmailTemplateRequest) SetSubject(val NilString) {
+	s.Subject = val
+}
+
+// SetBody sets the value of Body.
+func (s *CreateEmailTemplateRequest) SetBody(val NilString) {
+	s.Body = val
+}
+
+// SetPlaintextBody sets the value of PlaintextBody.
+func (s *CreateEmailTemplateRequest) SetPlaintextBody(val OptNilString) {
+	s.PlaintextBody = val
+}
+
+// SetPreheader sets the value of Preheader.
+func (s *CreateEmailTemplateRequest) SetPreheader(val OptNilString) {
+	s.Preheader = val
+}
+
+// SetTags sets the value of Tags.
+func (s *CreateEmailTemplateRequest) SetTags(val OptNilStringArray) {
+	s.Tags = val
+}
+
+// SetShouldInlineCSS sets the value of ShouldInlineCSS.
+func (s *CreateEmailTemplateRequest) SetShouldInlineCSS(val OptNilBool) {
+	s.ShouldInlineCSS = val
+}
+
+// Ref: #/CreateEmailTemplateResponse
+type CreateEmailTemplateResponse struct {
+	// The Email Template identifier.
+	EmailTemplateID string    `json:"email_template_id"`
+	Message         OptString `json:"message"`
+}
+
+// GetEmailTemplateID returns the value of EmailTemplateID.
+func (s *CreateEmailTemplateResponse) GetEmailTemplateID() string {
+	return s.EmailTemplateID
+}
+
+// GetMessage returns the value of Message.
+func (s *CreateEmailTemplateResponse) GetMessage() OptString {
+	return s.Message
+}
+
+// SetEmailTemplateID sets the value of EmailTemplateID.
+func (s *CreateEmailTemplateResponse) SetEmailTemplateID(val string) {
+	s.EmailTemplateID = val
+}
+
+// SetMessage sets the value of Message.
+func (s *CreateEmailTemplateResponse) SetMessage(val OptString) {
+	s.Message = val
+}
+
 type ErrorResponse struct {
 	// Error message describing what went wrong.
 	Message string `json:"message"`
@@ -289,6 +404,128 @@ func (s *GetContentBlockInfoResponse) SetTags(val OptNilStringArray) {
 	s.Tags = val
 }
 
+// Ref: #/GetEmailTemplateInfoResponse
+type GetEmailTemplateInfoResponse struct {
+	// The Email Template identifier.
+	EmailTemplateID string `json:"email_template_id"`
+	// The name of your email template.
+	TemplateName string `json:"template_name"`
+	// The email template subject line.
+	Subject OptNilString `json:"subject"`
+	// The email template body that may include HTML.
+	Body OptNilString `json:"body"`
+	// A plaintext version of the email template body.
+	PlaintextBody OptNilString `json:"plaintext_body"`
+	// The email preheader used to generate previews in some clients.
+	Preheader OptNilString `json:"preheader"`
+	// Tags assigned to the email template.
+	Tags OptNilStringArray `json:"tags"`
+	// Whether the inline CSS feature is enabled for the template.
+	ShouldInlineCSS OptNilBool     `json:"should_inline_css"`
+	CreatedAt       OptNilDateTime `json:"created_at"`
+	UpdatedAt       OptNilDateTime `json:"updated_at"`
+}
+
+// GetEmailTemplateID returns the value of EmailTemplateID.
+func (s *GetEmailTemplateInfoResponse) GetEmailTemplateID() string {
+	return s.EmailTemplateID
+}
+
+// GetTemplateName returns the value of TemplateName.
+func (s *GetEmailTemplateInfoResponse) GetTemplateName() string {
+	return s.TemplateName
+}
+
+// GetSubject returns the value of Subject.
+func (s *GetEmailTemplateInfoResponse) GetSubject() OptNilString {
+	return s.Subject
+}
+
+// GetBody returns the value of Body.
+func (s *GetEmailTemplateInfoResponse) GetBody() OptNilString {
+	return s.Body
+}
+
+// GetPlaintextBody returns the value of PlaintextBody.
+func (s *GetEmailTemplateInfoResponse) GetPlaintextBody() OptNilString {
+	return s.PlaintextBody
+}
+
+// GetPreheader returns the value of Preheader.
+func (s *GetEmailTemplateInfoResponse) GetPreheader() OptNilString {
+	return s.Preheader
+}
+
+// GetTags returns the value of Tags.
+func (s *GetEmailTemplateInfoResponse) GetTags() OptNilStringArray {
+	return s.Tags
+}
+
+// GetShouldInlineCSS returns the value of ShouldInlineCSS.
+func (s *GetEmailTemplateInfoResponse) GetShouldInlineCSS() OptNilBool {
+	return s.ShouldInlineCSS
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *GetEmailTemplateInfoResponse) GetCreatedAt() OptNilDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *GetEmailTemplateInfoResponse) GetUpdatedAt() OptNilDateTime {
+	return s.UpdatedAt
+}
+
+// SetEmailTemplateID sets the value of EmailTemplateID.
+func (s *GetEmailTemplateInfoResponse) SetEmailTemplateID(val string) {
+	s.EmailTemplateID = val
+}
+
+// SetTemplateName sets the value of TemplateName.
+func (s *GetEmailTemplateInfoResponse) SetTemplateName(val string) {
+	s.TemplateName = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *GetEmailTemplateInfoResponse) SetSubject(val OptNilString) {
+	s.Subject = val
+}
+
+// SetBody sets the value of Body.
+func (s *GetEmailTemplateInfoResponse) SetBody(val OptNilString) {
+	s.Body = val
+}
+
+// SetPlaintextBody sets the value of PlaintextBody.
+func (s *GetEmailTemplateInfoResponse) SetPlaintextBody(val OptNilString) {
+	s.PlaintextBody = val
+}
+
+// SetPreheader sets the value of Preheader.
+func (s *GetEmailTemplateInfoResponse) SetPreheader(val OptNilString) {
+	s.Preheader = val
+}
+
+// SetTags sets the value of Tags.
+func (s *GetEmailTemplateInfoResponse) SetTags(val OptNilStringArray) {
+	s.Tags = val
+}
+
+// SetShouldInlineCSS sets the value of ShouldInlineCSS.
+func (s *GetEmailTemplateInfoResponse) SetShouldInlineCSS(val OptNilBool) {
+	s.ShouldInlineCSS = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *GetEmailTemplateInfoResponse) SetCreatedAt(val OptNilDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *GetEmailTemplateInfoResponse) SetUpdatedAt(val OptNilDateTime) {
+	s.UpdatedAt = val
+}
+
 // Ref: #/ListContentBlocksResponse
 type ListContentBlocksResponse struct {
 	// The number of Content Blocks returned.
@@ -354,6 +591,126 @@ func (s *ListContentBlocksResponseContentBlock) SetName(val string) {
 // SetTags sets the value of Tags.
 func (s *ListContentBlocksResponseContentBlock) SetTags(val OptNilStringArray) {
 	s.Tags = val
+}
+
+// Ref: #/ListEmailTemplatesResponse
+type ListEmailTemplatesResponse struct {
+	Count     int                                       `json:"count"`
+	Templates []ListEmailTemplatesResponseTemplatesItem `json:"templates"`
+}
+
+// GetCount returns the value of Count.
+func (s *ListEmailTemplatesResponse) GetCount() int {
+	return s.Count
+}
+
+// GetTemplates returns the value of Templates.
+func (s *ListEmailTemplatesResponse) GetTemplates() []ListEmailTemplatesResponseTemplatesItem {
+	return s.Templates
+}
+
+// SetCount sets the value of Count.
+func (s *ListEmailTemplatesResponse) SetCount(val int) {
+	s.Count = val
+}
+
+// SetTemplates sets the value of Templates.
+func (s *ListEmailTemplatesResponse) SetTemplates(val []ListEmailTemplatesResponseTemplatesItem) {
+	s.Templates = val
+}
+
+type ListEmailTemplatesResponseTemplatesItem struct {
+	// The Email Template identifier.
+	EmailTemplateID string `json:"email_template_id"`
+	// The name of your email template.
+	TemplateName string         `json:"template_name"`
+	CreatedAt    OptNilDateTime `json:"created_at"`
+	UpdatedAt    OptNilDateTime `json:"updated_at"`
+}
+
+// GetEmailTemplateID returns the value of EmailTemplateID.
+func (s *ListEmailTemplatesResponseTemplatesItem) GetEmailTemplateID() string {
+	return s.EmailTemplateID
+}
+
+// GetTemplateName returns the value of TemplateName.
+func (s *ListEmailTemplatesResponseTemplatesItem) GetTemplateName() string {
+	return s.TemplateName
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ListEmailTemplatesResponseTemplatesItem) GetCreatedAt() OptNilDateTime {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *ListEmailTemplatesResponseTemplatesItem) GetUpdatedAt() OptNilDateTime {
+	return s.UpdatedAt
+}
+
+// SetEmailTemplateID sets the value of EmailTemplateID.
+func (s *ListEmailTemplatesResponseTemplatesItem) SetEmailTemplateID(val string) {
+	s.EmailTemplateID = val
+}
+
+// SetTemplateName sets the value of TemplateName.
+func (s *ListEmailTemplatesResponseTemplatesItem) SetTemplateName(val string) {
+	s.TemplateName = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ListEmailTemplatesResponseTemplatesItem) SetCreatedAt(val OptNilDateTime) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *ListEmailTemplatesResponseTemplatesItem) SetUpdatedAt(val OptNilDateTime) {
+	s.UpdatedAt = val
+}
+
+// NewNilString returns new NilString with value set to v.
+func NewNilString(v string) NilString {
+	return NilString{
+		Value: v,
+	}
+}
+
+// NilString is nullable string.
+type NilString struct {
+	Value string
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilString) SetTo(v string) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilString) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilString) SetToNull() {
+	o.Null = true
+	var v string
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilString) Get() (v string, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBool returns new OptBool with value set to v.
@@ -534,6 +891,132 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilBool returns new OptNilBool with value set to v.
+func NewOptNilBool(v bool) OptNilBool {
+	return OptNilBool{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilBool is optional nullable bool.
+type OptNilBool struct {
+	Value bool
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilBool was set.
+func (o OptNilBool) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilBool) Reset() {
+	var v bool
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilBool) SetTo(v bool) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilBool) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilBool) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v bool
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilBool) Get() (v bool, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilDateTime returns new OptNilDateTime with value set to v.
+func NewOptNilDateTime(v time.Time) OptNilDateTime {
+	return OptNilDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDateTime is optional nullable time.Time.
+type OptNilDateTime struct {
+	Value time.Time
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDateTime was set.
+func (o OptNilDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDateTime) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDateTime) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v time.Time
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDateTime) Get() (v time.Time, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDateTime) Or(d time.Time) time.Time {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -901,5 +1384,132 @@ func (s *UpdateContentBlockResponse) SetContentBlockID(val string) {
 
 // SetMessage sets the value of Message.
 func (s *UpdateContentBlockResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// Ref: #/UpdateEmailTemplateRequest
+type UpdateEmailTemplateRequest struct {
+	// The Email Template identifier.
+	EmailTemplateID string `json:"email_template_id"`
+	// The name of your email template.
+	TemplateName OptString `json:"template_name"`
+	// The email template subject line.
+	Subject OptNilString `json:"subject"`
+	// The email template body that may include HTML.
+	Body OptNilString `json:"body"`
+	// A plaintext version of the email template body.
+	PlaintextBody OptNilString `json:"plaintext_body"`
+	// The email preheader used to generate previews in some clients.
+	Preheader OptNilString `json:"preheader"`
+	// Tags must already exist.
+	Tags OptNilStringArray `json:"tags"`
+	// Enables or disables the inline CSS feature per template.
+	ShouldInlineCSS OptNilBool `json:"should_inline_css"`
+}
+
+// GetEmailTemplateID returns the value of EmailTemplateID.
+func (s *UpdateEmailTemplateRequest) GetEmailTemplateID() string {
+	return s.EmailTemplateID
+}
+
+// GetTemplateName returns the value of TemplateName.
+func (s *UpdateEmailTemplateRequest) GetTemplateName() OptString {
+	return s.TemplateName
+}
+
+// GetSubject returns the value of Subject.
+func (s *UpdateEmailTemplateRequest) GetSubject() OptNilString {
+	return s.Subject
+}
+
+// GetBody returns the value of Body.
+func (s *UpdateEmailTemplateRequest) GetBody() OptNilString {
+	return s.Body
+}
+
+// GetPlaintextBody returns the value of PlaintextBody.
+func (s *UpdateEmailTemplateRequest) GetPlaintextBody() OptNilString {
+	return s.PlaintextBody
+}
+
+// GetPreheader returns the value of Preheader.
+func (s *UpdateEmailTemplateRequest) GetPreheader() OptNilString {
+	return s.Preheader
+}
+
+// GetTags returns the value of Tags.
+func (s *UpdateEmailTemplateRequest) GetTags() OptNilStringArray {
+	return s.Tags
+}
+
+// GetShouldInlineCSS returns the value of ShouldInlineCSS.
+func (s *UpdateEmailTemplateRequest) GetShouldInlineCSS() OptNilBool {
+	return s.ShouldInlineCSS
+}
+
+// SetEmailTemplateID sets the value of EmailTemplateID.
+func (s *UpdateEmailTemplateRequest) SetEmailTemplateID(val string) {
+	s.EmailTemplateID = val
+}
+
+// SetTemplateName sets the value of TemplateName.
+func (s *UpdateEmailTemplateRequest) SetTemplateName(val OptString) {
+	s.TemplateName = val
+}
+
+// SetSubject sets the value of Subject.
+func (s *UpdateEmailTemplateRequest) SetSubject(val OptNilString) {
+	s.Subject = val
+}
+
+// SetBody sets the value of Body.
+func (s *UpdateEmailTemplateRequest) SetBody(val OptNilString) {
+	s.Body = val
+}
+
+// SetPlaintextBody sets the value of PlaintextBody.
+func (s *UpdateEmailTemplateRequest) SetPlaintextBody(val OptNilString) {
+	s.PlaintextBody = val
+}
+
+// SetPreheader sets the value of Preheader.
+func (s *UpdateEmailTemplateRequest) SetPreheader(val OptNilString) {
+	s.Preheader = val
+}
+
+// SetTags sets the value of Tags.
+func (s *UpdateEmailTemplateRequest) SetTags(val OptNilStringArray) {
+	s.Tags = val
+}
+
+// SetShouldInlineCSS sets the value of ShouldInlineCSS.
+func (s *UpdateEmailTemplateRequest) SetShouldInlineCSS(val OptNilBool) {
+	s.ShouldInlineCSS = val
+}
+
+// Ref: #/UpdateEmailTemplateResponse
+type UpdateEmailTemplateResponse struct {
+	// The Email Template identifier.
+	EmailTemplateID string    `json:"email_template_id"`
+	Message         OptString `json:"message"`
+}
+
+// GetEmailTemplateID returns the value of EmailTemplateID.
+func (s *UpdateEmailTemplateResponse) GetEmailTemplateID() string {
+	return s.EmailTemplateID
+}
+
+// GetMessage returns the value of Message.
+func (s *UpdateEmailTemplateResponse) GetMessage() OptString {
+	return s.Message
+}
+
+// SetEmailTemplateID sets the value of EmailTemplateID.
+func (s *UpdateEmailTemplateResponse) SetEmailTemplateID(val string) {
+	s.EmailTemplateID = val
+}
+
+// SetMessage sets the value of Message.
+func (s *UpdateEmailTemplateResponse) SetMessage(val OptString) {
 	s.Message = val
 }

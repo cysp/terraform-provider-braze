@@ -13,6 +13,125 @@ security:
   - brazeApiKey: []
 
 paths:
+  /templates/email/list:
+    get:
+      summary: List available Email Templates
+      description: List your existing Email Templates information
+      operationId: listEmailTemplates
+      tags:
+        - Email Templates
+      parameters:
+        - name: modified_after
+          in: query
+          description: Retrieve only Email Templates updated at or after the given time
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: modified_before
+          in: query
+          description: Retrieve only Email Templates updated at or before the given time
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of Email Templates to retrieve
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Number of Email Templates to skip before returning results
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/email_templates/list/response.yml#/ListEmailTemplatesResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /templates/email/info:
+    get:
+      summary: See Email Template information
+      description: Call information for your existing Email Templates
+      operationId: getEmailTemplateInfo
+      tags:
+        - Email Templates
+      parameters:
+        - name: email_template_id
+          in: query
+          description: Email Template identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/email_templates/info/response.yml#/GetEmailTemplateInfoResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /templates/email/create:
+    post:
+      summary: Create Email Template
+      description: Create an Email Template on the Braze dashboard
+      operationId: createEmailTemplate
+      tags:
+        - Email Templates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/email_templates/create/request.yml#/CreateEmailTemplateRequest'
+      responses:
+        '201':
+          description: Email Template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/email_templates/create/response.yml#/CreateEmailTemplateResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /templates/email/update:
+    post:
+      summary: Update Email Template
+      description: Update an Email Template on the Braze dashboard
+      operationId: updateEmailTemplate
+      tags:
+        - Email Templates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/email_templates/update/request.yml#/UpdateEmailTemplateRequest'
+      responses:
+        '200':
+          description: Email Template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/email_templates/update/response.yml#/UpdateEmailTemplateResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
   /content_blocks/list:
     get:
       summary: List available Content Blocks

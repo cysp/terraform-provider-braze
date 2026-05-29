@@ -149,11 +149,13 @@ func (p *brazeProvider) DataSources(_ context.Context) []func() datasource.DataS
 func (p *brazeProvider) ListResources(context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
 		NewBrazeContentBlockListResource,
+		NewBrazeEmailTemplateListResource,
 	}
 }
 
 func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewBrazeContentBlockResource,
+		NewBrazeEmailTemplateResource,
 	}
 }

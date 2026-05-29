@@ -1,0 +1,46 @@
+GetEmailTemplateInfoResponse:
+  type: object
+  required:
+    - email_template_id
+    - template_name
+  properties:
+    email_template_id:
+      type: string
+      description: The Email Template identifier.
+    template_name:
+      type: string
+      description: The name of your email template.
+    subject:
+      type: string
+      nullable: true
+      description: The email template subject line.
+    body:
+      type: string
+      nullable: true
+      description: The email template body that may include HTML.
+    plaintext_body:
+      type: string
+      nullable: true
+      description: A plaintext version of the email template body.
+    preheader:
+      type: string
+      nullable: true
+      description: The email preheader used to generate previews in some clients.
+    tags:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: Tags assigned to the email template.
+    should_inline_css:
+      type: boolean
+      nullable: true
+      description: Whether the inline CSS feature is enabled for the template.
+    created_at:
+      type: string
+      format: date-time
+      nullable: true
+    updated_at:
+      type: string
+      format: date-time
+      nullable: true

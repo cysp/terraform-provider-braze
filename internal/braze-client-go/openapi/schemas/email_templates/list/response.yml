@@ -1,0 +1,30 @@
+ListEmailTemplatesResponse:
+  type: object
+  required:
+    - count
+    - templates
+  properties:
+    count:
+      type: integer
+    templates:
+      type: array
+      items:
+        type: object
+        required:
+          - email_template_id
+          - template_name
+        properties:
+          email_template_id:
+            type: string
+            description: The Email Template identifier.
+          template_name:
+            type: string
+            description: The name of your email template.
+          created_at:
+            type: string
+            format: date-time
+            nullable: true
+          updated_at:
+            type: string
+            format: date-time
+            nullable: true

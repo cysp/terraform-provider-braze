@@ -1,0 +1,10 @@
+UpdateEmailTemplateResponse:
+  type: object
+  required:
+    - email_template_id
+  properties:
+    email_template_id:
+      type: string
+      description: The Email Template identifier.
+    message:
+      type: string
