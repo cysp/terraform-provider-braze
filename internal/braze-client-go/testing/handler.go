@@ -11,7 +11,8 @@ import (
 type Handler struct {
 	mu sync.Mutex
 
-	contentBlocks map[string]*brazeclient.GetContentBlockInfoResponse
+	contentBlocks  map[string]*brazeclient.GetContentBlockInfoResponse
+	emailTemplates map[string]*brazeclient.GetEmailTemplateInfoResponse
 }
 
 var _ brazeclient.Handler = (*Handler)(nil)
@@ -20,7 +21,8 @@ func NewBrazeHandler() *Handler {
 	return &Handler{
 		mu: sync.Mutex{},
 
-		contentBlocks: make(map[string]*brazeclient.GetContentBlockInfoResponse),
+		contentBlocks:  make(map[string]*brazeclient.GetContentBlockInfoResponse),
+		emailTemplates: make(map[string]*brazeclient.GetEmailTemplateInfoResponse),
 	}
 }
 

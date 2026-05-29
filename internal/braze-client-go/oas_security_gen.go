@@ -34,10 +34,14 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 
 // operationRolesBrazeApiKey is a private map storing roles per operation.
 var operationRolesBrazeApiKey = map[string][]string{
-	CreateContentBlockOperation:  []string{},
-	GetContentBlockInfoOperation: []string{},
-	ListContentBlocksOperation:   []string{},
-	UpdateContentBlockOperation:  []string{},
+	CreateContentBlockOperation:   []string{},
+	CreateEmailTemplateOperation:  []string{},
+	GetContentBlockInfoOperation:  []string{},
+	GetEmailTemplateInfoOperation: []string{},
+	ListContentBlocksOperation:    []string{},
+	ListEmailTemplatesOperation:   []string{},
+	UpdateContentBlockOperation:   []string{},
+	UpdateEmailTemplateOperation:  []string{},
 }
 
 // GetRolesForBrazeApiKey returns the required roles for the given operation.

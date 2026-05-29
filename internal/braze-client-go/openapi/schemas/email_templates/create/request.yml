@@ -1,0 +1,36 @@
+CreateEmailTemplateRequest:
+  type: object
+  required:
+    - template_name
+    - subject
+    - body
+  properties:
+    template_name:
+      type: string
+      description: The name of your email template.
+    subject:
+      type: string
+      nullable: true
+      description: The email template subject line.
+    body:
+      type: string
+      nullable: true
+      description: The email template body that may include HTML.
+    plaintext_body:
+      type: string
+      nullable: true
+      description: A plaintext version of the email template body.
+    preheader:
+      type: string
+      nullable: true
+      description: The email preheader used to generate previews in some clients.
+    tags:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: Tags must already exist.
+    should_inline_css:
+      type: boolean
+      nullable: true
+      description: Enables or disables the inline CSS feature per template.
