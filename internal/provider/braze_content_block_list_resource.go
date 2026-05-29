@@ -3,14 +3,12 @@ package provider
 import (
 	"context"
 
-	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework-timetypes/timetypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 //nolint:ireturn
@@ -67,8 +65,9 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 		return
 	}
 
-	params := brazeclient.ListContentBlocksParams{
-		Limit: brazeclient.NewOptInt(int(req.Limit)),
+	query := contentBlockListQuery{
+		Limit:           int(req.Limit),
+		IncludeResource: req.IncludeResource,
 	}
 	paramsDiags := diag.Diagnostics{}
 
@@ -76,14 +75,14 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 		modifiedAfter, modifiedAfterDiags := config.ModifiedAfter.ValueRFC3339Time()
 		paramsDiags.Append(modifiedAfterDiags...)
 
-		params.ModifiedAfter = brazeclient.NewOptDateTime(modifiedAfter)
+		query.ModifiedAfter = &modifiedAfter
 	}
 
 	if !config.ModifiedBefore.IsNull() {
 		modifiedBefore, modifiedBeforeDiags := config.ModifiedBefore.ValueRFC3339Time()
 		paramsDiags.Append(modifiedBeforeDiags...)
 
-		params.ModifiedBefore = brazeclient.NewOptDateTime(modifiedBefore)
+		query.ModifiedBefore = &modifiedBefore
 	}
 
 	if paramsDiags.HasError() {
@@ -93,45 +92,26 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		listResponse, listErr := r.providerData.client.ListContentBlocks(ctx, params)
-
-		tflog.Info(ctx, "braze_content_block.list", map[string]any{
-			"params":   params,
-			"response": listResponse,
-			"err":      listErr,
-		})
-
+		entries, listErr := r.providerData.contentBlocks.List(ctx, query)
 		if listErr != nil {
 			result := req.NewListResult(ctx)
-			result.Diagnostics.AddError("Failed to list content blocks", listErr.Error())
+			result.Diagnostics.AddError("Failed to list content blocks", detailFromError(listErr))
 
 			yield(result)
 
 			return
 		}
 
-		for _, block := range listResponse.GetContentBlocks() {
+		for _, entry := range entries {
 			result := req.NewListResult(ctx)
 
-			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), block.GetContentBlockID())...)
+			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), entry.ID)...)
 
-			result.DisplayName = block.GetName()
+			result.DisplayName = entry.DisplayName
 
 			if req.IncludeResource {
-				params := brazeclient.GetContentBlockInfoParams{
-					ContentBlockID: block.GetContentBlockID(),
-				}
-
-				getResponse, getErr := r.providerData.client.GetContentBlockInfo(ctx, params)
-
-				tflog.Info(ctx, "braze_content_block.list.get", map[string]any{
-					"params":   params,
-					"response": getResponse,
-					"err":      getErr,
-				})
-
-				if getResponse == nil || getErr != nil {
-					result.Diagnostics.AddError("Failed to get content block", detailFromError(getErr))
+				if entry.ResourceErr != nil {
+					result.Diagnostics.AddError("Failed to get content block", detailFromError(entry.ResourceErr))
 
 					if !yield(result) {
 						return
@@ -140,9 +120,7 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 					continue
 				}
 
-				data := NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse)
-
-				result.Diagnostics.Append(result.Resource.Set(ctx, data)...)
+				result.Diagnostics.Append(result.Resource.Set(ctx, *entry.Resource)...)
 			}
 
 			if !yield(result) {
