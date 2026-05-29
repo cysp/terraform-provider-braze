@@ -1,10 +1,12 @@
 package provider_test
 
 import (
+	"fmt"
 	"testing"
 
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -41,6 +43,56 @@ func TestAccBrazeContentBlockList(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_content_block.test", "content", "<p>This is <strong>HTML</strong> content</p>"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
 				),
+			},
+			{
+				Query: true,
+				Config: `
+				provider "braze" {}
+
+				list "braze_content_block" "test" {
+					provider = braze
+
+					limit = 0
+				}
+				`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("braze_content_block.test", 0),
+				},
+			},
+		},
+	})
+}
+
+func TestAccBrazeContentBlockListPagination(t *testing.T) {
+	t.Parallel()
+
+	server, _ := brazeclienttesting.NewBrazeServer()
+
+	for i := range 101 {
+		id := fmt.Sprintf("content-block-pagination-%03d", i)
+
+		server.SetContentBlock(id, id, "content", "", []string{})
+	}
+
+	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		Steps: []resource.TestStep{
+			{
+				Query: true,
+				Config: `
+				provider "braze" {}
+
+				list "braze_content_block" "test" {
+					provider = braze
+
+					limit = 101
+				}
+				`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("braze_content_block.test", 101),
+				},
 			},
 		},
 	})
