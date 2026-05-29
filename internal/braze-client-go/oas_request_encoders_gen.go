@@ -10,6 +10,34 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
+func encodeCreateCatalogRequest(
+	req *CreateCatalogRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateCatalogItemRequest(
+	req *CreateCatalogItemRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateContentBlockRequest(
 	req *CreateContentBlockRequest,
 	r *http.Request,
@@ -26,6 +54,20 @@ func encodeCreateContentBlockRequest(
 
 func encodeCreateEmailTemplateRequest(
 	req *CreateEmailTemplateRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeReplaceCatalogItemRequest(
+	req *ReplaceCatalogItemRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

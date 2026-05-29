@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-faster/errors"
+	"github.com/go-faster/jx"
 )
 
 func (s *ErrorResponseStatusCode) Error() string {
@@ -36,6 +37,287 @@ func (s *BrazeApiKey) SetToken(val string) {
 // SetRoles sets the value of Roles.
 func (s *BrazeApiKey) SetRoles(val []string) {
 	s.Roles = val
+}
+
+// Ref: #/Catalog
+type Catalog struct {
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Fields      []CatalogField `json:"fields"`
+	NumItems    OptInt         `json:"num_items"`
+	UpdatedAt   OptDateTime    `json:"updated_at"`
+}
+
+// GetName returns the value of Name.
+func (s *Catalog) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *Catalog) GetDescription() string {
+	return s.Description
+}
+
+// GetFields returns the value of Fields.
+func (s *Catalog) GetFields() []CatalogField {
+	return s.Fields
+}
+
+// GetNumItems returns the value of NumItems.
+func (s *Catalog) GetNumItems() OptInt {
+	return s.NumItems
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *Catalog) GetUpdatedAt() OptDateTime {
+	return s.UpdatedAt
+}
+
+// SetName sets the value of Name.
+func (s *Catalog) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Catalog) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetFields sets the value of Fields.
+func (s *Catalog) SetFields(val []CatalogField) {
+	s.Fields = val
+}
+
+// SetNumItems sets the value of NumItems.
+func (s *Catalog) SetNumItems(val OptInt) {
+	s.NumItems = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *Catalog) SetUpdatedAt(val OptDateTime) {
+	s.UpdatedAt = val
+}
+
+// Ref: #/CatalogField
+type CatalogField struct {
+	Name string           `json:"name"`
+	Type CatalogFieldType `json:"type"`
+}
+
+// GetName returns the value of Name.
+func (s *CatalogField) GetName() string {
+	return s.Name
+}
+
+// GetType returns the value of Type.
+func (s *CatalogField) GetType() CatalogFieldType {
+	return s.Type
+}
+
+// SetName sets the value of Name.
+func (s *CatalogField) SetName(val string) {
+	s.Name = val
+}
+
+// SetType sets the value of Type.
+func (s *CatalogField) SetType(val CatalogFieldType) {
+	s.Type = val
+}
+
+type CatalogFieldType string
+
+const (
+	CatalogFieldTypeString  CatalogFieldType = "string"
+	CatalogFieldTypeNumber  CatalogFieldType = "number"
+	CatalogFieldTypeBoolean CatalogFieldType = "boolean"
+	CatalogFieldTypeTime    CatalogFieldType = "time"
+	CatalogFieldTypeArray   CatalogFieldType = "array"
+	CatalogFieldTypeObject  CatalogFieldType = "object"
+	CatalogFieldTypeGeo     CatalogFieldType = "geo"
+)
+
+// AllValues returns all CatalogFieldType values.
+func (CatalogFieldType) AllValues() []CatalogFieldType {
+	return []CatalogFieldType{
+		CatalogFieldTypeString,
+		CatalogFieldTypeNumber,
+		CatalogFieldTypeBoolean,
+		CatalogFieldTypeTime,
+		CatalogFieldTypeArray,
+		CatalogFieldTypeObject,
+		CatalogFieldTypeGeo,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CatalogFieldType) MarshalText() ([]byte, error) {
+	switch s {
+	case CatalogFieldTypeString:
+		return []byte(s), nil
+	case CatalogFieldTypeNumber:
+		return []byte(s), nil
+	case CatalogFieldTypeBoolean:
+		return []byte(s), nil
+	case CatalogFieldTypeTime:
+		return []byte(s), nil
+	case CatalogFieldTypeArray:
+		return []byte(s), nil
+	case CatalogFieldTypeObject:
+		return []byte(s), nil
+	case CatalogFieldTypeGeo:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CatalogFieldType) UnmarshalText(data []byte) error {
+	switch CatalogFieldType(data) {
+	case CatalogFieldTypeString:
+		*s = CatalogFieldTypeString
+		return nil
+	case CatalogFieldTypeNumber:
+		*s = CatalogFieldTypeNumber
+		return nil
+	case CatalogFieldTypeBoolean:
+		*s = CatalogFieldTypeBoolean
+		return nil
+	case CatalogFieldTypeTime:
+		*s = CatalogFieldTypeTime
+		return nil
+	case CatalogFieldTypeArray:
+		*s = CatalogFieldTypeArray
+		return nil
+	case CatalogFieldTypeObject:
+		*s = CatalogFieldTypeObject
+		return nil
+	case CatalogFieldTypeGeo:
+		*s = CatalogFieldTypeGeo
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/CatalogItem
+type CatalogItem struct {
+	ID              string `json:"id"`
+	AdditionalProps CatalogItemAdditional
+}
+
+// GetID returns the value of ID.
+func (s *CatalogItem) GetID() string {
+	return s.ID
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *CatalogItem) GetAdditionalProps() CatalogItemAdditional {
+	return s.AdditionalProps
+}
+
+// SetID sets the value of ID.
+func (s *CatalogItem) SetID(val string) {
+	s.ID = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *CatalogItem) SetAdditionalProps(val CatalogItemAdditional) {
+	s.AdditionalProps = val
+}
+
+type CatalogItemAdditional map[string]jx.Raw
+
+func (s *CatalogItemAdditional) init() CatalogItemAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/CatalogItemOperationResponse
+type CatalogItemOperationResponse struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *CatalogItemOperationResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *CatalogItemOperationResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// Ref: #/CatalogItemWrite
+type CatalogItemWrite map[string]jx.Raw
+
+func (s *CatalogItemWrite) init() CatalogItemWrite {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/CreateCatalogItemRequest
+type CreateCatalogItemRequest struct {
+	Items []CatalogItemWrite `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *CreateCatalogItemRequest) GetItems() []CatalogItemWrite {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *CreateCatalogItemRequest) SetItems(val []CatalogItemWrite) {
+	s.Items = val
+}
+
+// Ref: #/CreateCatalogRequest
+type CreateCatalogRequest struct {
+	Catalogs []Catalog `json:"catalogs"`
+}
+
+// GetCatalogs returns the value of Catalogs.
+func (s *CreateCatalogRequest) GetCatalogs() []Catalog {
+	return s.Catalogs
+}
+
+// SetCatalogs sets the value of Catalogs.
+func (s *CreateCatalogRequest) SetCatalogs(val []Catalog) {
+	s.Catalogs = val
+}
+
+// Ref: #/CreateCatalogResponse
+type CreateCatalogResponse struct {
+	Catalogs []Catalog `json:"catalogs"`
+	Message  string    `json:"message"`
+}
+
+// GetCatalogs returns the value of Catalogs.
+func (s *CreateCatalogResponse) GetCatalogs() []Catalog {
+	return s.Catalogs
+}
+
+// GetMessage returns the value of Message.
+func (s *CreateCatalogResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetCatalogs sets the value of Catalogs.
+func (s *CreateCatalogResponse) SetCatalogs(val []Catalog) {
+	s.Catalogs = val
+}
+
+// SetMessage sets the value of Message.
+func (s *CreateCatalogResponse) SetMessage(val string) {
+	s.Message = val
 }
 
 // Ref: #/CreateContentBlockRequest
@@ -287,6 +569,36 @@ func (s *CreateEmailTemplateResponse) SetMessage(val OptString) {
 	s.Message = val
 }
 
+// Ref: #/DeleteCatalogItemResponse
+type DeleteCatalogItemResponse struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *DeleteCatalogItemResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *DeleteCatalogItemResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// Ref: #/DeleteCatalogResponse
+type DeleteCatalogResponse struct {
+	Message string `json:"message"`
+}
+
+// GetMessage returns the value of Message.
+func (s *DeleteCatalogResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetMessage sets the value of Message.
+func (s *DeleteCatalogResponse) SetMessage(val string) {
+	s.Message = val
+}
+
 type ErrorResponse struct {
 	// Error message describing what went wrong.
 	Message string `json:"message"`
@@ -338,6 +650,32 @@ func (s *ErrorResponseStatusCode) SetStatusCode(val int) {
 // SetResponse sets the value of Response.
 func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
 	s.Response = val
+}
+
+// Ref: #/GetCatalogItemResponse
+type GetCatalogItemResponse struct {
+	Items   []CatalogItem `json:"items"`
+	Message string        `json:"message"`
+}
+
+// GetItems returns the value of Items.
+func (s *GetCatalogItemResponse) GetItems() []CatalogItem {
+	return s.Items
+}
+
+// GetMessage returns the value of Message.
+func (s *GetCatalogItemResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetItems sets the value of Items.
+func (s *GetCatalogItemResponse) SetItems(val []CatalogItem) {
+	s.Items = val
+}
+
+// SetMessage sets the value of Message.
+func (s *GetCatalogItemResponse) SetMessage(val string) {
+	s.Message = val
 }
 
 // Ref: #/GetContentBlockInfoResponse
@@ -524,6 +862,84 @@ func (s *GetEmailTemplateInfoResponse) SetCreatedAt(val OptNilDateTime) {
 // SetUpdatedAt sets the value of UpdatedAt.
 func (s *GetEmailTemplateInfoResponse) SetUpdatedAt(val OptNilDateTime) {
 	s.UpdatedAt = val
+}
+
+// Ref: #/ListCatalogItemsResponse
+type ListCatalogItemsResponse struct {
+	Items   []CatalogItem `json:"items"`
+	Message string        `json:"message"`
+}
+
+// GetItems returns the value of Items.
+func (s *ListCatalogItemsResponse) GetItems() []CatalogItem {
+	return s.Items
+}
+
+// GetMessage returns the value of Message.
+func (s *ListCatalogItemsResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetItems sets the value of Items.
+func (s *ListCatalogItemsResponse) SetItems(val []CatalogItem) {
+	s.Items = val
+}
+
+// SetMessage sets the value of Message.
+func (s *ListCatalogItemsResponse) SetMessage(val string) {
+	s.Message = val
+}
+
+// ListCatalogItemsResponseHeaders wraps ListCatalogItemsResponse with response headers.
+type ListCatalogItemsResponseHeaders struct {
+	Link     OptString
+	Response ListCatalogItemsResponse
+}
+
+// GetLink returns the value of Link.
+func (s *ListCatalogItemsResponseHeaders) GetLink() OptString {
+	return s.Link
+}
+
+// GetResponse returns the value of Response.
+func (s *ListCatalogItemsResponseHeaders) GetResponse() ListCatalogItemsResponse {
+	return s.Response
+}
+
+// SetLink sets the value of Link.
+func (s *ListCatalogItemsResponseHeaders) SetLink(val OptString) {
+	s.Link = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ListCatalogItemsResponseHeaders) SetResponse(val ListCatalogItemsResponse) {
+	s.Response = val
+}
+
+// Ref: #/ListCatalogsResponse
+type ListCatalogsResponse struct {
+	Catalogs []Catalog `json:"catalogs"`
+	Message  string    `json:"message"`
+}
+
+// GetCatalogs returns the value of Catalogs.
+func (s *ListCatalogsResponse) GetCatalogs() []Catalog {
+	return s.Catalogs
+}
+
+// GetMessage returns the value of Message.
+func (s *ListCatalogsResponse) GetMessage() string {
+	return s.Message
+}
+
+// SetCatalogs sets the value of Catalogs.
+func (s *ListCatalogsResponse) SetCatalogs(val []Catalog) {
+	s.Catalogs = val
+}
+
+// SetMessage sets the value of Message.
+func (s *ListCatalogsResponse) SetMessage(val string) {
+	s.Message = val
 }
 
 // Ref: #/ListContentBlocksResponse
@@ -1239,6 +1655,21 @@ func (o OptUpdateContentBlockRequestState) Or(d UpdateContentBlockRequestState) 
 		return v
 	}
 	return d
+}
+
+// Ref: #/ReplaceCatalogItemRequest
+type ReplaceCatalogItemRequest struct {
+	Items []CatalogItemWrite `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *ReplaceCatalogItemRequest) GetItems() []CatalogItemWrite {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *ReplaceCatalogItemRequest) SetItems(val []CatalogItemWrite) {
+	s.Items = val
 }
 
 // Ref: #/UpdateContentBlockRequest

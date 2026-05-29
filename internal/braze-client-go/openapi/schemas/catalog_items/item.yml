@@ -1,0 +1,8 @@
+CatalogItem:
+  type: object
+  required:
+    - id
+  additionalProperties: true
+  properties:
+    id:
+      type: string

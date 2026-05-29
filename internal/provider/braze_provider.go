@@ -134,6 +134,8 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	providerData := brazeProviderData{
 		contentBlocks:  newGeneratedContentBlockClient(brazeClient),
 		emailTemplates: newGeneratedEmailTemplateClient(brazeClient),
+		catalogs:       newGeneratedCatalogClient(brazeClient),
+		catalogItems:   newGeneratedCatalogItemClient(brazeClient),
 	}
 
 	resp.ActionData = providerData
@@ -149,6 +151,8 @@ func (p *brazeProvider) DataSources(_ context.Context) []func() datasource.DataS
 
 func (p *brazeProvider) ListResources(context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
+		NewBrazeCatalogListResource,
+		NewBrazeCatalogItemListResource,
 		NewBrazeContentBlockListResource,
 		NewBrazeEmailTemplateListResource,
 	}
@@ -156,6 +160,8 @@ func (p *brazeProvider) ListResources(context.Context) []func() list.ListResourc
 
 func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewBrazeCatalogResource,
+		NewBrazeCatalogItemResource,
 		NewBrazeContentBlockResource,
 		NewBrazeEmailTemplateResource,
 	}

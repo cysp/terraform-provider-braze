@@ -21,6 +21,18 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	// CreateCatalog invokes createCatalog operation.
+	//
+	// Create catalog.
+	//
+	// POST /catalogs
+	CreateCatalog(ctx context.Context, request *CreateCatalogRequest) (*CreateCatalogResponse, error)
+	// CreateCatalogItem invokes createCatalogItem operation.
+	//
+	// Create catalog item.
+	//
+	// POST /catalogs/{catalog_name}/items/{item_id}
+	CreateCatalogItem(ctx context.Context, request *CreateCatalogItemRequest, params CreateCatalogItemParams) (*CatalogItemOperationResponse, error)
 	// CreateContentBlock invokes createContentBlock operation.
 	//
 	// Create a Content Block on the Braze dashboard.
@@ -33,6 +45,24 @@ type Invoker interface {
 	//
 	// POST /templates/email/create
 	CreateEmailTemplate(ctx context.Context, request *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
+	// DeleteCatalog invokes deleteCatalog operation.
+	//
+	// Delete catalog.
+	//
+	// DELETE /catalogs/{catalog_name}
+	DeleteCatalog(ctx context.Context, params DeleteCatalogParams) (*DeleteCatalogResponse, error)
+	// DeleteCatalogItem invokes deleteCatalogItem operation.
+	//
+	// Delete catalog item.
+	//
+	// DELETE /catalogs/{catalog_name}/items/{item_id}
+	DeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (*DeleteCatalogItemResponse, error)
+	// GetCatalogItem invokes getCatalogItem operation.
+	//
+	// Get catalog item.
+	//
+	// GET /catalogs/{catalog_name}/items/{item_id}
+	GetCatalogItem(ctx context.Context, params GetCatalogItemParams) (*GetCatalogItemResponse, error)
 	// GetContentBlockInfo invokes getContentBlockInfo operation.
 	//
 	// Call information for your existing Content Blocks.
@@ -45,6 +75,18 @@ type Invoker interface {
 	//
 	// GET /templates/email/info
 	GetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (*GetEmailTemplateInfoResponse, error)
+	// ListCatalogItems invokes listCatalogItems operation.
+	//
+	// List catalog items.
+	//
+	// GET /catalogs/{catalog_name}/items
+	ListCatalogItems(ctx context.Context, params ListCatalogItemsParams) (*ListCatalogItemsResponseHeaders, error)
+	// ListCatalogs invokes listCatalogs operation.
+	//
+	// List catalogs.
+	//
+	// GET /catalogs
+	ListCatalogs(ctx context.Context) (*ListCatalogsResponse, error)
 	// ListContentBlocks invokes listContentBlocks operation.
 	//
 	// List your existing Content Blocks information.
@@ -57,6 +99,12 @@ type Invoker interface {
 	//
 	// GET /templates/email/list
 	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
+	// ReplaceCatalogItem invokes replaceCatalogItem operation.
+	//
+	// Replace catalog item.
+	//
+	// PUT /catalogs/{catalog_name}/items/{item_id}
+	ReplaceCatalogItem(ctx context.Context, request *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (*CatalogItemOperationResponse, error)
 	// UpdateContentBlock invokes updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.
@@ -110,6 +158,207 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
+}
+
+// CreateCatalog invokes createCatalog operation.
+//
+// Create catalog.
+//
+// POST /catalogs
+func (c *Client) CreateCatalog(ctx context.Context, request *CreateCatalogRequest) (*CreateCatalogResponse, error) {
+	res, err := c.sendCreateCatalog(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateCatalog(ctx context.Context, request *CreateCatalogRequest) (res *CreateCatalogResponse, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/catalogs"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateCatalogRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, CreateCatalogOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeCreateCatalogResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateCatalogItem invokes createCatalogItem operation.
+//
+// Create catalog item.
+//
+// POST /catalogs/{catalog_name}/items/{item_id}
+func (c *Client) CreateCatalogItem(ctx context.Context, request *CreateCatalogItemRequest, params CreateCatalogItemParams) (*CatalogItemOperationResponse, error) {
+	res, err := c.sendCreateCatalogItem(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateCatalogItem(ctx context.Context, request *CreateCatalogItemRequest, params CreateCatalogItemParams) (res *CatalogItemOperationResponse, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/items/"
+	{
+		// Encode "item_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "item_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ItemID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateCatalogItemRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, CreateCatalogItemOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeCreateCatalogItemResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
 }
 
 // CreateContentBlock invokes createContentBlock operation.
@@ -269,6 +518,308 @@ func (c *Client) sendCreateEmailTemplate(ctx context.Context, request *CreateEma
 	defer body.Close()
 
 	result, err := decodeCreateEmailTemplateResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteCatalog invokes deleteCatalog operation.
+//
+// Delete catalog.
+//
+// DELETE /catalogs/{catalog_name}
+func (c *Client) DeleteCatalog(ctx context.Context, params DeleteCatalogParams) (*DeleteCatalogResponse, error) {
+	res, err := c.sendDeleteCatalog(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteCatalog(ctx context.Context, params DeleteCatalogParams) (res *DeleteCatalogResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, DeleteCatalogOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeDeleteCatalogResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteCatalogItem invokes deleteCatalogItem operation.
+//
+// Delete catalog item.
+//
+// DELETE /catalogs/{catalog_name}/items/{item_id}
+func (c *Client) DeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (*DeleteCatalogItemResponse, error) {
+	res, err := c.sendDeleteCatalogItem(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (res *DeleteCatalogItemResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/items/"
+	{
+		// Encode "item_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "item_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ItemID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, DeleteCatalogItemOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeDeleteCatalogItemResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetCatalogItem invokes getCatalogItem operation.
+//
+// Get catalog item.
+//
+// GET /catalogs/{catalog_name}/items/{item_id}
+func (c *Client) GetCatalogItem(ctx context.Context, params GetCatalogItemParams) (*GetCatalogItemResponse, error) {
+	res, err := c.sendGetCatalogItem(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetCatalogItem(ctx context.Context, params GetCatalogItemParams) (res *GetCatalogItemResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/items/"
+	{
+		// Encode "item_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "item_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ItemID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, GetCatalogItemOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeGetCatalogItemResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -460,6 +1011,185 @@ func (c *Client) sendGetEmailTemplateInfo(ctx context.Context, params GetEmailTe
 	defer body.Close()
 
 	result, err := decodeGetEmailTemplateInfoResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListCatalogItems invokes listCatalogItems operation.
+//
+// List catalog items.
+//
+// GET /catalogs/{catalog_name}/items
+func (c *Client) ListCatalogItems(ctx context.Context, params ListCatalogItemsParams) (*ListCatalogItemsResponseHeaders, error) {
+	res, err := c.sendListCatalogItems(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListCatalogItems(ctx context.Context, params ListCatalogItemsParams) (res *ListCatalogItemsResponseHeaders, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/items"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "cursor" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Cursor.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, ListCatalogItemsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeListCatalogItemsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListCatalogs invokes listCatalogs operation.
+//
+// List catalogs.
+//
+// GET /catalogs
+func (c *Client) ListCatalogs(ctx context.Context) (*ListCatalogsResponse, error) {
+	res, err := c.sendListCatalogs(ctx)
+	return res, err
+}
+
+func (c *Client) sendListCatalogs(ctx context.Context) (res *ListCatalogsResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/catalogs"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, ListCatalogsOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeListCatalogsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -742,6 +1472,125 @@ func (c *Client) sendListEmailTemplates(ctx context.Context, params ListEmailTem
 	defer body.Close()
 
 	result, err := decodeListEmailTemplatesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ReplaceCatalogItem invokes replaceCatalogItem operation.
+//
+// Replace catalog item.
+//
+// PUT /catalogs/{catalog_name}/items/{item_id}
+func (c *Client) ReplaceCatalogItem(ctx context.Context, request *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (*CatalogItemOperationResponse, error) {
+	res, err := c.sendReplaceCatalogItem(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendReplaceCatalogItem(ctx context.Context, request *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (res *CatalogItemOperationResponse, err error) {
+	// Validate request before sending.
+	if err := func() error {
+		if err := request.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return res, errors.Wrap(err, "validate")
+	}
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/catalogs/"
+	{
+		// Encode "catalog_name" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "catalog_name",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.CatalogName))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/items/"
+	{
+		// Encode "item_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "item_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ItemID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeReplaceCatalogItemRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, ReplaceCatalogItemOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer body.Close()
+
+	result, err := decodeReplaceCatalogItemResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

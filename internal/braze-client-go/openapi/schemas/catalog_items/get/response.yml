@@ -1,0 +1,12 @@
+GetCatalogItemResponse:
+  type: object
+  required:
+    - items
+    - message
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '../item.yml#/CatalogItem'
+    message:
+      type: string
