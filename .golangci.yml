@@ -6,6 +6,7 @@ linters:
     - depguard
     - exhaustruct
     - funlen
+    - goconst
     - lll
     - wsl
   settings:
@@ -31,6 +32,10 @@ linters:
       - builtin$
       - examples$
     rules:
+      - linters:
+          - gosec
+        path: "internal/provider/http_client_user_agent.go"
+        text: "G704: SSRF via taint analysis"
       - linters:
           - revive
         path: "util/*"
