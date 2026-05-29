@@ -116,7 +116,7 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	retryableClient := retryablehttp.NewClient()
 	retryableClient.RetryWaitMin = time.Duration(1) * time.Second
 	retryableClient.RetryWaitMax = time.Duration(3) * time.Second //nolint:mnd
-	retryableClient.Backoff = retryablehttp.LinearJitterBackoff
+	retryableClient.Backoff = brazeRateLimitBackoff
 
 	if p.httpClient != nil {
 		retryableClient.HTTPClient = p.httpClient
