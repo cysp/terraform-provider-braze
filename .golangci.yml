@@ -7,8 +7,11 @@ linters:
     - exhaustruct
     - funlen
     - goconst
+    - gomodguard
     - lll
     - wsl
+  enable:
+    - gomodguard_v2
   settings:
     cyclop:
       max-complexity: 20
