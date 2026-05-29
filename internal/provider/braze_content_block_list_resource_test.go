@@ -6,7 +6,9 @@ import (
 
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -43,6 +45,31 @@ func TestAccBrazeContentBlockList(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_content_block.test", "content", "<p>This is <strong>HTML</strong> content</p>"),
 					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
 				),
+			},
+			{
+				Query: true,
+				Config: `
+				provider "braze" {}
+
+				list "braze_content_block" "test" {
+					provider = braze
+
+					limit = 1
+				}
+				`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("braze_content_block.test", 1),
+					querycheck.ExpectIdentity("braze_content_block.test", map[string]knownvalue.Check{
+						"id": knownvalue.StringExact("content-block-id"),
+					}),
+					querycheck.ExpectResourceDisplayName(
+						"braze_content_block.test",
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact("content-block-id"),
+						}),
+						knownvalue.StringExact("test-content-block"),
+					),
+				},
 			},
 			{
 				Query: true,

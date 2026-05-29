@@ -132,7 +132,8 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	}
 
 	providerData := brazeProviderData{
-		client: brazeClient,
+		contentBlocks:  newGeneratedContentBlockClient(brazeClient),
+		emailTemplates: newGeneratedEmailTemplateClient(brazeClient),
 	}
 
 	resp.ActionData = providerData

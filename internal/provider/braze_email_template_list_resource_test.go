@@ -6,7 +6,9 @@ import (
 
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -48,6 +50,31 @@ func TestAccBrazeEmailTemplateList(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_email_template.test", "tags.0", "tag1"),
 					resource.TestCheckResourceAttr("braze_email_template.test", "should_inline_css", "true"),
 				),
+			},
+			{
+				Query: true,
+				Config: `
+				provider "braze" {}
+
+				list "braze_email_template" "test" {
+					provider = braze
+
+					limit = 1
+				}
+				`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("braze_email_template.test", 1),
+					querycheck.ExpectIdentity("braze_email_template.test", map[string]knownvalue.Check{
+						"id": knownvalue.StringExact("email-template-id"),
+					}),
+					querycheck.ExpectResourceDisplayName(
+						"braze_email_template.test",
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"id": knownvalue.StringExact("email-template-id"),
+						}),
+						knownvalue.StringExact("test-email-template"),
+					),
+				},
 			},
 			{
 				Query: true,
