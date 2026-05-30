@@ -20,7 +20,7 @@ func BrazeCatalogItemResourceIdentitySchema() identityschema.Schema {
 
 func BrazeCatalogItemResourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
-		Description: "Manage a Braze catalog item using canonical JSON for arbitrary catalog fields.",
+		Description: "Manage a Braze catalog item using canonical JSON for arbitrary catalog item values.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Description: "The Terraform import ID in `catalog_name/item_id` form.",
@@ -43,9 +43,9 @@ func BrazeCatalogItemResourceSchema(_ context.Context) schema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"data_json": schema.StringAttribute{
+			"values_json": schema.StringAttribute{
 				CustomType:  jsontypes.NormalizedType{},
-				Description: "Canonical JSON object containing the item fields. If present, the `id` field must match `item_id`.",
+				Description: "Canonical JSON object containing the item values sent in the request body. The Braze `id` field is addressed by `item_id` and must not be included.",
 				Required:    true,
 			},
 		},

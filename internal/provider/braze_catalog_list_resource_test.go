@@ -159,7 +159,7 @@ func TestAccBrazeCatalogItemList(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "id", "centres/airportwest"),
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "catalog_name", "centres"),
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "item_id", "airportwest"),
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "data_json", `{"id":"airportwest","name":"Airport West"}`),
+					resource.TestCheckResourceAttr("braze_catalog_item.test", "values_json", `{"name":"Airport West"}`),
 				),
 			},
 			{

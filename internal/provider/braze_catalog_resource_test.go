@@ -36,7 +36,7 @@ resource "braze_catalog" "test" {
 resource "braze_catalog_item" "test" {
   catalog_name = braze_catalog.test.name
   item_id      = "airportwest"
-  data_json    = jsonencode({ id = "airportwest", name = "Airport West", active = true })
+  values_json  = jsonencode({ name = "Airport West", active = true })
 }
 `
 
@@ -66,7 +66,7 @@ provider "braze" {}
 resource "braze_catalog_item" "test" {
   catalog_name = "centres"
   item_id      = "airportwest"
-  data_json    = jsonencode({ id = "airportwest", name = "Airport West" })
+  values_json  = jsonencode({ name = "Airport West" })
 }
 `
 
@@ -88,7 +88,7 @@ func TestAccBrazeCatalogAndCatalogItem(t *testing.T) {
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "id", "centres/airportwest"),
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "catalog_name", "centres"),
 					resource.TestCheckResourceAttr("braze_catalog_item.test", "item_id", "airportwest"),
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "data_json", `{"active":true,"id":"airportwest","name":"Airport West"}`),
+					resource.TestCheckResourceAttr("braze_catalog_item.test", "values_json", `{"active":true,"name":"Airport West"}`),
 				),
 			},
 			{
@@ -182,7 +182,7 @@ provider "braze" {}
 resource "braze_catalog_item" "test" {
   catalog_name = "centres"
   item_id      = "airportwest"
-  data_json    = "not json"
+  values_json  = "not json"
 }
 `,
 				ExpectError: regexp.MustCompile(`Invalid JSON String Value`),
@@ -194,10 +194,22 @@ provider "braze" {}
 resource "braze_catalog_item" "test" {
   catalog_name = "centres"
   item_id      = "airportwest"
-  data_json    = "null"
+  values_json  = "null"
 }
 `,
-				ExpectError: regexp.MustCompile(`data_json must be a JSON object`),
+				ExpectError: regexp.MustCompile(`values_json must be a JSON object`),
+			},
+			{
+				Config: `
+provider "braze" {}
+
+resource "braze_catalog_item" "test" {
+  catalog_name = "centres"
+  item_id      = "airportwest"
+  values_json  = jsonencode({ id = "airportwest", name = "Airport West" })
+}
+`,
+				ExpectError: regexp.MustCompile(`values_json must not include id`),
 			},
 		},
 	})

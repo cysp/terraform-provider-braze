@@ -229,26 +229,24 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 		actual, err := client.Create(t.Context(), brazeCatalogItemModel{
 			CatalogName: types.StringValue("centres"),
 			ItemID:      types.StringValue("airportwest"),
-			DataJSON:    jsontypes.NewNormalizedValue(`{"name":"Airport West"}`),
+			ValuesJSON:  jsontypes.NewNormalizedValue(`{"name":"Airport West"}`),
 		})
 
 		require.NoError(t, err)
 		assert.Equal(t, "centres/airportwest", actual.ID.ValueString())
-		assert.JSONEq(t, `{"id":"airportwest","name":"Airport West"}`, actual.DataJSON.ValueString())
+		assert.JSONEq(t, `{"name":"Airport West"}`, actual.ValuesJSON.ValueString())
 	})
 
-	t.Run("write item omits id from request body", func(t *testing.T) {
+	t.Run("write item rejects id in request body", func(t *testing.T) {
 		t.Parallel()
 
-		item, err := (brazeCatalogItemModel{
+		_, err := (brazeCatalogItemModel{
 			CatalogName: types.StringValue("centres"),
 			ItemID:      types.StringValue("airportwest"),
-			DataJSON:    jsontypes.NewNormalizedValue(`{"id":"airportwest","name":"Airport West"}`),
+			ValuesJSON:  jsontypes.NewNormalizedValue(`{"id":"airportwest","name":"Airport West"}`),
 		}).ToCatalogItemWrite()
 
-		require.NoError(t, err)
-		assert.NotContains(t, item, "id")
-		assert.Contains(t, item, "name")
+		require.ErrorIs(t, err, errCatalogItemValuesJSONIncludesID)
 	})
 
 	t.Run("list follows link header pagination", func(t *testing.T) {
@@ -263,7 +261,7 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 				_, err := itemClient.Create(t.Context(), brazeCatalogItemModel{
 					CatalogName: types.StringValue("centres"),
 					ItemID:      types.StringValue(id),
-					DataJSON:    jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
+					ValuesJSON:  jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
 				})
 				require.NoError(t, err)
 			}
@@ -289,7 +287,7 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 				_, err := itemClient.Create(t.Context(), brazeCatalogItemModel{
 					CatalogName: types.StringValue("centres"),
 					ItemID:      types.StringValue(id),
-					DataJSON:    jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
+					ValuesJSON:  jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
 				})
 				require.NoError(t, err)
 			}

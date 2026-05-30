@@ -3,12 +3,12 @@
 page_title: "braze_catalog_item Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-  Manage a Braze catalog item using canonical JSON for arbitrary catalog fields.
+  Manage a Braze catalog item using canonical JSON for arbitrary catalog item values.
 ---
 
 # braze_catalog_item (Resource)
 
-Manage a Braze catalog item using canonical JSON for arbitrary catalog fields.
+Manage a Braze catalog item using canonical JSON for arbitrary catalog item values.
 
 
 
@@ -18,8 +18,8 @@ Manage a Braze catalog item using canonical JSON for arbitrary catalog fields.
 ### Required
 
 - `catalog_name` (String) The name of the catalog containing the item.
-- `data_json` (String) Canonical JSON object containing the item fields. If present, the `id` field must match `item_id`.
 - `item_id` (String) The catalog item ID.
+- `values_json` (String) Canonical JSON object containing the item values sent in the request body. The Braze `id` field is addressed by `item_id` and must not be included.
 
 ### Read-Only
 

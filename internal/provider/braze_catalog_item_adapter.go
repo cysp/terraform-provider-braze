@@ -158,13 +158,13 @@ func (c generatedCatalogItemClient) List(ctx context.Context, catalogName string
 }
 
 func nextCursorFromLinkHeader(link brazeclient.OptString) (string, bool) {
-	value, ok := link.Get()
+	headerValue, ok := link.Get()
 	if !ok {
 		return "", false
 	}
 
-	for value := range strings.SplitSeq(value, ",") {
-		linkTarget, linkParams, ok := strings.Cut(value, ";")
+	for entry := range strings.SplitSeq(headerValue, ",") {
+		linkTarget, linkParams, ok := strings.Cut(entry, ";")
 		if !ok {
 			continue
 		}
