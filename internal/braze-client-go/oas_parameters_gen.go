@@ -4,6 +4,7 @@ package brazeclient
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
@@ -13,6 +14,425 @@ import (
 	"github.com/ogen-go/ogen/uri"
 	"github.com/ogen-go/ogen/validate"
 )
+
+// CreateCatalogItemParams is parameters of createCatalogItem operation.
+type CreateCatalogItemParams struct {
+	CatalogName string
+	ItemID      string
+}
+
+func unpackCreateCatalogItemParams(packed middleware.Parameters) (params CreateCatalogItemParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "item_id",
+			In:   "path",
+		}
+		params.ItemID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeCreateCatalogItemParams(args [2]string, argsEscaped bool, r *http.Request) (params CreateCatalogItemParams, _ error) {
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: item_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "item_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ItemID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "item_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteCatalogParams is parameters of deleteCatalog operation.
+type DeleteCatalogParams struct {
+	CatalogName string
+}
+
+func unpackDeleteCatalogParams(packed middleware.Parameters) (params DeleteCatalogParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteCatalogParams(args [1]string, argsEscaped bool, r *http.Request) (params DeleteCatalogParams, _ error) {
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// DeleteCatalogItemParams is parameters of deleteCatalogItem operation.
+type DeleteCatalogItemParams struct {
+	CatalogName string
+	ItemID      string
+}
+
+func unpackDeleteCatalogItemParams(packed middleware.Parameters) (params DeleteCatalogItemParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "item_id",
+			In:   "path",
+		}
+		params.ItemID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeDeleteCatalogItemParams(args [2]string, argsEscaped bool, r *http.Request) (params DeleteCatalogItemParams, _ error) {
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: item_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "item_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ItemID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "item_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetCatalogItemParams is parameters of getCatalogItem operation.
+type GetCatalogItemParams struct {
+	CatalogName string
+	ItemID      string
+}
+
+func unpackGetCatalogItemParams(packed middleware.Parameters) (params GetCatalogItemParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "item_id",
+			In:   "path",
+		}
+		params.ItemID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeGetCatalogItemParams(args [2]string, argsEscaped bool, r *http.Request) (params GetCatalogItemParams, _ error) {
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: item_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "item_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ItemID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "item_id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
 
 // GetContentBlockInfoParams is parameters of getContentBlockInfo operation.
 type GetContentBlockInfoParams struct {
@@ -180,6 +600,123 @@ func decodeGetEmailTemplateInfoParams(args [0]string, argsEscaped bool, r *http.
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "email_template_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListCatalogItemsParams is parameters of listCatalogItems operation.
+type ListCatalogItemsParams struct {
+	CatalogName string
+	Cursor      OptString `json:",omitempty,omitzero"`
+}
+
+func unpackListCatalogItemsParams(packed middleware.Parameters) (params ListCatalogItemsParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "cursor",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Cursor = v.(OptString)
+		}
+	}
+	return params
+}
+
+func decodeListCatalogItemsParams(args [1]string, argsEscaped bool, r *http.Request) (params ListCatalogItemsParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode query: cursor.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "cursor",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotCursorVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotCursorVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Cursor.SetTo(paramsDotCursorVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "cursor",
 			In:   "query",
 			Err:  err,
 		}
@@ -743,6 +1280,124 @@ func decodeListEmailTemplatesParams(args [0]string, argsEscaped bool, r *http.Re
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ReplaceCatalogItemParams is parameters of replaceCatalogItem operation.
+type ReplaceCatalogItemParams struct {
+	CatalogName string
+	ItemID      string
+}
+
+func unpackReplaceCatalogItemParams(packed middleware.Parameters) (params ReplaceCatalogItemParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "catalog_name",
+			In:   "path",
+		}
+		params.CatalogName = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "item_id",
+			In:   "path",
+		}
+		params.ItemID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeReplaceCatalogItemParams(args [2]string, argsEscaped bool, r *http.Request) (params ReplaceCatalogItemParams, _ error) {
+	// Decode path: catalog_name.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "catalog_name",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.CatalogName = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "catalog_name",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: item_id.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "item_id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ItemID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "item_id",
+			In:   "path",
 			Err:  err,
 		}
 	}

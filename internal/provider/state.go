@@ -23,3 +23,12 @@ func setIdentityAndState(ctx context.Context, identity stateAttributeValueSettab
 
 	return diags
 }
+
+func setNamedIdentityAndState(ctx context.Context, identity stateAttributeValueSettable, state stateValueSettable, name string, value any) diag.Diagnostics {
+	diags := diag.Diagnostics{}
+
+	diags.Append(identity.SetAttribute(ctx, path.Root("name"), name)...)
+	diags.Append(state.Set(ctx, value)...)
+
+	return diags
+}

@@ -13,6 +13,8 @@ type Handler struct {
 
 	contentBlocks  map[string]*brazeclient.GetContentBlockInfoResponse
 	emailTemplates map[string]*brazeclient.GetEmailTemplateInfoResponse
+	catalogs       map[string]brazeclient.Catalog
+	catalogItems   map[string]map[string]brazeclient.CatalogItem
 }
 
 var _ brazeclient.Handler = (*Handler)(nil)
@@ -23,6 +25,8 @@ func NewBrazeHandler() *Handler {
 
 		contentBlocks:  make(map[string]*brazeclient.GetContentBlockInfoResponse),
 		emailTemplates: make(map[string]*brazeclient.GetEmailTemplateInfoResponse),
+		catalogs:       make(map[string]brazeclient.Catalog),
+		catalogItems:   make(map[string]map[string]brazeclient.CatalogItem),
 	}
 }
 
