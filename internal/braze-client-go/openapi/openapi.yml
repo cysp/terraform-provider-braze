@@ -13,6 +13,210 @@ security:
   - brazeApiKey: []
 
 paths:
+  /catalogs:
+    get:
+      summary: List catalogs
+      operationId: listCatalogs
+      tags:
+        - Catalogs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalogs/list/response.yml#/ListCatalogsResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+    post:
+      summary: Create catalog
+      operationId: createCatalog
+      tags:
+        - Catalogs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/catalogs/create/request.yml#/CreateCatalogRequest'
+      responses:
+        '201':
+          description: Catalog created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalogs/create/response.yml#/CreateCatalogResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /catalogs/{catalog_name}:
+    delete:
+      summary: Delete catalog
+      operationId: deleteCatalog
+      tags:
+        - Catalogs
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Catalog deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalogs/delete/response.yml#/DeleteCatalogResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /catalogs/{catalog_name}/items:
+    get:
+      summary: List catalog items
+      operationId: listCatalogItems
+      tags:
+        - Catalog Items
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            Link:
+              description: Pagination links for previous and next pages. Present only when additional pages exist.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalog_items/list/response.yml#/ListCatalogItemsResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /catalogs/{catalog_name}/items/{item_id}:
+    post:
+      summary: Create catalog item
+      operationId: createCatalogItem
+      tags:
+        - Catalog Items
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/catalog_items/create/request.yml#/CreateCatalogItemRequest'
+      responses:
+        '201':
+          description: Catalog item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalog_items/operation/response.yml#/CatalogItemOperationResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+    get:
+      summary: Get catalog item
+      operationId: getCatalogItem
+      tags:
+        - Catalog Items
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalog_items/get/response.yml#/GetCatalogItemResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+    put:
+      summary: Replace catalog item
+      operationId: replaceCatalogItem
+      tags:
+        - Catalog Items
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/catalog_items/replace/request.yml#/ReplaceCatalogItemRequest'
+      responses:
+        '200':
+          description: Catalog item replaced successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalog_items/operation/response.yml#/CatalogItemOperationResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+    delete:
+      summary: Delete catalog item
+      operationId: deleteCatalogItem
+      tags:
+        - Catalog Items
+      parameters:
+        - name: catalog_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Catalog item deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/catalog_items/delete/response.yml#/DeleteCatalogItemResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
   /templates/email/list:
     get:
       summary: List available Email Templates

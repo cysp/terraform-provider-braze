@@ -37,5 +37,3 @@ resource "braze_content_block" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

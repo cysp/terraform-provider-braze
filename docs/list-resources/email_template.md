@@ -3,7 +3,7 @@
 page_title: "braze_email_template List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # braze_email_template (List Resource)

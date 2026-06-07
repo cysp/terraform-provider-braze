@@ -1,0 +1,6 @@
+CatalogItemWrite:
+  type: object
+  additionalProperties: true
+  not:
+    required:
+      - id

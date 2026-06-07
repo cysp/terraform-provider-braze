@@ -8,6 +8,18 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// CreateCatalog implements createCatalog operation.
+	//
+	// Create catalog.
+	//
+	// POST /catalogs
+	CreateCatalog(ctx context.Context, req *CreateCatalogRequest) (*CreateCatalogResponse, error)
+	// CreateCatalogItem implements createCatalogItem operation.
+	//
+	// Create catalog item.
+	//
+	// POST /catalogs/{catalog_name}/items/{item_id}
+	CreateCatalogItem(ctx context.Context, req *CreateCatalogItemRequest, params CreateCatalogItemParams) (*CatalogItemOperationResponse, error)
 	// CreateContentBlock implements createContentBlock operation.
 	//
 	// Create a Content Block on the Braze dashboard.
@@ -20,6 +32,24 @@ type Handler interface {
 	//
 	// POST /templates/email/create
 	CreateEmailTemplate(ctx context.Context, req *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
+	// DeleteCatalog implements deleteCatalog operation.
+	//
+	// Delete catalog.
+	//
+	// DELETE /catalogs/{catalog_name}
+	DeleteCatalog(ctx context.Context, params DeleteCatalogParams) (*DeleteCatalogResponse, error)
+	// DeleteCatalogItem implements deleteCatalogItem operation.
+	//
+	// Delete catalog item.
+	//
+	// DELETE /catalogs/{catalog_name}/items/{item_id}
+	DeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (*DeleteCatalogItemResponse, error)
+	// GetCatalogItem implements getCatalogItem operation.
+	//
+	// Get catalog item.
+	//
+	// GET /catalogs/{catalog_name}/items/{item_id}
+	GetCatalogItem(ctx context.Context, params GetCatalogItemParams) (*GetCatalogItemResponse, error)
 	// GetContentBlockInfo implements getContentBlockInfo operation.
 	//
 	// Call information for your existing Content Blocks.
@@ -32,6 +62,18 @@ type Handler interface {
 	//
 	// GET /templates/email/info
 	GetEmailTemplateInfo(ctx context.Context, params GetEmailTemplateInfoParams) (*GetEmailTemplateInfoResponse, error)
+	// ListCatalogItems implements listCatalogItems operation.
+	//
+	// List catalog items.
+	//
+	// GET /catalogs/{catalog_name}/items
+	ListCatalogItems(ctx context.Context, params ListCatalogItemsParams) (*ListCatalogItemsResponseHeaders, error)
+	// ListCatalogs implements listCatalogs operation.
+	//
+	// List catalogs.
+	//
+	// GET /catalogs
+	ListCatalogs(ctx context.Context) (*ListCatalogsResponse, error)
 	// ListContentBlocks implements listContentBlocks operation.
 	//
 	// List your existing Content Blocks information.
@@ -44,6 +86,12 @@ type Handler interface {
 	//
 	// GET /templates/email/list
 	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
+	// ReplaceCatalogItem implements replaceCatalogItem operation.
+	//
+	// Replace catalog item.
+	//
+	// PUT /catalogs/{catalog_name}/items/{item_id}
+	ReplaceCatalogItem(ctx context.Context, req *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (*CatalogItemOperationResponse, error)
 	// UpdateContentBlock implements updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.

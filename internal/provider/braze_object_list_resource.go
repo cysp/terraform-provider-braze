@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -30,7 +31,21 @@ func streamBrazeObjectListEntries[Model any](
 		}
 
 		result := req.NewListResult(ctx)
-		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root(identityAttribute), entry.ID)...)
+		if len(entry.Identity) == 0 {
+			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root(identityAttribute), entry.ID)...)
+		} else {
+			identityAttributes := make([]string, 0, len(entry.Identity))
+			for attribute := range entry.Identity {
+				identityAttributes = append(identityAttributes, attribute)
+			}
+
+			sort.Strings(identityAttributes)
+
+			for _, attribute := range identityAttributes {
+				result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root(attribute), entry.Identity[attribute])...)
+			}
+		}
+
 		result.DisplayName = entry.DisplayName
 
 		if req.IncludeResource {
