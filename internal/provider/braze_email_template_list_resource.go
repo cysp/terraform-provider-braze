@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
@@ -66,7 +65,7 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 	}
 
 	if req.Limit <= 0 {
-		resp.Results = func(_ func(list.ListResult) bool) {}
+		resp.Results = emptyBrazeObjectListResults
 
 		return
 	}
@@ -98,43 +97,13 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		r.listEmailTemplates(ctx, req, query, yield)
-	}
-}
+		entries, listErr := r.providerData.emailTemplates.List(ctx, query)
+		if listErr != nil {
+			streamBrazeObjectListError(ctx, req, "Failed to list email templates", listErr, yield)
 
-func (r *brazeEmailTemplateListResource) listEmailTemplates(
-	ctx context.Context,
-	req list.ListRequest,
-	query brazeObjectListQuery,
-	yield func(list.ListResult) bool,
-) {
-	entries, listErr := r.providerData.emailTemplates.List(ctx, query)
-	if listErr != nil {
-		result := req.NewListResult(ctx)
-		result.Diagnostics.AddError("Failed to list email templates", detailFromError(listErr))
-
-		yield(result)
-
-		return
-	}
-
-	for _, entry := range entries {
-		result := req.NewListResult(ctx)
-
-		result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), entry.ID)...)
-
-		result.DisplayName = entry.DisplayName
-
-		if req.IncludeResource {
-			if entry.ResourceErr != nil {
-				result.Diagnostics.AddError("Failed to get email template", detailFromError(entry.ResourceErr))
-			} else {
-				result.Diagnostics.Append(result.Resource.Set(ctx, *entry.Resource)...)
-			}
-		}
-
-		if !yield(result) {
 			return
 		}
+
+		streamBrazeObjectListEntries(ctx, req, entries, "id", "Failed to get email template", yield)
 	}
 }
