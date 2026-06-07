@@ -1,0 +1,12 @@
+ListCatalogsResponse:
+  type: object
+  required:
+    - catalogs
+    - message
+  properties:
+    catalogs:
+      type: array
+      items:
+        $ref: '../catalog.yml#/Catalog'
+    message:
+      type: string

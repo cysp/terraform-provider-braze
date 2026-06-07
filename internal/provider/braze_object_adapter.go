@@ -19,6 +19,7 @@ type brazeObjectListQuery struct {
 type brazeObjectListEntry[Model any] struct {
 	ID          string
 	DisplayName string
+	Identity    map[string]string
 	Resource    *Model
 	ResourceErr error
 }

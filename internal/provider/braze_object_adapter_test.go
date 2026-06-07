@@ -10,6 +10,8 @@ import (
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
+	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -214,6 +216,91 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 	})
 }
 
+func TestGeneratedCatalogItemClient(t *testing.T) {
+	t.Parallel()
+
+	t.Run("create uses item-addressed endpoint", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			createTestCatalog(t, server)
+		}))
+
+		actual, err := client.Create(t.Context(), brazeCatalogItemModel{
+			CatalogName: types.StringValue("centres"),
+			ItemID:      types.StringValue("airportwest"),
+			ValuesJSON:  jsontypes.NewNormalizedValue(`{"name":"Airport West"}`),
+		})
+
+		require.NoError(t, err)
+		assert.Equal(t, "centres/airportwest", actual.ID.ValueString())
+		assert.JSONEq(t, `{"name":"Airport West"}`, actual.ValuesJSON.ValueString())
+	})
+
+	t.Run("write item rejects id in request body", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := (brazeCatalogItemModel{
+			CatalogName: types.StringValue("centres"),
+			ItemID:      types.StringValue("airportwest"),
+			ValuesJSON:  jsontypes.NewNormalizedValue(`{"id":"airportwest","name":"Airport West"}`),
+		}).ToCatalogItemWrite()
+
+		require.ErrorIs(t, err, errCatalogItemValuesJSONIncludesID)
+	})
+
+	t.Run("list follows link header pagination", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			createTestCatalog(t, server)
+			itemClient := newGeneratedCatalogItemClient(serverClient(t, server))
+
+			for i := range 55 {
+				id := fmt.Sprintf("centre%02d", i)
+				_, err := itemClient.Create(t.Context(), brazeCatalogItemModel{
+					CatalogName: types.StringValue("centres"),
+					ItemID:      types.StringValue(id),
+					ValuesJSON:  jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
+				})
+				require.NoError(t, err)
+			}
+		}))
+
+		entries, err := client.List(t.Context(), "centres", 55)
+
+		require.NoError(t, err)
+		require.Len(t, entries, 55)
+		assert.Equal(t, "centres/centre00", entries[0].ID)
+		assert.Equal(t, "centres/centre54", entries[54].ID)
+	})
+
+	t.Run("list stops at requested limit", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			createTestCatalog(t, server)
+			itemClient := newGeneratedCatalogItemClient(serverClient(t, server))
+
+			for i := range 55 {
+				id := fmt.Sprintf("centre%02d", i)
+				_, err := itemClient.Create(t.Context(), brazeCatalogItemModel{
+					CatalogName: types.StringValue("centres"),
+					ItemID:      types.StringValue(id),
+					ValuesJSON:  jsontypes.NewNormalizedValue(fmt.Sprintf(`{"name":%q}`, id)),
+				})
+				require.NoError(t, err)
+			}
+		}))
+
+		entries, err := client.List(t.Context(), "centres", 51)
+
+		require.NoError(t, err)
+		require.Len(t, entries, 51)
+		assert.Equal(t, "centres/centre50", entries[50].ID)
+	})
+}
+
 func newTestBrazeClient(t *testing.T, configure func(*brazeclienttesting.Server)) *brazeclient.Client {
 	t.Helper()
 
@@ -233,6 +320,43 @@ func newTestBrazeClient(t *testing.T, configure func(*brazeclienttesting.Server)
 	require.NoError(t, err)
 
 	return client
+}
+
+func serverClient(t *testing.T, server *brazeclienttesting.Server) *brazeclient.Client {
+	t.Helper()
+
+	httpServer := httptest.NewServer(server)
+	t.Cleanup(httpServer.Close)
+
+	client, err := brazeclient.NewClient(
+		httpServer.URL,
+		NewBrazeAPIKeySecuritySource("test"),
+		brazeclient.WithClient(httpServer.Client()),
+	)
+	require.NoError(t, err)
+
+	return client
+}
+
+func createTestCatalog(t *testing.T, server *brazeclienttesting.Server) {
+	t.Helper()
+
+	client := newGeneratedCatalogClient(serverClient(t, server))
+	_, err := client.Create(t.Context(), brazeCatalogModel{
+		Name:        types.StringValue("centres"),
+		Description: types.StringValue("Centre metadata"),
+		Fields: types.ListValueMust(BrazeCatalogFieldObjectType(), []attr.Value{
+			types.ObjectValueMust(BrazeCatalogFieldObjectType().AttrTypes, map[string]attr.Value{
+				"name": types.StringValue("id"),
+				"type": types.StringValue("string"),
+			}),
+			types.ObjectValueMust(BrazeCatalogFieldObjectType().AttrTypes, map[string]attr.Value{
+				"name": types.StringValue("name"),
+				"type": types.StringValue("string"),
+			}),
+		}),
+	})
+	require.NoError(t, err)
 }
 
 func makeRangeStrings(count int) []string {

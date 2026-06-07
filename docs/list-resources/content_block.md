@@ -3,7 +3,7 @@
 page_title: "braze_content_block List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-  
+
 ---
 
 # braze_content_block (List Resource)

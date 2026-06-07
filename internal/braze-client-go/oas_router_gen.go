@@ -12,27 +12,43 @@ import (
 
 var (
 	rn1AllowedHeaders = map[string]string{
-		"POST": "Authorization,Content-Type",
-	}
-	rn5AllowedHeaders = map[string]string{
-		"GET": "Authorization",
-	}
-	rn8AllowedHeaders = map[string]string{
-		"GET": "Authorization",
-	}
-	rn10AllowedHeaders = map[string]string{
+		"GET":  "Authorization",
 		"POST": "Authorization,Content-Type",
 	}
 	rn3AllowedHeaders = map[string]string{
-		"POST": "Authorization,Content-Type",
+		"DELETE": "Authorization",
+	}
+	rn14AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn5AllowedHeaders = map[string]string{
+		"DELETE": "Authorization",
+		"GET":    "Authorization",
+		"POST":   "Authorization,Content-Type",
+		"PUT":    "Authorization,Content-Type",
 	}
 	rn7AllowedHeaders = map[string]string{
-		"GET": "Authorization",
-	}
-	rn9AllowedHeaders = map[string]string{
-		"GET": "Authorization",
+		"POST": "Authorization,Content-Type",
 	}
 	rn11AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn15AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn17AllowedHeaders = map[string]string{
+		"POST": "Authorization,Content-Type",
+	}
+	rn9AllowedHeaders = map[string]string{
+		"POST": "Authorization,Content-Type",
+	}
+	rn13AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn16AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn18AllowedHeaders = map[string]string{
 		"POST": "Authorization,Content-Type",
 	}
 )
@@ -67,6 +83,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
+	args := [2]string{}
 
 	// Static code generated router with unwrapped path search.
 	switch {
@@ -87,9 +104,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
-			case 'c': // Prefix: "content_blocks/"
+			case 'c': // Prefix: "c"
 
-				if l := len("content_blocks/"); len(elem) >= l && elem[0:l] == "content_blocks/" {
+				if l := len("c"); len(elem) >= l && elem[0:l] == "c" {
 					elem = elem[l:]
 				} else {
 					break
@@ -99,22 +116,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "create"
+				case 'a': // Prefix: "atalogs"
 
-					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+					if l := len("atalogs"); len(elem) >= l && elem[0:l] == "atalogs" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
 						switch r.Method {
+						case "GET":
+							s.handleListCatalogsRequest([0]string{}, elemIsEscaped, w, r)
 						case "POST":
-							s.handleCreateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleCreateCatalogRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, notAllowedParams{
-								allowedMethods: "POST",
+								allowedMethods: "GET,POST",
 								allowedHeaders: rn1AllowedHeaders,
 								acceptPost:     "application/json",
 								acceptPatch:    "",
@@ -123,80 +141,238 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 						return
 					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
 
-				case 'i': // Prefix: "info"
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
 
-					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+						// Param: "catalog_name"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "DELETE":
+								s.handleDeleteCatalogRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "DELETE",
+									allowedHeaders: rn3AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/items"
+
+							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleListCatalogItemsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET",
+										allowedHeaders: rn14AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
+								}
+
+								return
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "item_id"
+								// Leaf parameter, slashes are prohibited
+								idx := strings.IndexByte(elem, '/')
+								if idx >= 0 {
+									break
+								}
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "DELETE":
+										s.handleDeleteCatalogItemRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "GET":
+										s.handleGetCatalogItemRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleCreateCatalogItemRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									case "PUT":
+										s.handleReplaceCatalogItemRequest([2]string{
+											args[0],
+											args[1],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "DELETE,GET,POST,PUT",
+											allowedHeaders: rn5AllowedHeaders,
+											acceptPost:     "application/json",
+											acceptPatch:    "",
+										})
+									}
+
+									return
+								}
+
+							}
+
+						}
+
+					}
+
+				case 'o': // Prefix: "ontent_blocks/"
+
+					if l := len("ontent_blocks/"); len(elem) >= l && elem[0:l] == "ontent_blocks/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetContentBlockInfoRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, notAllowedParams{
-								allowedMethods: "GET",
-								allowedHeaders: rn5AllowedHeaders,
-								acceptPost:     "",
-								acceptPatch:    "",
-							})
-						}
-
-						return
-					}
-
-				case 'l': // Prefix: "list"
-
-					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
-						elem = elem[l:]
-					} else {
 						break
 					}
+					switch elem[0] {
+					case 'c': // Prefix: "create"
 
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleListContentBlocksRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, notAllowedParams{
-								allowedMethods: "GET",
-								allowedHeaders: rn8AllowedHeaders,
-								acceptPost:     "",
-								acceptPatch:    "",
-							})
+						if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+							elem = elem[l:]
+						} else {
+							break
 						}
 
-						return
-					}
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleCreateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "POST",
+									allowedHeaders: rn7AllowedHeaders,
+									acceptPost:     "application/json",
+									acceptPatch:    "",
+								})
+							}
 
-				case 'u': // Prefix: "update"
-
-					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleUpdateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, notAllowedParams{
-								allowedMethods: "POST",
-								allowedHeaders: rn10AllowedHeaders,
-								acceptPost:     "application/json",
-								acceptPatch:    "",
-							})
+							return
 						}
 
-						return
+					case 'i': // Prefix: "info"
+
+						if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetContentBlockInfoRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn11AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+
+					case 'l': // Prefix: "list"
+
+						if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleListContentBlocksRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn15AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+
+					case 'u': // Prefix: "update"
+
+						if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleUpdateContentBlockRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "POST",
+									allowedHeaders: rn17AllowedHeaders,
+									acceptPost:     "application/json",
+									acceptPatch:    "",
+								})
+							}
+
+							return
+						}
+
 					}
 
 				}
@@ -229,7 +405,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						default:
 							s.notAllowed(w, r, notAllowedParams{
 								allowedMethods: "POST",
-								allowedHeaders: rn3AllowedHeaders,
+								allowedHeaders: rn9AllowedHeaders,
 								acceptPost:     "application/json",
 								acceptPatch:    "",
 							})
@@ -254,7 +430,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						default:
 							s.notAllowed(w, r, notAllowedParams{
 								allowedMethods: "GET",
-								allowedHeaders: rn7AllowedHeaders,
+								allowedHeaders: rn13AllowedHeaders,
 								acceptPost:     "",
 								acceptPatch:    "",
 							})
@@ -279,7 +455,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						default:
 							s.notAllowed(w, r, notAllowedParams{
 								allowedMethods: "GET",
-								allowedHeaders: rn9AllowedHeaders,
+								allowedHeaders: rn16AllowedHeaders,
 								acceptPost:     "",
 								acceptPatch:    "",
 							})
@@ -304,7 +480,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						default:
 							s.notAllowed(w, r, notAllowedParams{
 								allowedMethods: "POST",
-								allowedHeaders: rn11AllowedHeaders,
+								allowedHeaders: rn18AllowedHeaders,
 								acceptPost:     "application/json",
 								acceptPatch:    "",
 							})
@@ -330,7 +506,7 @@ type Route struct {
 	operationGroup string
 	pathPattern    string
 	count          int
-	args           [0]string
+	args           [2]string
 }
 
 // Name returns ogen operation name.
@@ -415,9 +591,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
-			case 'c': // Prefix: "content_blocks/"
+			case 'c': // Prefix: "c"
 
-				if l := len("content_blocks/"); len(elem) >= l && elem[0:l] == "content_blocks/" {
+				if l := len("c"); len(elem) >= l && elem[0:l] == "c" {
 					elem = elem[l:]
 				} else {
 					break
@@ -427,104 +603,275 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'c': // Prefix: "create"
+				case 'a': // Prefix: "atalogs"
 
-					if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+					if l := len("atalogs"); len(elem) >= l && elem[0:l] == "atalogs" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = CreateContentBlockOperation
-							r.summary = "Create Content Block"
-							r.operationID = "createContentBlock"
-							r.operationGroup = ""
-							r.pathPattern = "/content_blocks/create"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'i': // Prefix: "info"
-
-					if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
 						switch method {
 						case "GET":
-							r.name = GetContentBlockInfoOperation
-							r.summary = "See Content Block information"
-							r.operationID = "getContentBlockInfo"
+							r.name = ListCatalogsOperation
+							r.summary = "List catalogs"
+							r.operationID = "listCatalogs"
 							r.operationGroup = ""
-							r.pathPattern = "/content_blocks/info"
+							r.pathPattern = "/catalogs"
 							r.args = args
 							r.count = 0
 							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'l': // Prefix: "list"
-
-					if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = ListContentBlocksOperation
-							r.summary = "List available Content Blocks"
-							r.operationID = "listContentBlocks"
-							r.operationGroup = ""
-							r.pathPattern = "/content_blocks/list"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'u': // Prefix: "update"
-
-					if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
 						case "POST":
-							r.name = UpdateContentBlockOperation
-							r.summary = "Update Content Block"
-							r.operationID = "updateContentBlock"
+							r.name = CreateCatalogOperation
+							r.summary = "Create catalog"
+							r.operationID = "createCatalog"
 							r.operationGroup = ""
-							r.pathPattern = "/content_blocks/update"
+							r.pathPattern = "/catalogs"
 							r.args = args
 							r.count = 0
 							return r, true
 						default:
 							return
 						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "catalog_name"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch method {
+							case "DELETE":
+								r.name = DeleteCatalogOperation
+								r.summary = "Delete catalog"
+								r.operationID = "deleteCatalog"
+								r.operationGroup = ""
+								r.pathPattern = "/catalogs/{catalog_name}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/items"
+
+							if l := len("/items"); len(elem) >= l && elem[0:l] == "/items" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = ListCatalogItemsOperation
+									r.summary = "List catalog items"
+									r.operationID = "listCatalogItems"
+									r.operationGroup = ""
+									r.pathPattern = "/catalogs/{catalog_name}/items"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+							switch elem[0] {
+							case '/': // Prefix: "/"
+
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								// Param: "item_id"
+								// Leaf parameter, slashes are prohibited
+								idx := strings.IndexByte(elem, '/')
+								if idx >= 0 {
+									break
+								}
+								args[1] = elem
+								elem = ""
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "DELETE":
+										r.name = DeleteCatalogItemOperation
+										r.summary = "Delete catalog item"
+										r.operationID = "deleteCatalogItem"
+										r.operationGroup = ""
+										r.pathPattern = "/catalogs/{catalog_name}/items/{item_id}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "GET":
+										r.name = GetCatalogItemOperation
+										r.summary = "Get catalog item"
+										r.operationID = "getCatalogItem"
+										r.operationGroup = ""
+										r.pathPattern = "/catalogs/{catalog_name}/items/{item_id}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "POST":
+										r.name = CreateCatalogItemOperation
+										r.summary = "Create catalog item"
+										r.operationID = "createCatalogItem"
+										r.operationGroup = ""
+										r.pathPattern = "/catalogs/{catalog_name}/items/{item_id}"
+										r.args = args
+										r.count = 2
+										return r, true
+									case "PUT":
+										r.name = ReplaceCatalogItemOperation
+										r.summary = "Replace catalog item"
+										r.operationID = "replaceCatalogItem"
+										r.operationGroup = ""
+										r.pathPattern = "/catalogs/{catalog_name}/items/{item_id}"
+										r.args = args
+										r.count = 2
+										return r, true
+									default:
+										return
+									}
+								}
+
+							}
+
+						}
+
+					}
+
+				case 'o': // Prefix: "ontent_blocks/"
+
+					if l := len("ontent_blocks/"); len(elem) >= l && elem[0:l] == "ontent_blocks/" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						break
+					}
+					switch elem[0] {
+					case 'c': // Prefix: "create"
+
+						if l := len("create"); len(elem) >= l && elem[0:l] == "create" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = CreateContentBlockOperation
+								r.summary = "Create Content Block"
+								r.operationID = "createContentBlock"
+								r.operationGroup = ""
+								r.pathPattern = "/content_blocks/create"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'i': // Prefix: "info"
+
+						if l := len("info"); len(elem) >= l && elem[0:l] == "info" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = GetContentBlockInfoOperation
+								r.summary = "See Content Block information"
+								r.operationID = "getContentBlockInfo"
+								r.operationGroup = ""
+								r.pathPattern = "/content_blocks/info"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'l': // Prefix: "list"
+
+						if l := len("list"); len(elem) >= l && elem[0:l] == "list" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = ListContentBlocksOperation
+								r.summary = "List available Content Blocks"
+								r.operationID = "listContentBlocks"
+								r.operationGroup = ""
+								r.pathPattern = "/content_blocks/list"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'u': // Prefix: "update"
+
+						if l := len("update"); len(elem) >= l && elem[0:l] == "update" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = UpdateContentBlockOperation
+								r.summary = "Update Content Block"
+								r.operationID = "updateContentBlock"
+								r.operationGroup = ""
+								r.pathPattern = "/content_blocks/update"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
 					}
 
 				}

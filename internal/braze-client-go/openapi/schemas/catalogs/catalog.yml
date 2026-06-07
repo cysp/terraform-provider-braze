@@ -1,0 +1,39 @@
+Catalog:
+  type: object
+  required:
+    - name
+    - description
+    - fields
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    fields:
+      type: array
+      items:
+        $ref: '#/CatalogField'
+    num_items:
+      type: integer
+    updated_at:
+      type: string
+      format: date-time
+
+CatalogField:
+  type: object
+  required:
+    - name
+    - type
+  properties:
+    name:
+      type: string
+    type:
+      type: string
+      enum:
+        - string
+        - number
+        - boolean
+        - time
+        - array
+        - object
+        - geo

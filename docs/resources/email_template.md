@@ -42,5 +42,3 @@ resource "braze_email_template" "example" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-
