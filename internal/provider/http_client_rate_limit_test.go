@@ -8,6 +8,23 @@ import (
 	"time"
 )
 
+func TestBrazeRateLimitBackoffUsesRateLimitDelay(t *testing.T) {
+	t.Parallel()
+
+	resp := &http.Response{
+		StatusCode: http.StatusTooManyRequests,
+		Header: http.Header{
+			"Retry-After": []string{"12"},
+		},
+	}
+
+	delay := brazeRateLimitBackoff(time.Second, time.Minute, 1, resp)
+
+	if delay != 12*time.Second {
+		t.Fatalf("expected 12s delay, got %s", delay)
+	}
+}
+
 func TestRateLimitDelayUsesRetryAfterSeconds(t *testing.T) {
 	t.Parallel()
 

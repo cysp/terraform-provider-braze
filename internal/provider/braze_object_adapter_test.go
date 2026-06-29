@@ -2,6 +2,7 @@
 package provider
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http/httptest"
@@ -260,6 +261,38 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 		assert.True(t, actual.ShouldInlineCSS.ValueBool())
 	})
 
+	t.Run("update returns hydrated model", func(t *testing.T) {
+		t.Parallel()
+
+		shouldInlineCSS := true
+		client := newGeneratedEmailTemplateClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			server.SetEmailTemplate("existing-email-template", "Existing email template", "Subject", "<p>Body</p>", "Body", "Preview", []string{"tag1"}, &shouldInlineCSS)
+		}))
+
+		actual, err := client.Update(t.Context(), brazeEmailTemplateModel{
+			IDIdentityModel: IDIdentityModel{
+				ID: types.StringValue("existing-email-template"),
+			},
+			TemplateName:    types.StringValue("Updated email template"),
+			Subject:         types.StringValue("Updated subject"),
+			Body:            types.StringValue("<p>Updated</p>"),
+			PlaintextBody:   types.StringValue("Updated"),
+			Preheader:       types.StringValue("Updated preview"),
+			Tags:            NewTypedListFromStringSlice([]string{"tag2"}),
+			ShouldInlineCSS: types.BoolValue(false),
+		})
+
+		require.NoError(t, err)
+		assert.Equal(t, "existing-email-template", actual.ID.ValueString())
+		assert.Equal(t, "Updated email template", actual.TemplateName.ValueString())
+		assert.Equal(t, "Updated subject", actual.Subject.ValueString())
+		assert.Equal(t, "<p>Updated</p>", actual.Body.ValueString())
+		assert.Equal(t, "Updated", actual.PlaintextBody.ValueString())
+		assert.Equal(t, "Updated preview", actual.Preheader.ValueString())
+		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+		assert.False(t, actual.ShouldInlineCSS.ValueBool())
+	})
+
 	t.Run("list hydrates resources", func(t *testing.T) {
 		t.Parallel()
 
@@ -283,15 +316,71 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 	})
 }
 
+func TestGeneratedCatalogClient(t *testing.T) {
+	t.Parallel()
+
+	t.Run("read returns hydrated model", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogClient(newTestBrazeClient(t, withTestCatalog(t)))
+
+		actual, err := client.Read(t.Context(), "centres")
+
+		require.NoError(t, err)
+		assert.Equal(t, "centres", actual.Name.ValueString())
+		assert.Equal(t, "Centre metadata", actual.Description.ValueString())
+		assert.Equal(t, int64(0), actual.NumItems.ValueInt64())
+		assert.False(t, actual.UpdatedAt.IsNull())
+	})
+
+	t.Run("read missing maps not found", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogClient(newTestBrazeClient(t, func(*brazeclienttesting.Server) {}))
+
+		_, err := client.Read(t.Context(), "missing-catalog")
+
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
+	})
+
+	t.Run("delete removes catalog", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogClient(newTestBrazeClient(t, withTestCatalog(t)))
+
+		err := client.Delete(t.Context(), "centres")
+		require.NoError(t, err)
+
+		_, err = client.Read(t.Context(), "centres")
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
+	})
+
+	t.Run("list returns resource entries", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogClient(newTestBrazeClient(t, withTestCatalog(t)))
+
+		entries, err := client.List(t.Context())
+
+		require.NoError(t, err)
+		require.Len(t, entries, 1)
+		assert.Equal(t, "centres", entries[0].ID)
+		assert.Equal(t, "centres", entries[0].DisplayName)
+		require.NotNil(t, entries[0].Resource)
+		assert.Equal(t, "Centre metadata", entries[0].Resource.Description.ValueString())
+		assert.NoError(t, entries[0].ResourceErr)
+	})
+}
+
 func TestGeneratedCatalogItemClient(t *testing.T) {
 	t.Parallel()
 
 	t.Run("create uses item-addressed endpoint", func(t *testing.T) {
 		t.Parallel()
 
-		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
-			createTestCatalog(t, server)
-		}))
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, withTestCatalog(t)))
 
 		actual, err := client.Create(t.Context(), brazeCatalogItemModel{
 			CatalogName: types.StringValue("centres"),
@@ -302,6 +391,56 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "centres/airportwest", actual.ID.ValueString())
 		assert.JSONEq(t, `{"name":"Airport West"}`, actual.ValuesJSON.ValueString())
+	})
+
+	t.Run("read maps not found", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, withTestCatalog(t)))
+
+		_, err := client.Read(t.Context(), "centres", "missing-centre")
+
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
+	})
+
+	t.Run("update replaces item values", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			createTestCatalog(t, server)
+			server.SetCatalogItem("centres", "airportwest", map[string]json.RawMessage{
+				"name": json.RawMessage(`"Airport West"`),
+			})
+		}))
+
+		actual, err := client.Update(t.Context(), brazeCatalogItemModel{
+			CatalogName: types.StringValue("centres"),
+			ItemID:      types.StringValue("airportwest"),
+			ValuesJSON:  jsontypes.NewNormalizedValue(`{"active":true,"name":"Airport West"}`),
+		})
+
+		require.NoError(t, err)
+		assert.Equal(t, "centres/airportwest", actual.ID.ValueString())
+		assert.JSONEq(t, `{"active":true,"name":"Airport West"}`, actual.ValuesJSON.ValueString())
+	})
+
+	t.Run("delete removes item", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedCatalogItemClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			createTestCatalog(t, server)
+			server.SetCatalogItem("centres", "airportwest", map[string]json.RawMessage{
+				"name": json.RawMessage(`"Airport West"`),
+			})
+		}))
+
+		err := client.Delete(t.Context(), "centres", "airportwest")
+		require.NoError(t, err)
+
+		_, err = client.Read(t.Context(), "centres", "airportwest")
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
 	})
 
 	t.Run("write item rejects id in request body", func(t *testing.T) {
@@ -424,6 +563,14 @@ func createTestCatalog(t *testing.T, server *brazeclienttesting.Server) {
 		}),
 	})
 	require.NoError(t, err)
+}
+
+func withTestCatalog(t *testing.T) func(*brazeclienttesting.Server) {
+	t.Helper()
+
+	return func(server *brazeclienttesting.Server) {
+		createTestCatalog(t, server)
+	}
 }
 
 func makeRangeStrings(count int) []string {
