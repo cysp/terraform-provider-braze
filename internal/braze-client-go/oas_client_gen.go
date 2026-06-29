@@ -110,7 +110,7 @@ type Invoker interface {
 	// Update a Content Block on the Braze dashboard.
 	//
 	// POST /content_blocks/update
-	UpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error)
+	UpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (UpdateContentBlockRes, error)
 	// UpdateEmailTemplate invokes updateEmailTemplate operation.
 	//
 	// Update an Email Template on the Braze dashboard.
@@ -1603,12 +1603,12 @@ func (c *Client) sendReplaceCatalogItem(ctx context.Context, request *ReplaceCat
 // Update a Content Block on the Braze dashboard.
 //
 // POST /content_blocks/update
-func (c *Client) UpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error) {
+func (c *Client) UpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (UpdateContentBlockRes, error) {
 	res, err := c.sendUpdateContentBlock(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendUpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (res *UpdateContentBlockResponse, err error) {
+func (c *Client) sendUpdateContentBlock(ctx context.Context, request *UpdateContentBlockRequest) (res UpdateContentBlockRes, err error) {
 	// Validate request before sending.
 	if err := func() error {
 		if err := request.Validate(); err != nil {

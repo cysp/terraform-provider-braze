@@ -22,6 +22,8 @@ type generatedContentBlockClient struct {
 	client *brazeclient.Client
 }
 
+var errUnexpectedUpdateContentBlockResponse = errors.New("unexpected update content block response")
+
 type contentBlockListItem struct {
 	item brazeclient.ListContentBlocksResponseContentBlock
 }
@@ -95,7 +97,23 @@ func (c generatedContentBlockClient) Update(ctx context.Context, plan brazeConte
 		return brazeContentBlockModel{}, errBrazeObjectEmptyResponse
 	}
 
-	return c.Read(ctx, updateResponse.GetContentBlockID())
+	contentBlockID, err := contentBlockIDFromUpdateContentBlockResponse(updateResponse)
+	if err != nil {
+		return brazeContentBlockModel{}, err
+	}
+
+	return c.Read(ctx, contentBlockID)
+}
+
+func contentBlockIDFromUpdateContentBlockResponse(response brazeclient.UpdateContentBlockRes) (string, error) {
+	switch response := response.(type) {
+	case *brazeclient.UpdateContentBlockOK:
+		return (*brazeclient.UpdateContentBlockResponse)(response).GetContentBlockID(), nil
+	case *brazeclient.UpdateContentBlockCreated:
+		return (*brazeclient.UpdateContentBlockResponse)(response).GetContentBlockID(), nil
+	default:
+		return "", fmt.Errorf("%w: %T", errUnexpectedUpdateContentBlockResponse, response)
+	}
 }
 
 func (c generatedContentBlockClient) List(ctx context.Context, query brazeObjectListQuery) ([]brazeObjectListEntry[brazeContentBlockModel], error) {

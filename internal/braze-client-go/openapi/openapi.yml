@@ -459,5 +459,11 @@ paths:
             application/json:
               schema:
                 $ref: './schemas/content_blocks/update/response.yml#/UpdateContentBlockResponse'
+        '201':
+          description: Content Block updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/content_blocks/update/response.yml#/UpdateContentBlockResponse'
         default:
           $ref: './responses/error.yml#/ErrorResponse'

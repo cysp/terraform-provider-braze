@@ -1672,6 +1672,14 @@ func (s *ReplaceCatalogItemRequest) SetItems(val []CatalogItemWrite) {
 	s.Items = val
 }
 
+type UpdateContentBlockCreated UpdateContentBlockResponse
+
+func (*UpdateContentBlockCreated) updateContentBlockRes() {}
+
+type UpdateContentBlockOK UpdateContentBlockResponse
+
+func (*UpdateContentBlockOK) updateContentBlockRes() {}
+
 // Ref: #/UpdateContentBlockRequest
 type UpdateContentBlockRequest struct {
 	// Content Block's API identifier.

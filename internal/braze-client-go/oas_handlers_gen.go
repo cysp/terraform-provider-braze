@@ -2146,7 +2146,7 @@ func (s *Server) handleUpdateContentBlockRequest(args [0]string, argsEscaped boo
 		}
 	}()
 
-	var response *UpdateContentBlockResponse
+	var response UpdateContentBlockRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -2162,7 +2162,7 @@ func (s *Server) handleUpdateContentBlockRequest(args [0]string, argsEscaped boo
 		type (
 			Request  = *UpdateContentBlockRequest
 			Params   = struct{}
-			Response = *UpdateContentBlockResponse
+			Response = UpdateContentBlockRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

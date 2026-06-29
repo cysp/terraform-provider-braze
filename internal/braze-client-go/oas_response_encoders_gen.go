@@ -278,17 +278,35 @@ func encodeReplaceCatalogItemResponse(response *CatalogItemOperationResponse, w 
 	return nil
 }
 
-func encodeUpdateContentBlockResponse(response *UpdateContentBlockResponse, w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(200)
+func encodeUpdateContentBlockResponse(response UpdateContentBlockRes, w http.ResponseWriter) error {
+	switch response := response.(type) {
+	case *UpdateContentBlockOK:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(200)
 
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *UpdateContentBlockCreated:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(201)
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
 	}
-
-	return nil
 }
 
 func encodeUpdateEmailTemplateResponse(response *UpdateEmailTemplateResponse, w http.ResponseWriter) error {
