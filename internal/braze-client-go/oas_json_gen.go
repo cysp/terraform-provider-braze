@@ -3798,6 +3798,82 @@ func (s *ReplaceCatalogItemRequest) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes UpdateContentBlockCreated as json.
+func (s *UpdateContentBlockCreated) Encode(e *jx.Encoder) {
+	unwrapped := (*UpdateContentBlockResponse)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdateContentBlockCreated from json.
+func (s *UpdateContentBlockCreated) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateContentBlockCreated to nil")
+	}
+	var unwrapped UpdateContentBlockResponse
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateContentBlockCreated(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdateContentBlockCreated) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateContentBlockCreated) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdateContentBlockOK as json.
+func (s *UpdateContentBlockOK) Encode(e *jx.Encoder) {
+	unwrapped := (*UpdateContentBlockResponse)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdateContentBlockOK from json.
+func (s *UpdateContentBlockOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateContentBlockOK to nil")
+	}
+	var unwrapped UpdateContentBlockResponse
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdateContentBlockOK(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdateContentBlockOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdateContentBlockOK) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *UpdateContentBlockRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()

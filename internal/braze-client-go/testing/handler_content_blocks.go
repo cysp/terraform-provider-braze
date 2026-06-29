@@ -86,7 +86,7 @@ func (h *Handler) CreateContentBlock(_ context.Context, req *brazeclient.CreateC
 	}, nil
 }
 
-func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateContentBlockRequest) (*brazeclient.UpdateContentBlockResponse, error) {
+func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateContentBlockRequest) (brazeclient.UpdateContentBlockRes, error) { //nolint:ireturn // ogen requires this interface return type.
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -124,7 +124,7 @@ func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateC
 		}
 	}
 
-	return &brazeclient.UpdateContentBlockResponse{
+	return &brazeclient.UpdateContentBlockCreated{
 		ContentBlockID: block.ContentBlockID,
 		Message:        "success",
 	}, nil

@@ -97,7 +97,7 @@ type Handler interface {
 	// Update a Content Block on the Braze dashboard.
 	//
 	// POST /content_blocks/update
-	UpdateContentBlock(ctx context.Context, req *UpdateContentBlockRequest) (*UpdateContentBlockResponse, error)
+	UpdateContentBlock(ctx context.Context, req *UpdateContentBlockRequest) (UpdateContentBlockRes, error)
 	// UpdateEmailTemplate implements updateEmailTemplate operation.
 	//
 	// Update an Email Template on the Braze dashboard.
