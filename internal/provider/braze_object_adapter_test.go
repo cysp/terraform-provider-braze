@@ -100,6 +100,48 @@ func TestCollectBrazeObjectPages(t *testing.T) {
 func TestGeneratedContentBlockClient(t *testing.T) {
 	t.Parallel()
 
+	t.Run("extracts update response content block ID", func(t *testing.T) {
+		t.Parallel()
+
+		tests := map[string]struct {
+			response    brazeclient.UpdateContentBlockRes
+			expectedID  string
+			expectedErr error
+		}{
+			"ok": {
+				response: &brazeclient.UpdateContentBlockOK{
+					ContentBlockID: "ok-content-block",
+				},
+				expectedID: "ok-content-block",
+			},
+			"created": {
+				response: &brazeclient.UpdateContentBlockCreated{
+					ContentBlockID: "created-content-block",
+				},
+				expectedID: "created-content-block",
+			},
+			"unexpected": {
+				expectedErr: errUnexpectedUpdateContentBlockResponse,
+			},
+		}
+
+		for name, test := range tests {
+			t.Run(name, func(t *testing.T) {
+				t.Parallel()
+
+				actual, err := contentBlockIDFromUpdateContentBlockResponse(test.response)
+
+				if test.expectedErr != nil {
+					require.ErrorIs(t, err, test.expectedErr)
+				} else {
+					require.NoError(t, err)
+				}
+
+				assert.Equal(t, test.expectedID, actual)
+			})
+		}
+	})
+
 	t.Run("read maps not found", func(t *testing.T) {
 		t.Parallel()
 
@@ -128,6 +170,31 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 		assert.Equal(t, "Created content block", actual.Name.ValueString())
 		assert.Equal(t, "created description", actual.Description.ValueString())
 		assert.Equal(t, "<p>Created</p>", actual.Content.ValueString())
+		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+	})
+
+	t.Run("update returns hydrated model", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedContentBlockClient(newTestBrazeClient(t, func(server *brazeclienttesting.Server) {
+			server.SetContentBlock("existing-content-block", "Existing content block", "<p>Existing</p>", "description", []string{"tag1"})
+		}))
+
+		actual, err := client.Update(t.Context(), brazeContentBlockModel{
+			IDIdentityModel: IDIdentityModel{
+				ID: types.StringValue("existing-content-block"),
+			},
+			Name:        types.StringValue("Updated content block"),
+			Description: types.StringValue("updated description"),
+			Content:     types.StringValue("<p>Updated</p>"),
+			Tags:        NewTypedListFromStringSlice([]string{"tag2"}),
+		})
+
+		require.NoError(t, err)
+		assert.Equal(t, "existing-content-block", actual.ID.ValueString())
+		assert.Equal(t, "Updated content block", actual.Name.ValueString())
+		assert.Equal(t, "updated description", actual.Description.ValueString())
+		assert.Equal(t, "<p>Updated</p>", actual.Content.ValueString())
 		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
 	})
 
