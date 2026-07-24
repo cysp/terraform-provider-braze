@@ -103,27 +103,27 @@ func (h *Handler) UpdateEmailTemplate(_ context.Context, req *brazeclient.Update
 		template.TemplateName = templateName
 	}
 
-	if req.Subject.IsSet() {
+	if !req.Subject.IsEmpty() {
 		template.Subject = req.Subject
 	}
 
-	if req.Body.IsSet() {
+	if !req.Body.IsEmpty() {
 		template.Body = req.Body
 	}
 
-	if req.PlaintextBody.IsSet() {
+	if !req.PlaintextBody.IsEmpty() {
 		template.PlaintextBody = req.PlaintextBody
 	}
 
-	if req.Preheader.IsSet() {
+	if !req.Preheader.IsEmpty() {
 		template.Preheader = req.Preheader
 	}
 
-	if req.ShouldInlineCSS.IsSet() {
+	if !req.ShouldInlineCSS.IsEmpty() {
 		template.ShouldInlineCSS = req.ShouldInlineCSS
 	}
 
-	if req.Tags.IsSet() {
+	if !req.Tags.IsEmpty() {
 		if req.Tags.IsNull() {
 			template.Tags.SetToNull()
 		} else {
