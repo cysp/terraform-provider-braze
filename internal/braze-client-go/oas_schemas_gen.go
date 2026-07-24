@@ -3,11 +3,11 @@
 package brazeclient
 
 import (
+	json2 "encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/go-faster/errors"
-	"github.com/go-faster/jx"
 )
 
 func (s *ErrorResponseStatusCode) Error() string {
@@ -226,12 +226,12 @@ func (s *CatalogItem) SetAdditionalProps(val CatalogItemAdditional) {
 	s.AdditionalProps = val
 }
 
-type CatalogItemAdditional map[string]jx.Raw
+type CatalogItemAdditional map[string]json2.RawMessage
 
 func (s *CatalogItemAdditional) init() CatalogItemAdditional {
 	m := *s
 	if m == nil {
-		m = map[string]jx.Raw{}
+		m = map[string]json2.RawMessage{}
 		*s = m
 	}
 	return m
@@ -253,12 +253,12 @@ func (s *CatalogItemOperationResponse) SetMessage(val string) {
 }
 
 // Ref: #/CatalogItemWrite
-type CatalogItemWrite map[string]jx.Raw
+type CatalogItemWrite map[string]json2.RawMessage
 
 func (s *CatalogItemWrite) init() CatalogItemWrite {
 	m := *s
 	if m == nil {
-		m = map[string]jx.Raw{}
+		m = map[string]json2.RawMessage{}
 		*s = m
 	}
 	return m

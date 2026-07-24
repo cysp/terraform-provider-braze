@@ -1,6 +1,7 @@
 CatalogItemWrite:
   type: object
-  additionalProperties: true
+  additionalProperties:
+    x-ogen-type: encoding/json.RawMessage
   not:
     required:
       - id
