@@ -45,7 +45,7 @@ linters:
         text: "dot-imports: should not use dot imports"
       - linters:
           - dupl
-        path: "internal/provider/braze_(content_block|email_template)_(list_)?resource.go"
+        path: "internal/provider/braze_(catalog_item|content_block|email_template|sdk_authentication_key)_(list_)?resource.go"
 
 issues:
   max-issues-per-linter: 0

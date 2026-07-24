@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
@@ -218,6 +219,188 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 		require.NotNil(t, entries[0].Resource)
 		assert.Equal(t, "<p>Existing</p>", entries[0].Resource.Content.ValueString())
 		assert.NoError(t, entries[0].ResourceErr)
+	})
+}
+
+func TestGeneratedSDKAuthenticationKeyClient(t *testing.T) {
+	t.Parallel()
+
+	t.Run("manages key lifecycle and primary promotion", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedSDKAuthenticationKeyClient(newTestBrazeClient(t, func(*brazeclienttesting.Server) {}))
+
+		firstResult, err := client.Create(t.Context(), brazeSDKAuthenticationKeyModel{
+			AppID:        types.StringValue("app-1"),
+			RSAPublicKey: types.StringValue("first public key"),
+			Description:  types.StringValue("First key"),
+			Primary:      types.BoolValue(true),
+		})
+		require.NoError(t, err)
+		require.NoError(t, firstResult.VerificationError)
+		first := firstResult.Key
+		assert.NotEmpty(t, first.ID.ValueString())
+		assert.Equal(t, "app-1", first.AppID.ValueString())
+		assert.Equal(t, "first public key", first.RSAPublicKey.ValueString())
+		assert.Equal(t, "First key", first.Description.ValueString())
+		assert.True(t, first.Primary.ValueBool())
+
+		secondResult, err := client.Create(t.Context(), brazeSDKAuthenticationKeyModel{
+			AppID:        types.StringValue("app-1"),
+			RSAPublicKey: types.StringValue("second public key"),
+			Description:  types.StringValue("Second key"),
+			Primary:      types.BoolNull(),
+		})
+		require.NoError(t, err)
+		require.NoError(t, secondResult.VerificationError)
+		second := secondResult.Key
+		assert.False(t, second.Primary.ValueBool())
+
+		err = client.Delete(t.Context(), "app-1", first.ID.ValueString())
+		require.ErrorIs(t, err, errSDKAuthenticationPrimaryDelete)
+
+		second, err = client.SetPrimary(t.Context(), "app-1", second.ID.ValueString())
+		require.NoError(t, err)
+		assert.True(t, second.Primary.ValueBool())
+
+		first, err = client.Read(t.Context(), "app-1", first.ID.ValueString())
+		require.NoError(t, err)
+		assert.False(t, first.Primary.ValueBool())
+
+		require.NoError(t, client.Delete(t.Context(), "app-1", first.ID.ValueString()))
+
+		_, err = client.Read(t.Context(), "app-1", first.ID.ValueString())
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
+	})
+
+	t.Run("maps missing endpoint object to not found", func(t *testing.T) {
+		t.Parallel()
+
+		client := newGeneratedSDKAuthenticationKeyClient(newTestBrazeClient(t, func(*brazeclienttesting.Server) {}))
+
+		_, err := client.Read(t.Context(), "app-1", "missing-key")
+
+		require.Error(t, err)
+		assert.True(t, isBrazeObjectNotFound(err))
+		require.NoError(t, client.Delete(t.Context(), "app-1", "missing-key"))
+	})
+
+	t.Run("preserves created key when verification fails", func(t *testing.T) {
+		t.Parallel()
+
+		httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			switch {
+			case req.Method == http.MethodPost && req.URL.Path == "/app_group/sdk_authentication/create":
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"id":"key-1"}`))
+			case req.Method == http.MethodGet && req.URL.Path == "/app_group/sdk_authentication/keys":
+				http.Error(w, "verification failed", http.StatusInternalServerError)
+			default:
+				http.NotFound(w, req)
+			}
+		}))
+		t.Cleanup(httpServer.Close)
+
+		generatedClient, err := brazeclient.NewClient(
+			httpServer.URL,
+			NewBrazeAPIKeySecuritySource("test"),
+			brazeclient.WithClient(httpServer.Client()),
+		)
+		require.NoError(t, err)
+
+		client := newGeneratedSDKAuthenticationKeyClient(generatedClient)
+		result, err := client.Create(t.Context(), brazeSDKAuthenticationKeyModel{
+			AppID:        types.StringValue("app-1"),
+			RSAPublicKey: types.StringValue("public-key"),
+			Description:  types.StringValue("Key"),
+			Primary:      types.BoolValue(true),
+		})
+
+		require.NoError(t, err)
+		require.Error(t, result.VerificationError)
+		assert.Equal(t, "key-1", result.Key.ID.ValueString())
+		assert.Equal(t, "app-1", result.Key.AppID.ValueString())
+		assert.True(t, result.Key.Primary.ValueBool())
+	})
+
+	t.Run("rejects inconsistent primary response", func(t *testing.T) {
+		t.Parallel()
+
+		httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if req.Method != http.MethodPut || req.URL.Path != "/app_group/sdk_authentication/primary" {
+				http.NotFound(w, req)
+
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"keys":[{"id":"key-1","rsa_public_key":"public-key","description":"Key","is_primary":false}]}`))
+		}))
+		t.Cleanup(httpServer.Close)
+
+		generatedClient, err := brazeclient.NewClient(
+			httpServer.URL,
+			NewBrazeAPIKeySecuritySource("test"),
+			brazeclient.WithClient(httpServer.Client()),
+		)
+		require.NoError(t, err)
+
+		client := newGeneratedSDKAuthenticationKeyClient(generatedClient)
+		_, err = client.SetPrimary(t.Context(), "app-1", "key-1")
+
+		require.ErrorIs(t, err, errSDKAuthenticationKeyNotPrimary)
+	})
+
+	t.Run("does not treat a list endpoint 404 as object absence", func(t *testing.T) {
+		t.Parallel()
+
+		httpServer := httptest.NewServer(http.NotFoundHandler())
+		t.Cleanup(httpServer.Close)
+
+		generatedClient, err := brazeclient.NewClient(
+			httpServer.URL,
+			NewBrazeAPIKeySecuritySource("test"),
+			brazeclient.WithClient(httpServer.Client()),
+		)
+		require.NoError(t, err)
+
+		client := newGeneratedSDKAuthenticationKeyClient(generatedClient)
+
+		_, err = client.Read(t.Context(), "app-1", "key-1")
+		require.Error(t, err)
+		assert.False(t, isBrazeObjectNotFound(err))
+
+		err = client.Delete(t.Context(), "app-1", "key-1")
+		require.Error(t, err)
+	})
+
+	t.Run("rejects a successful delete response that retains the key", func(t *testing.T) {
+		t.Parallel()
+
+		httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			if req.Method != http.MethodDelete || req.URL.Path != "/app_group/sdk_authentication/delete" {
+				http.NotFound(w, req)
+
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"keys":[{"id":"key-1","rsa_public_key":"public-key","description":"Key","is_primary":false}]}`))
+		}))
+		t.Cleanup(httpServer.Close)
+
+		generatedClient, err := brazeclient.NewClient(
+			httpServer.URL,
+			NewBrazeAPIKeySecuritySource("test"),
+			brazeclient.WithClient(httpServer.Client()),
+		)
+		require.NoError(t, err)
+
+		client := newGeneratedSDKAuthenticationKeyClient(generatedClient)
+		err = client.Delete(t.Context(), "app-1", "key-1")
+
+		require.ErrorIs(t, err, errSDKAuthenticationKeyStillExists)
 	})
 }
 
