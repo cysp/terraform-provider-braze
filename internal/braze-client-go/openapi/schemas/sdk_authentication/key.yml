@@ -1,0 +1,20 @@
+SDKAuthenticationKey:
+  type: object
+  required:
+    - id
+    - rsa_public_key
+    - description
+    - is_primary
+  properties:
+    id:
+      type: string
+      description: The ID of the SDK Authentication key.
+    rsa_public_key:
+      type: string
+      description: The RSA public key string.
+    description:
+      type: string
+      description: The description of the SDK Authentication key.
+    is_primary:
+      type: boolean
+      description: Whether this key is the primary SDK Authentication key.

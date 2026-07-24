@@ -1,0 +1,12 @@
+DeleteSDKAuthenticationKeyRequest:
+  type: object
+  required:
+    - app_id
+    - key_id
+  properties:
+    app_id:
+      type: string
+      description: The app API identifier.
+    key_id:
+      type: string
+      description: The ID of the SDK Authentication key to delete.

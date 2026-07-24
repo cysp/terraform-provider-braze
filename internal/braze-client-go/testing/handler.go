@@ -11,10 +11,11 @@ import (
 type Handler struct {
 	mu sync.Mutex
 
-	contentBlocks  map[string]*brazeclient.GetContentBlockInfoResponse
-	emailTemplates map[string]*brazeclient.GetEmailTemplateInfoResponse
-	catalogs       map[string]brazeclient.Catalog
-	catalogItems   map[string]map[string]brazeclient.CatalogItem
+	contentBlocks         map[string]*brazeclient.GetContentBlockInfoResponse
+	emailTemplates        map[string]*brazeclient.GetEmailTemplateInfoResponse
+	catalogs              map[string]brazeclient.Catalog
+	catalogItems          map[string]map[string]brazeclient.CatalogItem
+	sdkAuthenticationKeys map[string]map[string]brazeclient.SDKAuthenticationKey
 }
 
 var _ brazeclient.Handler = (*Handler)(nil)
@@ -23,10 +24,11 @@ func NewBrazeHandler() *Handler {
 	return &Handler{
 		mu: sync.Mutex{},
 
-		contentBlocks:  make(map[string]*brazeclient.GetContentBlockInfoResponse),
-		emailTemplates: make(map[string]*brazeclient.GetEmailTemplateInfoResponse),
-		catalogs:       make(map[string]brazeclient.Catalog),
-		catalogItems:   make(map[string]map[string]brazeclient.CatalogItem),
+		contentBlocks:         make(map[string]*brazeclient.GetContentBlockInfoResponse),
+		emailTemplates:        make(map[string]*brazeclient.GetEmailTemplateInfoResponse),
+		catalogs:              make(map[string]brazeclient.Catalog),
+		catalogItems:          make(map[string]map[string]brazeclient.CatalogItem),
+		sdkAuthenticationKeys: make(map[string]map[string]brazeclient.SDKAuthenticationKey),
 	}
 }
 

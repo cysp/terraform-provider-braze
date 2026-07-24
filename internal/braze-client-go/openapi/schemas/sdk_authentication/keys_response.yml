@@ -1,0 +1,9 @@
+SDKAuthenticationKeysResponse:
+  type: object
+  required:
+    - keys
+  properties:
+    keys:
+      type: array
+      items:
+        $ref: './key.yml#/SDKAuthenticationKey'
