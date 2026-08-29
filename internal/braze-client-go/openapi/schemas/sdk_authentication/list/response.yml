@@ -1,0 +1,2 @@
+ListSDKAuthenticationKeysResponse:
+  $ref: '../keys_response.yml#/SDKAuthenticationKeysResponse'

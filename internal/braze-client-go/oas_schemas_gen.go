@@ -569,6 +569,100 @@ func (s *CreateEmailTemplateResponse) SetMessage(val OptString) {
 	s.Message = val
 }
 
+// Ref: #/CreateSDKAuthenticationKeyRequest
+type CreateSDKAuthenticationKeyRequest struct {
+	// The app API identifier.
+	AppID string `json:"app_id"`
+	// The RSA public key string.
+	RsaPublicKeyStr string `json:"rsa_public_key_str"`
+	// The description of the SDK Authentication key.
+	Description string `json:"description"`
+	// Whether to make the key primary when it is created.
+	MakePrimary OptBool `json:"make_primary"`
+}
+
+// GetAppID returns the value of AppID.
+func (s *CreateSDKAuthenticationKeyRequest) GetAppID() string {
+	return s.AppID
+}
+
+// GetRsaPublicKeyStr returns the value of RsaPublicKeyStr.
+func (s *CreateSDKAuthenticationKeyRequest) GetRsaPublicKeyStr() string {
+	return s.RsaPublicKeyStr
+}
+
+// GetDescription returns the value of Description.
+func (s *CreateSDKAuthenticationKeyRequest) GetDescription() string {
+	return s.Description
+}
+
+// GetMakePrimary returns the value of MakePrimary.
+func (s *CreateSDKAuthenticationKeyRequest) GetMakePrimary() OptBool {
+	return s.MakePrimary
+}
+
+// SetAppID sets the value of AppID.
+func (s *CreateSDKAuthenticationKeyRequest) SetAppID(val string) {
+	s.AppID = val
+}
+
+// SetRsaPublicKeyStr sets the value of RsaPublicKeyStr.
+func (s *CreateSDKAuthenticationKeyRequest) SetRsaPublicKeyStr(val string) {
+	s.RsaPublicKeyStr = val
+}
+
+// SetDescription sets the value of Description.
+func (s *CreateSDKAuthenticationKeyRequest) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetMakePrimary sets the value of MakePrimary.
+func (s *CreateSDKAuthenticationKeyRequest) SetMakePrimary(val OptBool) {
+	s.MakePrimary = val
+}
+
+// Ref: #/CreateSDKAuthenticationKeyResponse
+type CreateSDKAuthenticationKeyResponse struct {
+	// The ID of the newly created SDK Authentication key.
+	ID string `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateSDKAuthenticationKeyResponse) GetID() string {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateSDKAuthenticationKeyResponse) SetID(val string) {
+	s.ID = val
+}
+
+// CreateSDKAuthenticationKeyResponseStatusCode wraps CreateSDKAuthenticationKeyResponse with StatusCode.
+type CreateSDKAuthenticationKeyResponseStatusCode struct {
+	StatusCode int
+	Response   CreateSDKAuthenticationKeyResponse
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s *CreateSDKAuthenticationKeyResponseStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s *CreateSDKAuthenticationKeyResponseStatusCode) GetResponse() CreateSDKAuthenticationKeyResponse {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *CreateSDKAuthenticationKeyResponseStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *CreateSDKAuthenticationKeyResponseStatusCode) SetResponse(val CreateSDKAuthenticationKeyResponse) {
+	s.Response = val
+}
+
 // Ref: #/DeleteCatalogItemResponse
 type DeleteCatalogItemResponse struct {
 	Message string `json:"message"`
@@ -597,6 +691,34 @@ func (s *DeleteCatalogResponse) GetMessage() string {
 // SetMessage sets the value of Message.
 func (s *DeleteCatalogResponse) SetMessage(val string) {
 	s.Message = val
+}
+
+// Ref: #/DeleteSDKAuthenticationKeyRequest
+type DeleteSDKAuthenticationKeyRequest struct {
+	// The app API identifier.
+	AppID string `json:"app_id"`
+	// The ID of the SDK Authentication key to delete.
+	KeyID string `json:"key_id"`
+}
+
+// GetAppID returns the value of AppID.
+func (s *DeleteSDKAuthenticationKeyRequest) GetAppID() string {
+	return s.AppID
+}
+
+// GetKeyID returns the value of KeyID.
+func (s *DeleteSDKAuthenticationKeyRequest) GetKeyID() string {
+	return s.KeyID
+}
+
+// SetAppID sets the value of AppID.
+func (s *DeleteSDKAuthenticationKeyRequest) SetAppID(val string) {
+	s.AppID = val
+}
+
+// SetKeyID sets the value of KeyID.
+func (s *DeleteSDKAuthenticationKeyRequest) SetKeyID(val string) {
+	s.KeyID = val
 }
 
 type ErrorResponse struct {
@@ -1690,6 +1812,127 @@ func (s *ReplaceCatalogItemRequest) GetItems() []CatalogItemWrite {
 // SetItems sets the value of Items.
 func (s *ReplaceCatalogItemRequest) SetItems(val []CatalogItemWrite) {
 	s.Items = val
+}
+
+// Ref: #/SDKAuthenticationKey
+type SDKAuthenticationKey struct {
+	// The ID of the SDK Authentication key.
+	ID string `json:"id"`
+	// The RSA public key string.
+	RsaPublicKey string `json:"rsa_public_key"`
+	// The description of the SDK Authentication key.
+	Description string `json:"description"`
+	// Whether this key is the primary SDK Authentication key.
+	IsPrimary bool `json:"is_primary"`
+}
+
+// GetID returns the value of ID.
+func (s *SDKAuthenticationKey) GetID() string {
+	return s.ID
+}
+
+// GetRsaPublicKey returns the value of RsaPublicKey.
+func (s *SDKAuthenticationKey) GetRsaPublicKey() string {
+	return s.RsaPublicKey
+}
+
+// GetDescription returns the value of Description.
+func (s *SDKAuthenticationKey) GetDescription() string {
+	return s.Description
+}
+
+// GetIsPrimary returns the value of IsPrimary.
+func (s *SDKAuthenticationKey) GetIsPrimary() bool {
+	return s.IsPrimary
+}
+
+// SetID sets the value of ID.
+func (s *SDKAuthenticationKey) SetID(val string) {
+	s.ID = val
+}
+
+// SetRsaPublicKey sets the value of RsaPublicKey.
+func (s *SDKAuthenticationKey) SetRsaPublicKey(val string) {
+	s.RsaPublicKey = val
+}
+
+// SetDescription sets the value of Description.
+func (s *SDKAuthenticationKey) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetIsPrimary sets the value of IsPrimary.
+func (s *SDKAuthenticationKey) SetIsPrimary(val bool) {
+	s.IsPrimary = val
+}
+
+// Ref: #/SDKAuthenticationKeysResponse
+type SDKAuthenticationKeysResponse struct {
+	Keys []SDKAuthenticationKey `json:"keys"`
+}
+
+// GetKeys returns the value of Keys.
+func (s *SDKAuthenticationKeysResponse) GetKeys() []SDKAuthenticationKey {
+	return s.Keys
+}
+
+// SetKeys sets the value of Keys.
+func (s *SDKAuthenticationKeysResponse) SetKeys(val []SDKAuthenticationKey) {
+	s.Keys = val
+}
+
+// SDKAuthenticationKeysResponseStatusCode wraps SDKAuthenticationKeysResponse with StatusCode.
+type SDKAuthenticationKeysResponseStatusCode struct {
+	StatusCode int
+	Response   SDKAuthenticationKeysResponse
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s *SDKAuthenticationKeysResponseStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s *SDKAuthenticationKeysResponseStatusCode) GetResponse() SDKAuthenticationKeysResponse {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *SDKAuthenticationKeysResponseStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *SDKAuthenticationKeysResponseStatusCode) SetResponse(val SDKAuthenticationKeysResponse) {
+	s.Response = val
+}
+
+// Ref: #/SetPrimarySDKAuthenticationKeyRequest
+type SetPrimarySDKAuthenticationKeyRequest struct {
+	// The app API identifier.
+	AppID string `json:"app_id"`
+	// The ID of the SDK Authentication key to mark as primary.
+	KeyID string `json:"key_id"`
+}
+
+// GetAppID returns the value of AppID.
+func (s *SetPrimarySDKAuthenticationKeyRequest) GetAppID() string {
+	return s.AppID
+}
+
+// GetKeyID returns the value of KeyID.
+func (s *SetPrimarySDKAuthenticationKeyRequest) GetKeyID() string {
+	return s.KeyID
+}
+
+// SetAppID sets the value of AppID.
+func (s *SetPrimarySDKAuthenticationKeyRequest) SetAppID(val string) {
+	s.AppID = val
+}
+
+// SetKeyID sets the value of KeyID.
+func (s *SetPrimarySDKAuthenticationKeyRequest) SetKeyID(val string) {
+	s.KeyID = val
 }
 
 type UpdateContentBlockCreated UpdateContentBlockResponse

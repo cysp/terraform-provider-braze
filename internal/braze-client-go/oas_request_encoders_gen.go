@@ -66,8 +66,50 @@ func encodeCreateEmailTemplateRequest(
 	return nil
 }
 
+func encodeCreateSDKAuthenticationKeyRequest(
+	req *CreateSDKAuthenticationKeyRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDeleteSDKAuthenticationKeyRequest(
+	req *DeleteSDKAuthenticationKeyRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeReplaceCatalogItemRequest(
 	req *ReplaceCatalogItemRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeSetPrimarySDKAuthenticationKeyRequest(
+	req *SetPrimarySDKAuthenticationKeyRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
