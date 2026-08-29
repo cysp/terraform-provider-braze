@@ -108,7 +108,7 @@ func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateC
 		block.Content = req.Content.Value
 	}
 
-	if req.Description.IsSet() {
+	if !req.Description.IsEmpty() {
 		if req.Description.IsNull() {
 			block.Description.SetToNull()
 		} else {
@@ -116,7 +116,7 @@ func (h *Handler) UpdateContentBlock(_ context.Context, req *brazeclient.UpdateC
 		}
 	}
 
-	if req.Tags.IsSet() {
+	if !req.Tags.IsEmpty() {
 		if req.Tags.IsNull() {
 			block.Tags.SetToNull()
 		} else {
