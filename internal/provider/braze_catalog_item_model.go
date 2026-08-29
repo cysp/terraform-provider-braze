@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	"github.com/go-faster/jx"
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -39,22 +38,11 @@ func (m brazeCatalogItemModel) ToCatalogItemWrite() (brazeclient.CatalogItemWrit
 		return nil, errCatalogItemValuesJSONIncludesID
 	}
 
-	item := make(brazeclient.CatalogItemWrite, len(values))
-	for key, value := range values {
-		item[key] = jx.Raw(value)
-	}
-
-	return item, nil
+	return brazeclient.CatalogItemWrite(values), nil
 }
 
 func newBrazeCatalogItemModelFromCatalogItem(catalogName string, item brazeclient.CatalogItem) (brazeCatalogItemModel, error) {
-	values := map[string]json.RawMessage{}
-
-	for key, value := range item.GetAdditionalProps() {
-		values[key] = json.RawMessage(value)
-	}
-
-	raw, err := json.Marshal(values)
+	raw, err := json.Marshal(map[string]json.RawMessage(item.GetAdditionalProps()))
 	if err != nil {
 		return brazeCatalogItemModel{}, fmt.Errorf("marshal values_json: %w", err)
 	}

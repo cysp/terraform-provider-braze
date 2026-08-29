@@ -3,6 +3,7 @@
 package brazeclient
 
 import (
+	json2 "encoding/json"
 	"math/bits"
 	"strconv"
 	"time"
@@ -364,9 +365,7 @@ func (s *CatalogItem) encodeFields(e *jx.Encoder) {
 	for k, elem := range s.AdditionalProps {
 		e.FieldStart(k)
 
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
+		json.EncodeJSON(e, elem)
 	}
 }
 
@@ -380,7 +379,7 @@ func (s *CatalogItem) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode CatalogItem to nil")
 	}
 	var requiredBitSet [1]uint8
-	s.AdditionalProps = map[string]jx.Raw{}
+	s.AdditionalProps = map[string]json2.RawMessage{}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -397,10 +396,10 @@ func (s *CatalogItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"id\"")
 			}
 		default:
-			var elem jx.Raw
+			var elem json2.RawMessage
 			if err := func() error {
-				v, err := d.RawAppend(nil)
-				elem = jx.Raw(v)
+				v, err := json.DecodeJSON[json2.RawMessage](d)
+				elem = v
 				if err != nil {
 					return err
 				}
@@ -475,9 +474,7 @@ func (s CatalogItemAdditional) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
+		json.EncodeJSON(e, elem)
 	}
 }
 
@@ -488,10 +485,10 @@ func (s *CatalogItemAdditional) Decode(d *jx.Decoder) error {
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
+		var elem json2.RawMessage
 		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
+			v, err := json.DecodeJSON[json2.RawMessage](d)
+			elem = v
 			if err != nil {
 				return err
 			}
@@ -629,9 +626,7 @@ func (s CatalogItemWrite) encodeFields(e *jx.Encoder) {
 	for k, elem := range s {
 		e.FieldStart(k)
 
-		if len(elem) != 0 {
-			e.Raw(elem)
-		}
+		json.EncodeJSON(e, elem)
 	}
 }
 
@@ -642,10 +637,10 @@ func (s *CatalogItemWrite) Decode(d *jx.Decoder) error {
 	}
 	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		var elem jx.Raw
+		var elem json2.RawMessage
 		if err := func() error {
-			v, err := d.RawAppend(nil)
-			elem = jx.Raw(v)
+			v, err := json.DecodeJSON[json2.RawMessage](d)
+			elem = v
 			if err != nil {
 				return err
 			}
