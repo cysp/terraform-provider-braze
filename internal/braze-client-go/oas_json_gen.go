@@ -1845,7 +1845,9 @@ func (s *ErrorResponse) encodeFields(e *jx.Encoder) {
 			e.FieldStart("errors")
 			e.ArrStart()
 			for _, elem := range s.Errors {
-				e.Str(elem)
+				if len(elem) != 0 {
+					e.Raw(elem)
+				}
 			}
 			e.ArrEnd()
 		}
@@ -1880,11 +1882,11 @@ func (s *ErrorResponse) Decode(d *jx.Decoder) error {
 			}
 		case "errors":
 			if err := func() error {
-				s.Errors = make([]string, 0)
+				s.Errors = make([]jx.Raw, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
+					var elem jx.Raw
+					v, err := d.RawAppend(nil)
+					elem = jx.Raw(v)
 					if err != nil {
 						return err
 					}

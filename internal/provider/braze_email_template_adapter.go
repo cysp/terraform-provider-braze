@@ -33,11 +33,7 @@ func (c generatedEmailTemplateClient) Create(ctx context.Context, plan brazeEmai
 
 	createResponse, createErr := c.client.CreateEmailTemplate(ctx, &createRequest)
 
-	tflog.Info(ctx, "braze_email_template.create", map[string]any{
-		"request":  createRequest,
-		"response": createResponse,
-		"err":      createErr,
-	})
+	tflog.Debug(ctx, "braze_email_template.create")
 
 	if createErr != nil {
 		return brazeEmailTemplateModel{}, fmt.Errorf("create email template: %w", createErr)
@@ -57,10 +53,8 @@ func (c generatedEmailTemplateClient) Read(ctx context.Context, id string) (braz
 
 	getResponse, getErr := c.client.GetEmailTemplateInfo(ctx, getParams)
 
-	tflog.Info(ctx, "braze_email_template.read", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
+	tflog.Debug(ctx, "braze_email_template.read", map[string]any{
+		"params": getParams,
 	})
 
 	if getErr != nil {
@@ -79,11 +73,7 @@ func (c generatedEmailTemplateClient) Update(ctx context.Context, plan brazeEmai
 
 	updateResponse, updateErr := c.client.UpdateEmailTemplate(ctx, &updateRequest)
 
-	tflog.Info(ctx, "braze_email_template.update", map[string]any{
-		"request":  updateRequest,
-		"response": updateResponse,
-		"err":      updateErr,
-	})
+	tflog.Debug(ctx, "braze_email_template.update")
 
 	if updateErr != nil {
 		return brazeEmailTemplateModel{}, fmt.Errorf("update email template: %w", updateErr)
@@ -120,10 +110,8 @@ func (c generatedEmailTemplateClient) listPage(ctx context.Context, query brazeO
 
 	listResponse, listErr := c.client.ListEmailTemplates(ctx, params)
 
-	tflog.Info(ctx, "braze_email_template.list", map[string]any{
-		"params":   params,
-		"response": listResponse,
-		"err":      listErr,
+	tflog.Debug(ctx, "braze_email_template.list", map[string]any{
+		"params": params,
 	})
 
 	if listErr != nil {

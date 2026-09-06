@@ -602,8 +602,9 @@ func (s *DeleteCatalogResponse) SetMessage(val string) {
 type ErrorResponse struct {
 	// Error message describing what went wrong.
 	Message string `json:"message"`
-	// Array of minor error messages.
-	Errors []string `json:"errors"`
+	// Endpoint-specific error details. Template endpoints return strings; catalog endpoints return objects
+	// with id, message, parameters, and parameter_values.
+	Errors []jx.Raw `json:"errors"`
 }
 
 // GetMessage returns the value of Message.
@@ -612,7 +613,7 @@ func (s *ErrorResponse) GetMessage() string {
 }
 
 // GetErrors returns the value of Errors.
-func (s *ErrorResponse) GetErrors() []string {
+func (s *ErrorResponse) GetErrors() []jx.Raw {
 	return s.Errors
 }
 
@@ -622,7 +623,7 @@ func (s *ErrorResponse) SetMessage(val string) {
 }
 
 // SetErrors sets the value of Errors.
-func (s *ErrorResponse) SetErrors(val []string) {
+func (s *ErrorResponse) SetErrors(val []jx.Raw) {
 	s.Errors = val
 }
 

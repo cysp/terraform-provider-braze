@@ -34,11 +34,7 @@ func (c generatedCatalogClient) Create(ctx context.Context, plan brazeCatalogMod
 
 	createResponse, createErr := c.client.CreateCatalog(ctx, &createRequest)
 
-	tflog.Info(ctx, "braze_catalog.create", map[string]any{
-		"request":  createRequest,
-		"response": createResponse,
-		"err":      createErr,
-	})
+	tflog.Debug(ctx, "braze_catalog.create")
 
 	if createErr != nil {
 		return brazeCatalogModel{}, fmt.Errorf("create catalog: %w", createErr)
@@ -54,10 +50,8 @@ func (c generatedCatalogClient) Create(ctx context.Context, plan brazeCatalogMod
 func (c generatedCatalogClient) Read(ctx context.Context, name string) (brazeCatalogModel, error) {
 	listResponse, listErr := c.client.ListCatalogs(ctx)
 
-	tflog.Info(ctx, "braze_catalog.read", map[string]any{
-		"name":     name,
-		"response": listResponse,
-		"err":      listErr,
+	tflog.Debug(ctx, "braze_catalog.read", map[string]any{
+		"name": name,
 	})
 
 	if listErr != nil {
@@ -79,12 +73,10 @@ func (c generatedCatalogClient) Read(ctx context.Context, name string) (brazeCat
 
 func (c generatedCatalogClient) Delete(ctx context.Context, name string) error {
 	params := brazeclient.DeleteCatalogParams{CatalogName: name}
-	deleteResponse, deleteErr := c.client.DeleteCatalog(ctx, params)
+	_, deleteErr := c.client.DeleteCatalog(ctx, params)
 
-	tflog.Info(ctx, "braze_catalog.delete", map[string]any{
-		"params":   params,
-		"response": deleteResponse,
-		"err":      deleteErr,
+	tflog.Debug(ctx, "braze_catalog.delete", map[string]any{
+		"params": params,
 	})
 
 	if deleteErr != nil {
@@ -97,10 +89,7 @@ func (c generatedCatalogClient) Delete(ctx context.Context, name string) error {
 func (c generatedCatalogClient) List(ctx context.Context) ([]brazeObjectListEntry[brazeCatalogModel], error) {
 	listResponse, listErr := c.client.ListCatalogs(ctx)
 
-	tflog.Info(ctx, "braze_catalog.list", map[string]any{
-		"response": listResponse,
-		"err":      listErr,
-	})
+	tflog.Debug(ctx, "braze_catalog.list")
 
 	if listErr != nil {
 		return nil, fmt.Errorf("list catalogs: %w", listErr)

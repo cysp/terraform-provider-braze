@@ -37,11 +37,7 @@ func (c generatedContentBlockClient) Create(ctx context.Context, plan brazeConte
 
 	createResponse, createErr := c.client.CreateContentBlock(ctx, &createRequest)
 
-	tflog.Info(ctx, "braze_content_block.create", map[string]any{
-		"request":  createRequest,
-		"response": createResponse,
-		"err":      createErr,
-	})
+	tflog.Debug(ctx, "braze_content_block.create")
 
 	if createErr != nil {
 		return brazeContentBlockModel{}, fmt.Errorf("create content block: %w", createErr)
@@ -61,10 +57,8 @@ func (c generatedContentBlockClient) Read(ctx context.Context, id string) (braze
 
 	getResponse, getErr := c.client.GetContentBlockInfo(ctx, getParams)
 
-	tflog.Info(ctx, "braze_content_block.read", map[string]any{
-		"params":   getParams,
-		"response": getResponse,
-		"err":      getErr,
+	tflog.Debug(ctx, "braze_content_block.read", map[string]any{
+		"params": getParams,
 	})
 
 	if getErr != nil {
@@ -83,11 +77,7 @@ func (c generatedContentBlockClient) Update(ctx context.Context, plan brazeConte
 
 	updateResponse, updateErr := c.client.UpdateContentBlock(ctx, &updateRequest)
 
-	tflog.Info(ctx, "braze_content_block.update", map[string]any{
-		"request":  updateRequest,
-		"response": updateResponse,
-		"err":      updateErr,
-	})
+	tflog.Debug(ctx, "braze_content_block.update")
 
 	if updateErr != nil {
 		return brazeContentBlockModel{}, fmt.Errorf("update content block: %w", updateErr)
@@ -140,10 +130,8 @@ func (c generatedContentBlockClient) listPage(ctx context.Context, query brazeOb
 
 	listResponse, listErr := c.client.ListContentBlocks(ctx, params)
 
-	tflog.Info(ctx, "braze_content_block.list", map[string]any{
-		"params":   params,
-		"response": listResponse,
-		"err":      listErr,
+	tflog.Debug(ctx, "braze_content_block.list", map[string]any{
+		"params": params,
 	})
 
 	if listErr != nil {
