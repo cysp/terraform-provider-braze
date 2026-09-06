@@ -1,62 +1,24 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/list"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
-func SetProviderDataFromDataSourceConfigureRequest[ProviderData any](req datasource.ConfigureRequest, out *ProviderData) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-
-	if req.ProviderData == nil {
-		return diags
+func setProviderData(data any, out *brazeProviderData) diag.Diagnostics {
+	if data == nil {
+		return nil
 	}
 
-	if providerData, ok := req.ProviderData.(ProviderData); ok {
+	if providerData, ok := data.(brazeProviderData); ok {
 		*out = providerData
 
-		return diags
+		return nil
 	}
 
-	diags.AddError("Invalid provider data", "")
-
-	return diags
-}
-
-func SetProviderDataFromListConfigureRequest[ProviderData any](req list.ConfigureRequest, out *ProviderData) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-
-	if req.ProviderData == nil {
-		return diags
-	}
-
-	if providerData, ok := req.ProviderData.(ProviderData); ok {
-		*out = providerData
-
-		return diags
-	}
-
-	diags.AddError("Invalid provider data", "")
-
-	return diags
-}
-
-func SetProviderDataFromResourceConfigureRequest[ProviderData any](req resource.ConfigureRequest, out *ProviderData) diag.Diagnostics {
-	diags := diag.Diagnostics{}
-
-	if req.ProviderData == nil {
-		return diags
-	}
-
-	if providerData, ok := req.ProviderData.(ProviderData); ok {
-		*out = providerData
-
-		return diags
-	}
-
-	diags.AddError("Invalid provider data", "")
-
-	return diags
+	return diag.Diagnostics{diag.NewErrorDiagnostic(
+		"Invalid provider data",
+		fmt.Sprintf("Expected the configured Braze client, got %T. Please report this provider error.", data),
+	)}
 }

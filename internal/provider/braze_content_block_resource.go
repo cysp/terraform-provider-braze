@@ -35,8 +35,8 @@ func (r *brazeContentBlockResource) Schema(ctx context.Context, _ resource.Schem
 	resp.Schema = BrazeContentBlockResourceSchema(ctx)
 }
 
-func (r *brazeContentBlockResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeContentBlockResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeContentBlockResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

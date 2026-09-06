@@ -37,8 +37,8 @@ func (r *brazeCatalogItemResource) Schema(ctx context.Context, _ resource.Schema
 	resp.Schema = BrazeCatalogItemResourceSchema(ctx)
 }
 
-func (r *brazeCatalogItemResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeCatalogItemResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeCatalogItemResource) ValidateConfig(ctx context.Context, req resource.ValidateConfigRequest, resp *resource.ValidateConfigResponse) {

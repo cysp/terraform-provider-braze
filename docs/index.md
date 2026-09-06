@@ -13,8 +13,17 @@ Manage Braze configuration.
 ## Example Usage
 
 ```terraform
+terraform {
+  required_version = ">= 1.12"
+  required_providers {
+    braze = { source = "cysp/braze" }
+  }
+}
+
 provider "braze" {
-  api_key = "your-api-key-here"
+  # Choose the REST endpoint for your Braze instance.
+  base_url = "https://rest.iad-01.braze.com"
+  # Set BRAZE_API_KEY in your environment.
 }
 ```
 
@@ -24,4 +33,4 @@ provider "braze" {
 ### Optional
 
 - `api_key` (String, Sensitive) The REST API key to use when communicating with Braze. If not provided, it will default to the value of the BRAZE_API_KEY environment variable.
-- `base_url` (String) The base URL associated with your Braze instance's REST API.
+- `base_url` (String) The absolute REST API URL for your Braze instance, for example https://rest.iad-01.braze.com. This must be set; there is no default instance.

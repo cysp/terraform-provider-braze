@@ -35,8 +35,8 @@ func (r *brazeEmailTemplateResource) Schema(ctx context.Context, _ resource.Sche
 	resp.Schema = BrazeEmailTemplateResourceSchema(ctx)
 }
 
-func (r *brazeEmailTemplateResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeEmailTemplateResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeEmailTemplateResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
