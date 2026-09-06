@@ -26,15 +26,18 @@ func BrazeContentBlockResourceSchema(_ context.Context) schema.Schema {
 		Description: "Manage Braze Content Blocks, reusable snippets for messaging campaigns.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Description:        "The Braze-generated ID. Use import to manage an existing object.",
+				DeprecationMessage: "Configuring id is deprecated. Remove it from the resource configuration; Terraform retains the existing ID in state. Use import to adopt existing objects.",
+				Optional:           true,
+				Computed:           true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
-				Description: "A unique name for the content block.",
+				Validators:  []validator.String{nonBlankStringValidator{}},
+				Description: "A unique name using letters, numbers, hyphens, and underscores. Braze does not permit renaming active content blocks.",
 				Required:    true,
 			},
 			"description": schema.StringAttribute{

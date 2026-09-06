@@ -14,10 +14,9 @@ Manage Braze Content Blocks, reusable snippets for messaging campaigns.
 
 ```terraform
 resource "braze_content_block" "example" {
-  name        = "My Content Block"
+  name        = "welcome_block"
   description = "An example content block for email campaigns"
   content     = "<p>This is <strong>HTML</strong> content for the block.</p>"
-  tags        = ["example", "html"]
 }
 ```
 
@@ -27,13 +26,10 @@ resource "braze_content_block" "example" {
 ### Required
 
 - `content` (String) The content of the content block.
-- `name` (String) A unique name for the content block.
+- `name` (String) A unique name using letters, numbers, hyphens, and underscores. Braze does not permit renaming active content blocks.
 
 ### Optional
 
 - `description` (String) An optional description of the content block.
+- `id` (String, Deprecated) The Braze-generated ID. Use import to manage an existing object.
 - `tags` (List of String) Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.
-
-### Read-Only
-
-- `id` (String) The ID of this resource.

@@ -23,17 +23,20 @@ func BrazeEmailTemplateResourceIdentitySchema() identityschema.Schema {
 
 func BrazeEmailTemplateResourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
-		Description: "Manage Braze Email Templates stored on the Templates & Media page.",
+		Description: "Manage Braze Email Templates stored on the Templates & Media page. Templates created with the drag-and-drop editor are not supported.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Optional: true,
-				Computed: true,
+				Description:        "The Braze-generated ID. Use import to manage an existing object.",
+				DeprecationMessage: "Configuring id is deprecated. Remove it from the resource configuration; Terraform retains the existing ID in state. Use import to adopt existing objects.",
+				Optional:           true,
+				Computed:           true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"template_name": schema.StringAttribute{
+				Validators:  []validator.String{nonBlankStringValidator{}},
 				Description: "The name of the email template.",
 				Required:    true,
 			},
@@ -61,8 +64,8 @@ func BrazeEmailTemplateResourceSchema(_ context.Context) schema.Schema {
 			},
 			"should_inline_css": schema.BoolAttribute{
 				Description: "Whether Braze should inline CSS for this template. Omit on creation to use the App Group default. When omitted for an existing template, its observed value is retained. Set explicitly to manage this setting.",
-				Computed:    true,
 				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}

@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	_ resource.ResourceWithModifyPlan  = (*brazeContentBlockResource)(nil)
 	_ resource.Resource                = (*brazeContentBlockResource)(nil)
 	_ resource.ResourceWithConfigure   = (*brazeContentBlockResource)(nil)
 	_ resource.ResourceWithIdentity    = (*brazeContentBlockResource)(nil)
@@ -96,9 +97,8 @@ func (r *brazeContentBlockResource) Read(ctx context.Context, req resource.ReadR
 }
 
 func (r *brazeContentBlockResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state brazeContentBlockModel
+	var plan brazeContentBlockModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -127,4 +127,8 @@ func (r *brazeContentBlockResource) Delete(ctx context.Context, req resource.Del
 	}
 
 	resp.Diagnostics.AddWarning("Content Block not deleted", "Braze does not provide a delete API for content blocks; resource removed from Terraform state only.")
+}
+
+func (r *brazeContentBlockResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	modifyTemplatePlan(ctx, req, resp, "Content Block")
 }

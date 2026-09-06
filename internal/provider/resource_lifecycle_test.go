@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -110,6 +111,50 @@ func TestCreateRetainsIdentityWhenReadFails(t *testing.T) {
 			require.False(t, response.State.GetAttribute(t.Context(), path.Root("id"), &id).HasError())
 			assert.Equal(t, test.id, id.ValueString())
 			assert.True(t, response.State.Raw.IsFullyKnown())
+		})
+	}
+}
+
+func TestTemplatePlansExplainGeneratedIDsAndDestroy(t *testing.T) {
+	t.Parallel()
+
+	for name, test := range map[string]struct {
+		r     resource.Resource
+		model any
+	}{
+		"content block":  {NewBrazeContentBlockResource(), brazeContentBlockModel{IDIdentityModel: IDIdentityModel{ID: types.StringValue("existing")}, Tags: types.ListNull(types.StringType), Name: types.StringValue("welcome"), Content: types.StringValue("Hello")}},
+		"email template": {NewBrazeEmailTemplateResource(), brazeEmailTemplateModel{IDIdentityModel: IDIdentityModel{ID: types.StringValue("existing")}, Tags: types.ListNull(types.StringType), TemplateName: types.StringValue("welcome"), Subject: types.StringValue("Welcome"), Body: types.StringValue("Hello")}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			modifier, ok := test.r.(resource.ResourceWithModifyPlan)
+			require.True(t, ok, "Generated IDs and non-deleting destruction need plan diagnostics")
+			plan := lifecyclePlan(t, test.r, test.model)
+			state := tfsdk.State(plan)
+			config := tfsdk.Config(plan)
+			response := resource.ModifyPlanResponse{Plan: plan}
+			modifier.ModifyPlan(t.Context(), resource.ModifyPlanRequest{Config: config, Plan: plan, State: tfsdk.State{Schema: plan.Schema}}, &response)
+			assert.True(t, response.Diagnostics.HasError(), "Creating with a configured generated ID must fail before a POST")
+
+			response = resource.ModifyPlanResponse{Plan: plan}
+			modifier.ModifyPlan(t.Context(), resource.ModifyPlanRequest{Config: config, Plan: plan, State: state}, &response)
+			assert.False(t, response.Diagnostics.HasError(), "Existing configurations that pin their actual ID must remain usable")
+
+			destroy := tfsdk.Plan{Schema: plan.Schema}
+			destroy.Raw = tftypes.NewValue(plan.Raw.Type(), nil)
+			response = resource.ModifyPlanResponse{Plan: destroy}
+			modifier.ModifyPlan(t.Context(), resource.ModifyPlanRequest{Plan: destroy, State: state}, &response)
+			assert.False(t, response.Diagnostics.HasError())
+			require.Len(t, response.Diagnostics.Warnings(), 1)
+			assert.Contains(t, response.Diagnostics.Warnings()[0].Detail(), "Terraform state")
+			assert.True(t, response.Plan.Raw.IsNull())
+
+			deletion := resource.DeleteResponse{State: state}
+			test.r.Delete(t.Context(), resource.DeleteRequest{State: state}, &deletion)
+			require.False(t, deletion.Diagnostics.HasError())
+			require.Len(t, deletion.Diagnostics.Warnings(), 1)
+			assert.Contains(t, deletion.Diagnostics.Warnings()[0].Detail(), "Terraform state")
 		})
 	}
 }
