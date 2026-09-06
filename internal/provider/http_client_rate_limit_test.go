@@ -113,3 +113,12 @@ func fixedTime() time.Time {
 func strconvFormatInt(value int64) string {
 	return strconv.FormatInt(value, 10)
 }
+
+func TestRetryAfterDoesNotOverflow(t *testing.T) {
+	t.Parallel()
+
+	delay, valid := retryAfterDelay("9223372036854775807", fixedTime)
+	if valid || delay != 0 {
+		t.Fatalf("overflowing seconds must be rejected, got %v %v", delay, valid)
+	}
+}

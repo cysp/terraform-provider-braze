@@ -6,12 +6,12 @@ import (
 )
 
 type HTTPClientWithUserAgent struct {
-	client *http.Client
+	client httpDoer
 
 	UserAgent string
 }
 
-func NewHTTPClientWithUserAgent(client *http.Client, userAgent string) *HTTPClientWithUserAgent {
+func NewHTTPClientWithUserAgent(client httpDoer, userAgent string) *HTTPClientWithUserAgent {
 	return &HTTPClientWithUserAgent{
 		client:    client,
 		UserAgent: userAgent,
@@ -19,6 +19,11 @@ func NewHTTPClientWithUserAgent(client *http.Client, userAgent string) *HTTPClie
 }
 
 func (c *HTTPClientWithUserAgent) Do(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	if req.Header == nil {
+		req.Header = make(http.Header)
+	}
+
 	if req.Header.Get("User-Agent") == "" && c.UserAgent != "" {
 		req.Header.Set("User-Agent", c.UserAgent)
 	}
