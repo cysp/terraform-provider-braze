@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"net/http"
-	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -14,9 +14,9 @@ import (
 
 type contentBlockClient interface {
 	Create(ctx context.Context, plan brazeContentBlockModel) (brazeContentBlockModel, error)
-	Read(ctx context.Context, id string) (brazeContentBlockModel, error)
+	Read(ctx context.Context, objectID string) (brazeContentBlockModel, error)
 	Update(ctx context.Context, plan brazeContentBlockModel) (brazeContentBlockModel, error)
-	List(ctx context.Context, query brazeObjectListQuery) ([]brazeObjectListEntry[brazeContentBlockModel], error)
+	List(ctx context.Context, query brazeObjectListQuery) iter.Seq2[brazeObjectListEntry[brazeContentBlockModel], error]
 }
 
 type generatedContentBlockClient struct {
@@ -136,27 +136,31 @@ func contentBlockIDFromUpdateContentBlockResponse(response brazeclient.UpdateCon
 	}
 }
 
-func (c generatedContentBlockClient) List(ctx context.Context, query brazeObjectListQuery) ([]brazeObjectListEntry[brazeContentBlockModel], error) {
-	return listBrazeObjectEntries(query, func(offset, limit int) ([]contentBlockListItem, error) {
+func (c generatedContentBlockClient) List(ctx context.Context, query brazeObjectListQuery) iter.Seq2[brazeObjectListEntry[brazeContentBlockModel], error] {
+	return listBrazeObjectEntries(ctx, query, func(offset, limit int) ([]contentBlockListItem, error) {
 		return c.listPage(ctx, query, offset, limit)
-	}, func(id string) (brazeContentBlockModel, error) {
-		return c.Read(ctx, id)
+	}, func(objectID string) (brazeContentBlockModel, error) {
+		return c.Read(ctx, objectID)
 	})
 }
 
-//nolint:dupl // The generated list endpoint types differ; abstracting this would add callback-heavy plumbing.
+//nolint:dupl // Endpoint types differ; keep request construction explicit.
 func (c generatedContentBlockClient) listPage(ctx context.Context, query brazeObjectListQuery, offset, limit int) ([]contentBlockListItem, error) {
 	params := brazeclient.ListContentBlocksParams{}
 
-	applyBrazeObjectListQuery(
-		query,
-		offset,
-		limit,
-		func(value int) { params.Limit = brazeclient.NewOptInt(value) },
-		func(value int) { params.Offset = brazeclient.NewOptInt(value) },
-		func(value time.Time) { params.ModifiedAfter = brazeclient.NewOptDateTime(value) },
-		func(value time.Time) { params.ModifiedBefore = brazeclient.NewOptDateTime(value) },
-	)
+	params.Limit.SetTo(limit)
+
+	if offset > 0 {
+		params.Offset.SetTo(offset)
+	}
+
+	if query.ModifiedAfter != nil {
+		params.ModifiedAfter.SetTo(*query.ModifiedAfter)
+	}
+
+	if query.ModifiedBefore != nil {
+		params.ModifiedBefore.SetTo(*query.ModifiedBefore)
+	}
 
 	listResponse, listErr := c.client.ListContentBlocks(ctx, params)
 

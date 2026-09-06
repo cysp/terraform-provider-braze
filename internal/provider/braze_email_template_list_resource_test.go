@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -39,17 +40,17 @@ func TestAccBrazeEmailTemplateList(t *testing.T) {
 					include_resource = true
 				}
 				`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("braze_email_template.test", "id", "email-template-id"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "template_name", "test-email-template"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "subject", "Welcome"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "body", "<p>Hello</p>"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "plaintext_body", "Hello"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "preheader", "Preview text"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "tags.#", "1"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "tags.0", "tag1"),
-					resource.TestCheckResourceAttr("braze_email_template.test", "should_inline_css", "true"),
-				),
+				QueryResultChecks: []querycheck.QueryResultCheck{querycheck.ExpectLength("braze_email_template.test", 1), querycheck.ExpectResourceKnownValues("braze_email_template.test", nil, []querycheck.KnownValueCheck{
+					{Path: tfjsonpath.New("id"), KnownValue: knownvalue.StringExact("email-template-id")},
+					{Path: tfjsonpath.New("template_name"), KnownValue: knownvalue.StringExact("test-email-template")},
+					{Path: tfjsonpath.New("subject"), KnownValue: knownvalue.StringExact("Welcome")},
+					{Path: tfjsonpath.New("body"), KnownValue: knownvalue.StringExact("<p>Hello</p>")},
+					{Path: tfjsonpath.New("plaintext_body"), KnownValue: knownvalue.StringExact("Hello")},
+					{Path: tfjsonpath.New("preheader"), KnownValue: knownvalue.StringExact("Preview text")},
+					{Path: tfjsonpath.New("tags"), KnownValue: knownvalue.ListSizeExact(1)},
+					{Path: tfjsonpath.New("tags").AtSliceIndex(0), KnownValue: knownvalue.StringExact("tag1")},
+					{Path: tfjsonpath.New("should_inline_css"), KnownValue: knownvalue.Bool(true)},
+				})},
 			},
 			{
 				Query: true,

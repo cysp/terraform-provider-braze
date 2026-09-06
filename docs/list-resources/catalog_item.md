@@ -3,12 +3,12 @@
 page_title: "braze_catalog_item List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-
+  Discover items in one catalog. Results identify each item by catalog_name and item_id.
 ---
 
 # braze_catalog_item (List Resource)
 
-
+Discover items in one catalog. Results identify each item by catalog_name and item_id.
 
 
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -15,7 +16,7 @@ type catalogClient interface {
 	Create(ctx context.Context, plan brazeCatalogModel) (brazeCatalogModel, error)
 	Read(ctx context.Context, name string) (brazeCatalogModel, error)
 	Delete(ctx context.Context, name string) error
-	List(ctx context.Context) ([]brazeObjectListEntry[brazeCatalogModel], error)
+	List(ctx context.Context) iter.Seq2[brazeObjectListEntry[brazeCatalogModel], error]
 }
 
 type generatedCatalogClient struct {
@@ -91,38 +92,39 @@ func (c generatedCatalogClient) Delete(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c generatedCatalogClient) List(ctx context.Context) ([]brazeObjectListEntry[brazeCatalogModel], error) {
-	listResponse, listErr := c.client.ListCatalogs(ctx)
-
-	tflog.Debug(ctx, "braze_catalog.list")
-
-	if listErr != nil {
-		return nil, fmt.Errorf("list catalogs: %w", listErr)
-	}
-
-	if listResponse == nil {
-		return nil, errBrazeObjectEmptyResponse
-	}
-
-	catalogs := listResponse.GetCatalogs()
-
-	entries := make([]brazeObjectListEntry[brazeCatalogModel], 0, len(catalogs))
-	for _, catalog := range catalogs {
-		model, err := newBrazeCatalogModelFromCatalog(ctx, catalog)
-
-		entry := brazeObjectListEntry[brazeCatalogModel]{
-			ID:          catalog.GetName(),
-			DisplayName: catalog.GetName(),
-		}
-
+func (c generatedCatalogClient) List(ctx context.Context) iter.Seq2[brazeObjectListEntry[brazeCatalogModel], error] {
+	return func(yield func(brazeObjectListEntry[brazeCatalogModel], error) bool) {
+		response, err := c.client.ListCatalogs(ctx)
 		if err != nil {
-			entry.ResourceErr = err
-		} else {
-			entry.Resource = &model
+			yield(brazeObjectListEntry[brazeCatalogModel]{}, fmt.Errorf("list catalogs: %w", err))
+
+			return
 		}
 
-		entries = append(entries, entry)
-	}
+		if response == nil {
+			yield(brazeObjectListEntry[brazeCatalogModel]{}, errBrazeObjectEmptyResponse)
 
-	return entries, nil
+			return
+		}
+
+		for _, catalog := range response.GetCatalogs() {
+			err := ctx.Err()
+			if err != nil {
+				yield(brazeObjectListEntry[brazeCatalogModel]{}, err)
+
+				return
+			}
+
+			model, err := newBrazeCatalogModelFromCatalog(ctx, catalog)
+
+			entry := brazeObjectListEntry[brazeCatalogModel]{ID: catalog.GetName(), DisplayName: catalog.GetName(), ResourceErr: err}
+			if err == nil {
+				entry.Resource = &model
+			}
+
+			if !yield(entry, nil) {
+				return
+			}
+		}
+	}
 }

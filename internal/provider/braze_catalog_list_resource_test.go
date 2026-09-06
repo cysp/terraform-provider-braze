@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -39,13 +40,13 @@ func TestAccBrazeCatalogList(t *testing.T) {
 					include_resource = true
 				}
 				`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("braze_catalog.test", "name", "centres"),
-					resource.TestCheckResourceAttr("braze_catalog.test", "description", "Centre metadata"),
-					resource.TestCheckResourceAttr("braze_catalog.test", "fields.#", "2"),
-					resource.TestCheckResourceAttr("braze_catalog.test", "fields.0.name", "id"),
-					resource.TestCheckResourceAttr("braze_catalog.test", "fields.0.type", "string"),
-				),
+				QueryResultChecks: []querycheck.QueryResultCheck{querycheck.ExpectLength("braze_catalog.test", 1), querycheck.ExpectResourceKnownValues("braze_catalog.test", nil, []querycheck.KnownValueCheck{
+					{Path: tfjsonpath.New("name"), KnownValue: knownvalue.StringExact("centres")},
+					{Path: tfjsonpath.New("description"), KnownValue: knownvalue.StringExact("Centre metadata")},
+					{Path: tfjsonpath.New("fields"), KnownValue: knownvalue.ListSizeExact(2)},
+					{Path: tfjsonpath.New("fields").AtSliceIndex(0).AtMapKey("name"), KnownValue: knownvalue.StringExact("id")},
+					{Path: tfjsonpath.New("fields").AtSliceIndex(0).AtMapKey("type"), KnownValue: knownvalue.StringExact("string")},
+				})},
 			},
 		},
 	})
@@ -155,12 +156,12 @@ func TestAccBrazeCatalogItemList(t *testing.T) {
 					include_resource = true
 				}
 				`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "id", "centres/airportwest"),
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "catalog_name", "centres"),
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "item_id", "airportwest"),
-					resource.TestCheckResourceAttr("braze_catalog_item.test", "values_json", `{"name":"Airport West"}`),
-				),
+				QueryResultChecks: []querycheck.QueryResultCheck{querycheck.ExpectLength("braze_catalog_item.test", 1), querycheck.ExpectResourceKnownValues("braze_catalog_item.test", nil, []querycheck.KnownValueCheck{
+					{Path: tfjsonpath.New("id"), KnownValue: knownvalue.StringExact("centres/airportwest")},
+					{Path: tfjsonpath.New("catalog_name"), KnownValue: knownvalue.StringExact("centres")},
+					{Path: tfjsonpath.New("item_id"), KnownValue: knownvalue.StringExact("airportwest")},
+					{Path: tfjsonpath.New("values_json"), KnownValue: knownvalue.StringExact(`{"name":"Airport West"}`)},
+				})},
 			},
 			{
 				Query: true,

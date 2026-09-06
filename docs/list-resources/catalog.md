@@ -3,12 +3,12 @@
 page_title: "braze_catalog List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-
+  Discover catalogs in the configured Braze workspace. Results identify each catalog by name.
 ---
 
 # braze_catalog (List Resource)
 
-
+Discover catalogs in the configured Braze workspace. Results identify each catalog by name.
 
 
 

@@ -3,10 +3,9 @@ package provider
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"iter"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
@@ -18,84 +17,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var errTestBrazeObjectFetch = errors.New("fetch failed")
+func collectListForTest[T any](t *testing.T, sequence iter.Seq2[T, error]) []T {
+	t.Helper()
 
-func TestCollectBrazeObjectPages(t *testing.T) {
-	t.Parallel()
+	var items []T
 
-	tests := map[string]struct {
-		query         brazeObjectListQuery
-		fetch         func(offset, limit int) ([]string, error)
-		expectedItems []string
-		expectedCalls []string
-		expectedErr   error
-	}{
-		"zero limit does not fetch": {
-			query: brazeObjectListQuery{Limit: 0},
-			fetch: func(int, int) ([]string, error) {
-				t.Fatal("fetch should not be called")
+	for item, err := range sequence {
+		require.NoError(t, err)
 
-				return nil, nil
-			},
-		},
-		"stops after short page": {
-			query: brazeObjectListQuery{Limit: 100},
-			fetch: func(offset, limit int) ([]string, error) {
-				return []string{fmt.Sprintf("%d/%d", offset, limit)}, nil
-			},
-			expectedItems: []string{"0/100"},
-			expectedCalls: []string{"0/100"},
-		},
-		"fetches until requested limit": {
-			query: brazeObjectListQuery{Limit: 101},
-			fetch: func(offset, limit int) ([]string, error) {
-				items := make([]string, limit)
-				for i := range items {
-					items[i] = strconv.Itoa(offset + i)
-				}
-
-				return items, nil
-			},
-			expectedItems: makeRangeStrings(101),
-			expectedCalls: []string{"0/100", "100/100"},
-		},
-		"returns fetch error": {
-			query: brazeObjectListQuery{Limit: 101},
-			fetch: func(offset, limit int) ([]string, error) {
-				if offset == 100 {
-					return nil, errTestBrazeObjectFetch
-				}
-
-				return makeRangeStrings(limit), nil
-			},
-			expectedItems: nil,
-			expectedCalls: []string{"0/100", "100/100"},
-			expectedErr:   errTestBrazeObjectFetch,
-		},
+		items = append(items, item)
 	}
 
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			var calls []string
-
-			actual, err := collectBrazeObjectPages(test.query, func(offset, limit int) ([]string, error) {
-				calls = append(calls, fmt.Sprintf("%d/%d", offset, limit))
-
-				return test.fetch(offset, limit)
-			})
-
-			if test.expectedErr != nil {
-				require.ErrorIs(t, err, test.expectedErr)
-			} else {
-				require.NoError(t, err)
-			}
-
-			assert.Equal(t, test.expectedItems, actual)
-			assert.Equal(t, test.expectedCalls, calls)
-		})
-	}
+	return items
 }
 
 func TestGeneratedContentBlockClient(t *testing.T) {
@@ -206,12 +139,10 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 			server.SetContentBlock("existing-content-block", "Existing content block", "<p>Existing</p>", "description", []string{"tag1"})
 		}))
 
-		entries, err := client.List(t.Context(), brazeObjectListQuery{
+		entries := collectListForTest(t, client.List(t.Context(), brazeObjectListQuery{
 			Limit:           1,
 			IncludeResource: true,
-		})
-
-		require.NoError(t, err)
+		}))
 		require.Len(t, entries, 1)
 		assert.Equal(t, "existing-content-block", entries[0].ID)
 		assert.Equal(t, "Existing content block", entries[0].DisplayName)
@@ -301,12 +232,10 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 			server.SetEmailTemplate("existing-email-template", "Existing email template", "Subject", "<p>Body</p>", "Body", "Preview", []string{"tag1"}, &shouldInlineCSS)
 		}))
 
-		entries, err := client.List(t.Context(), brazeObjectListQuery{
+		entries := collectListForTest(t, client.List(t.Context(), brazeObjectListQuery{
 			Limit:           1,
 			IncludeResource: true,
-		})
-
-		require.NoError(t, err)
+		}))
 		require.Len(t, entries, 1)
 		assert.Equal(t, "existing-email-template", entries[0].ID)
 		assert.Equal(t, "Existing email template", entries[0].DisplayName)
@@ -362,9 +291,7 @@ func TestGeneratedCatalogClient(t *testing.T) {
 
 		client := newGeneratedCatalogClient(newTestBrazeClient(t, withTestCatalog(t)))
 
-		entries, err := client.List(t.Context())
-
-		require.NoError(t, err)
+		entries := collectListForTest(t, client.List(t.Context()))
 		require.Len(t, entries, 1)
 		assert.Equal(t, "centres", entries[0].ID)
 		assert.Equal(t, "centres", entries[0].DisplayName)
@@ -473,9 +400,7 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 			}
 		}))
 
-		entries, err := client.List(t.Context(), "centres", 55)
-
-		require.NoError(t, err)
+		entries := collectListForTest(t, client.List(t.Context(), "centres", 55))
 		require.Len(t, entries, 55)
 		assert.Equal(t, "centres/centre00", entries[0].ID)
 		assert.Equal(t, "centres/centre54", entries[54].ID)
@@ -499,9 +424,7 @@ func TestGeneratedCatalogItemClient(t *testing.T) {
 			}
 		}))
 
-		entries, err := client.List(t.Context(), "centres", 51)
-
-		require.NoError(t, err)
+		entries := collectListForTest(t, client.List(t.Context(), "centres", 51))
 		require.Len(t, entries, 51)
 		assert.Equal(t, "centres/centre50", entries[50].ID)
 	})
@@ -571,13 +494,4 @@ func withTestCatalog(t *testing.T) func(*brazeclienttesting.Server) {
 	return func(server *brazeclienttesting.Server) {
 		createTestCatalog(t, server)
 	}
-}
-
-func makeRangeStrings(count int) []string {
-	items := make([]string, count)
-	for i := range items {
-		items[i] = strconv.Itoa(i)
-	}
-
-	return items
 }

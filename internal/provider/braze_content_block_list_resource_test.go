@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -38,13 +39,13 @@ func TestAccBrazeContentBlockList(t *testing.T) {
 					include_resource = true
 				}
 				`,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("braze_content_block.test", "id", "content-block-id"),
-					resource.TestCheckResourceAttr("braze_content_block.test", "name", "test-content-block"),
-					resource.TestCheckResourceAttr("braze_content_block.test", "description", ""),
-					resource.TestCheckResourceAttr("braze_content_block.test", "content", "<p>This is <strong>HTML</strong> content</p>"),
-					resource.TestCheckResourceAttr("braze_content_block.test", "tags.#", "0"),
-				),
+				QueryResultChecks: []querycheck.QueryResultCheck{querycheck.ExpectLength("braze_content_block.test", 1), querycheck.ExpectResourceKnownValues("braze_content_block.test", nil, []querycheck.KnownValueCheck{
+					{Path: tfjsonpath.New("id"), KnownValue: knownvalue.StringExact("content-block-id")},
+					{Path: tfjsonpath.New("name"), KnownValue: knownvalue.StringExact("test-content-block")},
+					{Path: tfjsonpath.New("description"), KnownValue: knownvalue.Null()},
+					{Path: tfjsonpath.New("content"), KnownValue: knownvalue.StringExact("<p>This is <strong>HTML</strong> content</p>")},
+					{Path: tfjsonpath.New("tags"), KnownValue: knownvalue.ListSizeExact(0)},
+				})},
 			},
 			{
 				Query: true,

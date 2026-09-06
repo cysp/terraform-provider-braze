@@ -33,6 +33,7 @@ func (r *brazeCatalogItemListResource) Metadata(_ context.Context, req resource.
 
 func (r *brazeCatalogItemListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Discover items in one catalog. Results identify each item by catalog_name and item_id.",
 		Attributes: map[string]schema.Attribute{
 			"catalog_name": schema.StringAttribute{
 				Description: "The catalog to list items from.",
@@ -63,13 +64,6 @@ func (r *brazeCatalogItemListResource) List(ctx context.Context, req list.ListRe
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		entries, listErr := r.providerData.catalogItems.List(ctx, config.CatalogName.ValueString(), req.Limit)
-		if listErr != nil {
-			streamBrazeObjectListError(ctx, req, "Failed to list catalog items", listErr, yield)
-
-			return
-		}
-
-		streamBrazeObjectListEntries(ctx, req, entries, "id", "Failed to get catalog item", yield)
+		streamBrazeObjectListEntries(ctx, req, r.providerData.catalogItems.List(ctx, config.CatalogName.ValueString(), req.Limit), "id", "Failed to list catalog items", "Failed to get catalog item", yield)
 	}
 }

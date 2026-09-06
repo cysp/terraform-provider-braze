@@ -98,9 +98,7 @@ func TestProviderConfigurationPrecedence(t *testing.T) {
 			require.False(t, response.Diagnostics.HasError(), "%v", response.Diagnostics)
 			data, ok := response.ResourceData.(brazeProviderData)
 			require.True(t, ok)
-			entries, err := data.catalogs.List(t.Context())
-			require.NoError(t, err)
-			assert.Empty(t, entries)
+			assert.Empty(t, collectListForTest(t, data.catalogs.List(t.Context())))
 		})
 	}
 }
