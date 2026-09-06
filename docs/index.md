@@ -50,9 +50,9 @@ provider "braze" {
 
 ## REST API permissions
 
-Grant the permissions for the operations you use. Creating templates and catalog
-items also requires read permission so the provider can retrieve the created
-object. Import and refresh require read permission only.
+Grant the permissions for the operations you use. Creating templates, catalog
+items, and SDK authentication keys also requires read permission so the provider
+can retrieve the created object. Import and refresh require read permission only.
 
 | Surface | Manage resources | Discovery |
 | --- | --- | --- |
@@ -60,6 +60,7 @@ object. Import and refresh require read permission only.
 | Catalog items | `catalogs.create_item`, `catalogs.get_item`, `catalogs.replace_item`, `catalogs.delete_item` | `catalogs.get_items` |
 | Content blocks | `content_blocks.create`, `content_blocks.info`, `content_blocks.update` | `content_blocks.list`; also `content_blocks.info` with `include_resource = true` |
 | Email templates | `templates.email.create`, `templates.email.info`, `templates.email.update` | `templates.email.list`; also `templates.email.info` with `include_resource = true` |
+| SDK authentication keys | `sdk_authentication.create`, `sdk_authentication.keys`, `sdk_authentication.primary`, `sdk_authentication.delete` | Not supported |
 
 See the [catalog endpoints](https://www.braze.com/docs/api/endpoints/catalogs)
 and [template endpoints](https://www.braze.com/docs/api/endpoints/templates)

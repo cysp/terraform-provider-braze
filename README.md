@@ -1,6 +1,6 @@
 # Terraform Provider for Braze
 
-Manage Braze catalogs, catalog items, content blocks, and email templates.
+Manage Braze catalogs, catalog items, content blocks, email templates, and SDK authentication keys.
 Requires Terraform 1.12 or later; discovery with `terraform query` requires 1.14
 or later.
 

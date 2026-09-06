@@ -49,3 +49,20 @@ func setCatalogItemIdentityAndState(
 
 	return diags
 }
+
+func setSDKAuthenticationKeyIdentityAndState(
+	ctx context.Context,
+	identity stateAttributeValueSettable,
+	state stateValueSettable,
+	appID string,
+	keyID string,
+	value any,
+) diag.Diagnostics {
+	diags := diag.Diagnostics{}
+
+	diags.Append(identity.SetAttribute(ctx, path.Root("app_id"), appID)...)
+	diags.Append(identity.SetAttribute(ctx, path.Root("id"), keyID)...)
+	diags.Append(state.Set(ctx, value)...)
+
+	return diags
+}

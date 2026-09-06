@@ -36,7 +36,7 @@ func lifecycleIdentity(t *testing.T, r resource.Resource) *tfsdk.ResourceIdentit
 	require.True(t, ok)
 	identified.IdentitySchema(t.Context(), resource.IdentitySchemaRequest{}, &response)
 
-	return &tfsdk.ResourceIdentity{Schema: response.IdentitySchema}
+	return &tfsdk.ResourceIdentity{Schema: response.IdentitySchema, Raw: tftypes.NewValue(response.IdentitySchema.Type().TerraformType(t.Context()), nil)}
 }
 
 func configureHTTPResource(t *testing.T, r resource.Resource, handler http.Handler) {
@@ -64,6 +64,11 @@ func TestCreateRetainsIdentityWhenReadFails(t *testing.T) {
 		model        any
 		response, id string
 	}{
+		"SDK authentication key": {
+			NewBrazeSDKAuthenticationKeyResource(),
+			brazeSDKAuthenticationKeyModel{ID: types.StringUnknown(), AppID: types.StringValue("app-1"), RSAPublicKey: types.StringValue("public-key"), Description: types.StringValue("Key"), Primary: types.BoolUnknown()},
+			`{"id":"created"}`, "created",
+		},
 		"content block": {
 			NewBrazeContentBlockResource(),
 			brazeContentBlockModel{IDIdentityModel: IDIdentityModel{ID: types.StringUnknown()}, Tags: types.ListNull(types.StringType), Name: types.StringValue("welcome"), Content: types.StringValue("Hello")},
