@@ -46,6 +46,12 @@ type Invoker interface {
 	//
 	// POST /templates/email/create
 	CreateEmailTemplate(ctx context.Context, request *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
+	// CreateSDKAuthenticationKey invokes createSDKAuthenticationKey operation.
+	//
+	// Create SDK Authentication key.
+	//
+	// POST /app_group/sdk_authentication/create
+	CreateSDKAuthenticationKey(ctx context.Context, request *CreateSDKAuthenticationKeyRequest) (*CreateSDKAuthenticationKeyResponseStatusCode, error)
 	// DeleteCatalog invokes deleteCatalog operation.
 	//
 	// Delete catalog.
@@ -58,6 +64,12 @@ type Invoker interface {
 	//
 	// DELETE /catalogs/{catalog_name}/items/{item_id}
 	DeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (*DeleteCatalogItemResponse, error)
+	// DeleteSDKAuthenticationKey invokes deleteSDKAuthenticationKey operation.
+	//
+	// Delete SDK Authentication key.
+	//
+	// DELETE /app_group/sdk_authentication/delete
+	DeleteSDKAuthenticationKey(ctx context.Context, request *DeleteSDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// GetCatalogItem invokes getCatalogItem operation.
 	//
 	// Get catalog item.
@@ -100,12 +112,24 @@ type Invoker interface {
 	//
 	// GET /templates/email/list
 	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
+	// ListSDKAuthenticationKeys invokes listSDKAuthenticationKeys operation.
+	//
+	// List SDK Authentication keys.
+	//
+	// GET /app_group/sdk_authentication/keys
+	ListSDKAuthenticationKeys(ctx context.Context, params ListSDKAuthenticationKeysParams) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// ReplaceCatalogItem invokes replaceCatalogItem operation.
 	//
 	// Replace catalog item.
 	//
 	// PUT /catalogs/{catalog_name}/items/{item_id}
 	ReplaceCatalogItem(ctx context.Context, request *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (*CatalogItemOperationResponse, error)
+	// SetPrimarySDKAuthenticationKey invokes setPrimarySDKAuthenticationKey operation.
+	//
+	// Set primary SDK Authentication key.
+	//
+	// PUT /app_group/sdk_authentication/primary
+	SetPrimarySDKAuthenticationKey(ctx context.Context, request *SetPrimarySDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// UpdateContentBlock invokes updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.
@@ -550,6 +574,85 @@ func (c *Client) sendCreateEmailTemplate(ctx context.Context, request *CreateEma
 	return result, nil
 }
 
+// CreateSDKAuthenticationKey invokes createSDKAuthenticationKey operation.
+//
+// Create SDK Authentication key.
+//
+// POST /app_group/sdk_authentication/create
+func (c *Client) CreateSDKAuthenticationKey(ctx context.Context, request *CreateSDKAuthenticationKeyRequest) (*CreateSDKAuthenticationKeyResponseStatusCode, error) {
+	res, err := c.sendCreateSDKAuthenticationKey(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateSDKAuthenticationKey(ctx context.Context, request *CreateSDKAuthenticationKeyRequest) (res *CreateSDKAuthenticationKeyResponseStatusCode, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/app_group/sdk_authentication/create"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateSDKAuthenticationKeyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, CreateSDKAuthenticationKeyOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateSDKAuthenticationKeyResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteCatalog invokes deleteCatalog operation.
 //
 // Delete catalog.
@@ -750,6 +853,85 @@ func (c *Client) sendDeleteCatalogItem(ctx context.Context, params DeleteCatalog
 	}()
 
 	result, err := decodeDeleteCatalogItemResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteSDKAuthenticationKey invokes deleteSDKAuthenticationKey operation.
+//
+// Delete SDK Authentication key.
+//
+// DELETE /app_group/sdk_authentication/delete
+func (c *Client) DeleteSDKAuthenticationKey(ctx context.Context, request *DeleteSDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error) {
+	res, err := c.sendDeleteSDKAuthenticationKey(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendDeleteSDKAuthenticationKey(ctx context.Context, request *DeleteSDKAuthenticationKeyRequest) (res *SDKAuthenticationKeysResponseStatusCode, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/app_group/sdk_authentication/delete"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDeleteSDKAuthenticationKeyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, DeleteSDKAuthenticationKeyOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteSDKAuthenticationKeyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1558,6 +1740,99 @@ func (c *Client) sendListEmailTemplates(ctx context.Context, params ListEmailTem
 	return result, nil
 }
 
+// ListSDKAuthenticationKeys invokes listSDKAuthenticationKeys operation.
+//
+// List SDK Authentication keys.
+//
+// GET /app_group/sdk_authentication/keys
+func (c *Client) ListSDKAuthenticationKeys(ctx context.Context, params ListSDKAuthenticationKeysParams) (*SDKAuthenticationKeysResponseStatusCode, error) {
+	res, err := c.sendListSDKAuthenticationKeys(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListSDKAuthenticationKeys(ctx context.Context, params ListSDKAuthenticationKeysParams) (res *SDKAuthenticationKeysResponseStatusCode, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/app_group/sdk_authentication/keys"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "app_id" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "app_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(params.AppID))
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, ListSDKAuthenticationKeysOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeListSDKAuthenticationKeysResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ReplaceCatalogItem invokes replaceCatalogItem operation.
 //
 // Replace catalog item.
@@ -1676,6 +1951,85 @@ func (c *Client) sendReplaceCatalogItem(ctx context.Context, request *ReplaceCat
 	}()
 
 	result, err := decodeReplaceCatalogItemResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// SetPrimarySDKAuthenticationKey invokes setPrimarySDKAuthenticationKey operation.
+//
+// Set primary SDK Authentication key.
+//
+// PUT /app_group/sdk_authentication/primary
+func (c *Client) SetPrimarySDKAuthenticationKey(ctx context.Context, request *SetPrimarySDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error) {
+	res, err := c.sendSetPrimarySDKAuthenticationKey(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendSetPrimarySDKAuthenticationKey(ctx context.Context, request *SetPrimarySDKAuthenticationKeyRequest) (res *SDKAuthenticationKeysResponseStatusCode, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/app_group/sdk_authentication/primary"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeSetPrimarySDKAuthenticationKeyRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBrazeApiKey(ctx, SetPrimarySDKAuthenticationKeyOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BrazeApiKey\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeSetPrimarySDKAuthenticationKeyResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

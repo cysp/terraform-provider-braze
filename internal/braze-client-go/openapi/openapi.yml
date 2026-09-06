@@ -13,6 +13,94 @@ security:
   - brazeApiKey: []
 
 paths:
+  /app_group/sdk_authentication/create:
+    post:
+      summary: Create SDK Authentication key
+      operationId: createSDKAuthenticationKey
+      tags:
+        - SDK Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/sdk_authentication/create/request.yml#/CreateSDKAuthenticationKeyRequest'
+      responses:
+        '2XX':
+          description: SDK Authentication key created successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/sdk_authentication/create/response.yml#/CreateSDKAuthenticationKeyResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /app_group/sdk_authentication/keys:
+    get:
+      summary: List SDK Authentication keys
+      operationId: listSDKAuthenticationKeys
+      tags:
+        - SDK Authentication
+      parameters:
+        - name: app_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '2XX':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/sdk_authentication/list/response.yml#/ListSDKAuthenticationKeysResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /app_group/sdk_authentication/primary:
+    put:
+      summary: Set primary SDK Authentication key
+      operationId: setPrimarySDKAuthenticationKey
+      tags:
+        - SDK Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/sdk_authentication/primary/request.yml#/SetPrimarySDKAuthenticationKeyRequest'
+      responses:
+        '2XX':
+          description: Primary SDK Authentication key updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/sdk_authentication/keys_response.yml#/SDKAuthenticationKeysResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
+  /app_group/sdk_authentication/delete:
+    delete:
+      summary: Delete SDK Authentication key
+      operationId: deleteSDKAuthenticationKey
+      tags:
+        - SDK Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/sdk_authentication/delete/request.yml#/DeleteSDKAuthenticationKeyRequest'
+      responses:
+        '2XX':
+          description: SDK Authentication key deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/sdk_authentication/keys_response.yml#/SDKAuthenticationKeysResponse'
+        default:
+          $ref: './responses/error.yml#/ErrorResponse'
+
   /catalogs:
     get:
       summary: List catalogs

@@ -32,6 +32,12 @@ type Handler interface {
 	//
 	// POST /templates/email/create
 	CreateEmailTemplate(ctx context.Context, req *CreateEmailTemplateRequest) (*CreateEmailTemplateResponse, error)
+	// CreateSDKAuthenticationKey implements createSDKAuthenticationKey operation.
+	//
+	// Create SDK Authentication key.
+	//
+	// POST /app_group/sdk_authentication/create
+	CreateSDKAuthenticationKey(ctx context.Context, req *CreateSDKAuthenticationKeyRequest) (*CreateSDKAuthenticationKeyResponseStatusCode, error)
 	// DeleteCatalog implements deleteCatalog operation.
 	//
 	// Delete catalog.
@@ -44,6 +50,12 @@ type Handler interface {
 	//
 	// DELETE /catalogs/{catalog_name}/items/{item_id}
 	DeleteCatalogItem(ctx context.Context, params DeleteCatalogItemParams) (*DeleteCatalogItemResponse, error)
+	// DeleteSDKAuthenticationKey implements deleteSDKAuthenticationKey operation.
+	//
+	// Delete SDK Authentication key.
+	//
+	// DELETE /app_group/sdk_authentication/delete
+	DeleteSDKAuthenticationKey(ctx context.Context, req *DeleteSDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// GetCatalogItem implements getCatalogItem operation.
 	//
 	// Get catalog item.
@@ -86,12 +98,24 @@ type Handler interface {
 	//
 	// GET /templates/email/list
 	ListEmailTemplates(ctx context.Context, params ListEmailTemplatesParams) (*ListEmailTemplatesResponse, error)
+	// ListSDKAuthenticationKeys implements listSDKAuthenticationKeys operation.
+	//
+	// List SDK Authentication keys.
+	//
+	// GET /app_group/sdk_authentication/keys
+	ListSDKAuthenticationKeys(ctx context.Context, params ListSDKAuthenticationKeysParams) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// ReplaceCatalogItem implements replaceCatalogItem operation.
 	//
 	// Replace catalog item.
 	//
 	// PUT /catalogs/{catalog_name}/items/{item_id}
 	ReplaceCatalogItem(ctx context.Context, req *ReplaceCatalogItemRequest, params ReplaceCatalogItemParams) (*CatalogItemOperationResponse, error)
+	// SetPrimarySDKAuthenticationKey implements setPrimarySDKAuthenticationKey operation.
+	//
+	// Set primary SDK Authentication key.
+	//
+	// PUT /app_group/sdk_authentication/primary
+	SetPrimarySDKAuthenticationKey(ctx context.Context, req *SetPrimarySDKAuthenticationKeyRequest) (*SDKAuthenticationKeysResponseStatusCode, error)
 	// UpdateContentBlock implements updateContentBlock operation.
 	//
 	// Update a Content Block on the Braze dashboard.
