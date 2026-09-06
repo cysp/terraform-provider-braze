@@ -9,6 +9,18 @@ description: |-
 # {{.Name}} ({{.Type}})
 
 {{ .Description | trimspace }}
+{{- if eq .Name "braze_catalog" }}
+
+~> Changing the catalog's name, description, or fields replaces it and deletes
+all contained items. Add the catalog to each managed item's
+`lifecycle.replace_triggered_by` to recreate those items when the catalog is
+replaced. Back up items managed outside Terraform before applying a replacement.
+{{- else if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") }}
+
+~> Destroy removes Terraform state only; the remote object remains in Braze.
+Replacement leaves the previous object behind, even if a forced `-replace` plan
+does not display a warning. Import an existing object to resume management.
+{{- end }}
 
 {{ if .HasExample -}}
 ## Example Usage
@@ -16,11 +28,36 @@ description: |-
 {{tffile .ExampleFile }}
 {{- end }}
 
+{{ if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") -}}
+## Optional values
+
+Omitting optional text fields or tags sends JSON null to Braze. Empty strings and
+lists are sent as explicit values. Omission may not clear an existing remote
+value; review the refreshed state when removing these settings.
+
+## Recovering from a create error
+
+If Braze creates the object but the subsequent read fails, the provider records
+the returned ID. Resolve the error and inspect both Terraform state and the remote
+object before retrying. Terraform may mark it tainted and propose replacement,
+which leaves the existing object behind.
+
+{{ end -}}
 {{ .SchemaMarkdown | trimspace }}{{ if .HasImport }}
 
 ## Import
 
-Import is supported using the following syntax:
+Use the provider configuration for the workspace that owns the object.
 
 {{codefile "shell" .ImportFile }}
+
+With Terraform 1.12 or later, an identity import block can also be used:
+
+{{tffile (printf "examples/resources/%s/import.tf" .Name) }}
+{{- if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") }}
+
+Leave `id` out of the resource configuration; use import for existing objects.
+If an existing resource configuration already sets its actual `id`, remove that
+argument while keeping the resource in state.
+{{- end }}
 {{- end }}

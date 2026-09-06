@@ -10,17 +10,32 @@ description: |-
 
 {{ .Description | trimspace }}
 
+Requires Terraform 1.14 or later. Configure the provider for the Braze workspace
+to query and save list blocks in a `.tfquery.hcl` file.
+
 {{ if .HasExample -}}
 ## Example Usage
 
 {{tffile .ExampleFile }}
 {{- end }}
 
-{{ .SchemaMarkdown | trimspace }}{{ if .HasImport }}
+{{ .SchemaMarkdown | trimspace }}
 
-## Import
+## Discover and import
 
-Import is supported using the following syntax:
+Generate resource configuration and import blocks with:
 
-{{codefile "shell" .ImportFile }}
+```shell
+terraform query -generate-config-out=generated.tf
+```
+
+Review the generated values and import blocks, then run `terraform plan` and
+`terraform apply` to import the objects.
+
+Set `include_resource = false` when only object identities are needed. Use `limit`
+to bound the number of results.
+{{- if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") }}
+
+Including resource values requires an additional read for each object and the
+corresponding API read permission.
 {{- end }}
