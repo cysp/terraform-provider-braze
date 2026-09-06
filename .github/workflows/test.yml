@@ -54,8 +54,11 @@ jobs:
       fail-fast: false
       matrix:
         terraform:
+          - "1.12.*"
           - "1.13.*"
           - "1.14.*"
+          - "1.15.*"
+          - "1.16.*"
     steps:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -71,7 +74,7 @@ jobs:
       - run: go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... ./internal/provider/
         env:
           TF_ACC: "1"
-          BRAZE_API_KEY: ${{ secrets.BRAZE_API_KEY }}
+          TF_ACC_MOCKED: "1"
         timeout-minutes: 10
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
