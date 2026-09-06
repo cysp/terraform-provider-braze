@@ -31,10 +31,10 @@ func BrazeCatalogResourceSchema(ctx context.Context) schema.Schema {
 	_ = ctx
 
 	return schema.Schema{
-		Description: "Manage Braze catalogs and their creation-time field schema.",
+		Description: "Manage a Braze catalog and its field schema.",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Description: "The catalog name.",
+				Description: "The catalog name, unique within the configured Braze workspace. Use letters, numbers, hyphens, and underscores.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -48,7 +48,7 @@ func BrazeCatalogResourceSchema(ctx context.Context) schema.Schema {
 				},
 			},
 			"fields": schema.ListNestedAttribute{
-				Description: "The catalog field schema. Braze requires the first field to be `id` with type `string`.",
+				Description: "Ordered catalog fields with unique, non-empty names. The first field must be `id` with type `string`. Supported types are string, number, boolean, time, array, object, and geo. Any change requires replacement.",
 				Required:    true,
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.RequiresReplace(),

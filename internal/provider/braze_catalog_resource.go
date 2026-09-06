@@ -8,6 +8,8 @@ import (
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var (
@@ -52,35 +54,70 @@ func (r *brazeCatalogResource) ValidateConfig(ctx context.Context, req resource.
 		return
 	}
 
-	fields, err := catalogFieldsFromTerraform(ctx, config.Fields)
-	if err != nil {
-		resp.Diagnostics.AddError("Invalid catalog fields", detailFromError(err))
+	fields := config.Fields.Elements()
+	if len(fields) == 0 {
+		resp.Diagnostics.AddAttributeError(path.Root("fields"), "Invalid catalog fields", "Braze requires the first catalog field to be named \"id\" with type \"string\".")
 
 		return
 	}
 
-	if len(fields) == 0 || fields[0].GetName() != "id" || fields[0].GetType() != brazeclient.CatalogFieldTypeString {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("fields"),
-			"Invalid catalog fields",
-			"Braze requires the first catalog field to be named \"id\" with type \"string\".",
-		)
-	}
+	seen := make(map[string]bool, len(fields))
+	for i, value := range fields {
+		fieldPath := path.Root("fields").AtListIndex(i)
 
-	for i, field := range fields {
-		if field.GetType().Validate() != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("fields").AtListIndex(i).AtName("type"),
-				"Invalid catalog field type",
-				fmt.Sprintf("Braze catalog field type must be one of %s. Got %q.", strings.Join(catalogFieldTypeValues(), ", "), field.GetType()),
-			)
+		if value.IsUnknown() {
+			continue
+		}
+
+		if value.IsNull() {
+			resp.Diagnostics.AddAttributeError(fieldPath, "Invalid catalog field", "Catalog fields must be non-null objects.")
+
+			continue
+		}
+
+		var field brazeCatalogFieldModel
+
+		object, ok := value.(types.Object)
+		if !ok {
+			resp.Diagnostics.AddAttributeError(fieldPath, "Invalid catalog field", "Catalog fields must be objects.")
+
+			return
+		}
+
+		resp.Diagnostics.Append(object.As(ctx, &field, basetypes.ObjectAsOptions{})...)
+
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if i == 0 && ((!field.Name.IsUnknown() && field.Name.ValueString() != "id") || (!field.Type.IsUnknown() && field.Type.ValueString() != "string")) {
+			resp.Diagnostics.AddAttributeError(fieldPath, "Invalid catalog fields", "Braze requires the first catalog field to be named \"id\" with type \"string\".")
+		}
+
+		if !field.Name.IsUnknown() {
+			name := field.Name.ValueString()
+			if name == "" || seen[name] {
+				resp.Diagnostics.AddAttributeError(fieldPath.AtName("name"), "Invalid catalog field name", "Catalog field names must be non-empty and unique.")
+			}
+
+			seen[name] = true
+		}
+
+		if !field.Type.IsUnknown() && brazeclient.CatalogFieldType(field.Type.ValueString()).Validate() != nil {
+			resp.Diagnostics.AddAttributeError(fieldPath.AtName("type"), "Invalid catalog field type",
+				fmt.Sprintf("Braze catalog field type must be one of %s. Got %q.", strings.Join(catalogFieldTypeValues(), ", "), field.Type.ValueString()))
 		}
 	}
 }
 
 func (r *brazeCatalogResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), req.ID)...)
-	resp.Diagnostics.Append(resp.Identity.SetAttribute(ctx, path.Root("name"), req.ID)...)
+	if req.ID == "" && req.Identity == nil {
+		resp.Diagnostics.AddError("Invalid catalog import", "Supply the catalog name as the import ID or use an identity import block.")
+
+		return
+	}
+
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("name"), path.Root("name"), req, resp)
 }
 
 func (r *brazeCatalogResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

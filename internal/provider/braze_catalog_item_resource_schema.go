@@ -38,7 +38,7 @@ func BrazeCatalogItemResourceSchema(_ context.Context) schema.Schema {
 				},
 			},
 			"item_id": schema.StringAttribute{
-				Description: "The catalog item ID.",
+				Description: "The catalog item ID. Use letters, numbers, hyphens, and underscores.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -46,7 +46,7 @@ func BrazeCatalogItemResourceSchema(_ context.Context) schema.Schema {
 			},
 			"values_json": schema.StringAttribute{
 				CustomType:  jsontypes.NormalizedType{},
-				Description: "Canonical JSON object containing the item values sent in the request body. The Braze `id` field is addressed by `item_id` and must not be included.",
+				Description: "Canonical JSON object containing the item values sent in the request body. Updates replace all item values, removing omitted keys. JSON formatting and object key order do not cause changes. The Braze `id` field is addressed by `item_id` and must not be included.",
 				Required:    true,
 			},
 		},
