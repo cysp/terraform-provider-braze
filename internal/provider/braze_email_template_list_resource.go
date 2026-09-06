@@ -50,8 +50,8 @@ func (r *brazeEmailTemplateListResource) ListResourceConfigSchema(_ context.Cont
 	}
 }
 
-func (r *brazeEmailTemplateListResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeEmailTemplateListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.ListRequest, resp *list.ListResultsStream) {

@@ -30,8 +30,8 @@ func (r *brazeCatalogListResource) ListResourceConfigSchema(_ context.Context, _
 	resp.Schema = schema.Schema{}
 }
 
-func (r *brazeCatalogListResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeCatalogListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeCatalogListResource) List(ctx context.Context, req list.ListRequest, resp *list.ListResultsStream) {

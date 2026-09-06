@@ -3,13 +3,16 @@ package provider
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -66,7 +69,7 @@ func (p *brazeProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 		Description: "Manage Braze configuration.",
 		Attributes: map[string]schema.Attribute{
 			"base_url": schema.StringAttribute{
-				Description: "The base URL associated with your Braze instance's REST API.",
+				Description: "The absolute REST API URL for your Braze instance, for example https://rest.iad-01.braze.com. This must be set; there is no default instance.",
 				Optional:    true,
 			},
 			"api_key": schema.StringAttribute{
@@ -87,26 +90,40 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	var baseURL string
+	if data.BaseURL.IsUnknown() || data.APIKey.IsUnknown() {
+		if req.ClientCapabilities.DeferralAllowed {
+			resp.Deferred = &provider.Deferred{Reason: provider.DeferredReasonProviderConfigUnknown}
+		} else {
+			for name, value := range map[string]types.String{"base_url": data.BaseURL, "api_key": data.APIKey} {
+				if value.IsUnknown() {
+					resp.Diagnostics.AddAttributeError(path.Root(name), "Unknown Braze configuration", "The provider needs a known "+name+" before it can connect to Braze.")
+				}
+			}
+		}
+
+		return
+	}
+
+	baseURL := p.baseURL
 	if !data.BaseURL.IsNull() {
 		baseURL = data.BaseURL.ValueString()
 	}
 
-	if baseURL == "" {
-		baseURL = p.baseURL
+	apiKey := p.apiKey
+	if value := os.Getenv("BRAZE_API_KEY"); value != "" {
+		apiKey = value
 	}
 
-	var apiKey string
 	if !data.APIKey.IsNull() {
 		apiKey = data.APIKey.ValueString()
-	} else {
-		if apiKeyFromEnv, found := os.LookupEnv("BRAZE_API_KEY"); found {
-			apiKey = apiKeyFromEnv
-		}
 	}
 
-	if apiKey == "" {
-		apiKey = p.apiKey
+	if !validBrazeURL(baseURL) {
+		resp.Diagnostics.AddAttributeError(path.Root("base_url"), "Invalid Braze API URL", "Set base_url to the absolute HTTP or HTTPS REST API URL for your Braze instance, without credentials, a query, or a fragment.")
+	}
+
+	if strings.TrimSpace(apiKey) == "" {
+		resp.Diagnostics.AddAttributeError(path.Root("api_key"), "Missing Braze API key", "Set api_key in the provider configuration or set the BRAZE_API_KEY environment variable. An explicitly empty api_key does not use the environment fallback.")
 	}
 
 	if resp.Diagnostics.HasError() {
@@ -128,7 +145,9 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		brazeclient.WithClient(NewHTTPClientWithUserAgent(retryableClient.StandardClient(), "terraform-provider-braze/"+p.version)),
 	)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create Braze client", err.Error())
+		resp.Diagnostics.AddError("Failed to create Braze client", "The Braze client could not be initialized. Check the provider configuration.")
+
+		return
 	}
 
 	providerData := brazeProviderData{
@@ -138,9 +157,6 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		catalogItems:   newGeneratedCatalogItemClient(brazeClient),
 	}
 
-	resp.ActionData = providerData
-	resp.DataSourceData = providerData
-	resp.EphemeralResourceData = providerData
 	resp.ListResourceData = providerData
 	resp.ResourceData = providerData
 }
@@ -165,4 +181,10 @@ func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewBrazeContentBlockResource,
 		NewBrazeEmailTemplateResource,
 	}
+}
+
+func validBrazeURL(baseURL string) bool {
+	endpoint, err := url.Parse(baseURL)
+
+	return err == nil && endpoint.Hostname() != "" && (endpoint.Scheme == "https" || endpoint.Scheme == "http") && endpoint.User == nil && endpoint.RawQuery == "" && !endpoint.ForceQuery && endpoint.Fragment == ""
 }

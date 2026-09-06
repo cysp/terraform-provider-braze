@@ -2,7 +2,6 @@ package provider_test
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	. "github.com/cysp/terraform-provider-braze/internal/provider"
@@ -58,9 +57,7 @@ func TestProtocol6ProviderServerSchemaVersion(t *testing.T) {
 }
 
 func TestProtocol6ProviderServerConfigure(t *testing.T) {
-	if os.Getenv("TF_ACC") != "" {
-		return
-	}
+	t.Setenv("BRAZE_API_KEY", "")
 
 	tests := map[string]struct {
 		config          map[string]any
@@ -71,25 +68,25 @@ func TestProtocol6ProviderServerConfigure(t *testing.T) {
 			config: map[string]any{
 				"base_url": "https://rest.test.braze.com",
 			},
-			expectedSuccess: true,
+			expectedSuccess: false,
 		},
 		"config: api_key": {
 			config: map[string]any{
-				"api_key": "CFPAT-12345",
+				"api_key": "test-api-key",
 			},
-			expectedSuccess: true,
+			expectedSuccess: false,
 		},
 		"config: base_url,api_key": {
 			config: map[string]any{
 				"base_url": "https://rest.test.braze.com",
-				"api_key":  "CFPAT-12345",
+				"api_key":  "test-api-key",
 			},
 			expectedSuccess: true,
 		},
 		"config: base_url(invalid),api_key": {
 			config: map[string]any{
 				"base_url": "url://an invalid url %/",
-				"api_key":  "CFPAT-12345",
+				"api_key":  "test-api-key",
 			},
 			expectedSuccess: false,
 		},
@@ -98,7 +95,7 @@ func TestProtocol6ProviderServerConfigure(t *testing.T) {
 				"base_url": "https://rest.test.braze.com",
 			},
 			env: map[string]string{
-				"BRAZE_API_KEY": "CFPAT-12345",
+				"BRAZE_API_KEY": "test-api-key",
 			},
 			expectedSuccess: true,
 		},

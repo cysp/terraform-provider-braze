@@ -50,8 +50,8 @@ func (r *brazeContentBlockListResource) ListResourceConfigSchema(_ context.Conte
 	}
 }
 
-func (r *brazeContentBlockListResource) Configure(_ context.Context, req resource.ConfigureRequest, _ *resource.ConfigureResponse) {
-	SetProviderDataFromResourceConfigureRequest(req, &r.providerData)
+func (r *brazeContentBlockListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	resp.Diagnostics.Append(setProviderData(req.ProviderData, &r.providerData)...)
 }
 
 func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListRequest, resp *list.ListResultsStream) {
