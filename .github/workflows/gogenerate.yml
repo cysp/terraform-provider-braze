@@ -25,6 +25,6 @@ jobs:
           cache: true
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
       - run: go generate ./...
-      - name: git diff
-        run: |
+      - run: |
           git diff --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
