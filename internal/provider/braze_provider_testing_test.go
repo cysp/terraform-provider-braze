@@ -38,7 +38,7 @@ func BrazeProviderMockedResourceTest(t *testing.T, handler http.Handler, testcas
 
 // Check the remote outcome even for APIs that intentionally retain the object.
 //
-//nolint:gocognit // Check the four distinct remote destroy contracts in one test hook.
+//nolint:gocognit // Check the distinct remote destroy contracts in one test hook.
 func checkBrazeDestroy(t *testing.T, server *httptest.Server) resource.TestCheckFunc {
 	t.Helper()
 
@@ -49,6 +49,9 @@ func checkBrazeDestroy(t *testing.T, server *httptest.Server) resource.TestCheck
 			status := http.StatusNotFound
 
 			switch item.Type {
+			case "braze_sdk_authentication_key":
+				endpoint = "/app_group/sdk_authentication/keys?app_id=" + url.QueryEscape(item.Primary.Attributes["app_id"])
+				status = http.StatusOK
 			case "braze_catalog":
 				endpoint = "/catalogs"
 				status = http.StatusOK
@@ -85,6 +88,13 @@ func checkBrazeDestroy(t *testing.T, server *httptest.Server) resource.TestCheck
 
 			if response.StatusCode != status {
 				return fmt.Errorf("%w: %s destroy expected HTTP %d, got %d", errUnexpectedDestroyOutcome, item.Type, status, response.StatusCode)
+			}
+
+			if item.Type == "braze_sdk_authentication_key" {
+				err := checkSDKAuthenticationKeyDestroyed(body, item.Primary.Attributes["id"])
+				if err != nil {
+					return err
+				}
 			}
 
 			if item.Type == "braze_catalog" {
@@ -124,3 +134,24 @@ func BrazeProviderOptionsWithHTTPTestServer(testserver *httptest.Server) []Braze
 }
 
 var errUnexpectedDestroyOutcome = errors.New("unexpected remote destroy outcome")
+
+func checkSDKAuthenticationKeyDestroyed(body []byte, keyID string) error {
+	var result struct {
+		Keys []struct {
+			ID string `json:"id"`
+		} `json:"keys"`
+	}
+
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		return fmt.Errorf("decode SDK authentication keys after destroy: %w", err)
+	}
+
+	for _, key := range result.Keys {
+		if key.ID == keyID {
+			return fmt.Errorf("%w: SDK authentication key %s still exists after destroy", errUnexpectedDestroyOutcome, key.ID)
+		}
+	}
+
+	return nil
+}

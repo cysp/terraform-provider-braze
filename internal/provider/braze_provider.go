@@ -140,10 +140,11 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	}
 
 	providerData := brazeProviderData{
-		contentBlocks:  newGeneratedContentBlockClient(brazeClient),
-		emailTemplates: newGeneratedEmailTemplateClient(brazeClient),
-		catalogs:       newGeneratedCatalogClient(brazeClient),
-		catalogItems:   newGeneratedCatalogItemClient(brazeClient),
+		contentBlocks:         newGeneratedContentBlockClient(brazeClient),
+		emailTemplates:        newGeneratedEmailTemplateClient(brazeClient),
+		catalogs:              newGeneratedCatalogClient(brazeClient),
+		catalogItems:          newGeneratedCatalogItemClient(brazeClient),
+		sdkAuthenticationKeys: newGeneratedSDKAuthenticationKeyClient(brazeClient),
 	}
 
 	resp.ListResourceData = providerData
@@ -169,6 +170,7 @@ func (p *brazeProvider) Resources(_ context.Context) []func() resource.Resource 
 		NewBrazeCatalogItemResource,
 		NewBrazeContentBlockResource,
 		NewBrazeEmailTemplateResource,
+		NewBrazeSDKAuthenticationKeyResource,
 	}
 }
 
