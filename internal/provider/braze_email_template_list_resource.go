@@ -35,14 +35,15 @@ func (r *brazeEmailTemplateListResource) Metadata(_ context.Context, req resourc
 
 func (r *brazeEmailTemplateListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Discover email templates, optionally filtered by modification time. Results identify each email template by its Braze-generated ID.",
 		Attributes: map[string]schema.Attribute{
 			"modified_after": schema.StringAttribute{
-				Description: "Filter to email templates modified after this date/time.",
+				Description: "Filter to email templates modified after this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.",
 				CustomType:  timetypes.RFC3339Type{},
 				Optional:    true,
 			},
 			"modified_before": schema.StringAttribute{
-				Description: "Filter to email templates modified before this date/time.",
+				Description: "Filter to email templates modified before this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.",
 				CustomType:  timetypes.RFC3339Type{},
 				Optional:    true,
 			},
@@ -97,13 +98,6 @@ func (r *brazeEmailTemplateListResource) List(ctx context.Context, req list.List
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		entries, listErr := r.providerData.emailTemplates.List(ctx, query)
-		if listErr != nil {
-			streamBrazeObjectListError(ctx, req, "Failed to list email templates", listErr, yield)
-
-			return
-		}
-
-		streamBrazeObjectListEntries(ctx, req, entries, "id", "Failed to get email template", yield)
+		streamBrazeObjectListEntries(ctx, req, r.providerData.emailTemplates.List(ctx, query), "id", "Failed to list email templates", "Failed to get email template", yield)
 	}
 }

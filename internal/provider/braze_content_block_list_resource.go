@@ -35,14 +35,15 @@ func (r *brazeContentBlockListResource) Metadata(_ context.Context, req resource
 
 func (r *brazeContentBlockListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description: "Discover content blocks, optionally filtered by modification time. Results identify each content block by its Braze-generated ID.",
 		Attributes: map[string]schema.Attribute{
 			"modified_after": schema.StringAttribute{
-				Description: "Filter to content blocks modified after this date/time.",
+				Description: "Filter to content blocks modified after this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.",
 				CustomType:  timetypes.RFC3339Type{},
 				Optional:    true,
 			},
 			"modified_before": schema.StringAttribute{
-				Description: "Filter to content blocks modified before this date/time.",
+				Description: "Filter to content blocks modified before this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.",
 				CustomType:  timetypes.RFC3339Type{},
 				Optional:    true,
 			},
@@ -97,13 +98,6 @@ func (r *brazeContentBlockListResource) List(ctx context.Context, req list.ListR
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		entries, listErr := r.providerData.contentBlocks.List(ctx, query)
-		if listErr != nil {
-			streamBrazeObjectListError(ctx, req, "Failed to list content blocks", listErr, yield)
-
-			return
-		}
-
-		streamBrazeObjectListEntries(ctx, req, entries, "id", "Failed to get content block", yield)
+		streamBrazeObjectListEntries(ctx, req, r.providerData.contentBlocks.List(ctx, query), "id", "Failed to list content blocks", "Failed to get content block", yield)
 	}
 }

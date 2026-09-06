@@ -2,7 +2,9 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"iter"
 	"net/url"
 	"strings"
 
@@ -10,14 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-const catalogItemListPageSize = 50
+var errCatalogItemCursor = errors.New("invalid catalog item pagination cursor")
 
 type catalogItemClient interface {
 	Create(ctx context.Context, plan brazeCatalogItemModel) (brazeCatalogItemModel, error)
 	Read(ctx context.Context, catalogName, itemID string) (brazeCatalogItemModel, error)
 	Update(ctx context.Context, plan brazeCatalogItemModel) (brazeCatalogItemModel, error)
 	Delete(ctx context.Context, catalogName, itemID string) error
-	List(ctx context.Context, catalogName string, limit int64) ([]brazeObjectListEntry[brazeCatalogItemModel], error)
+	List(ctx context.Context, catalogName string, limit int64) iter.Seq2[brazeObjectListEntry[brazeCatalogItemModel], error]
 }
 
 type generatedCatalogItemClient struct {
@@ -106,90 +108,102 @@ func (c generatedCatalogItemClient) Delete(ctx context.Context, catalogName, ite
 	return nil
 }
 
-func (c generatedCatalogItemClient) List(ctx context.Context, catalogName string, limit int64) ([]brazeObjectListEntry[brazeCatalogItemModel], error) {
-	params := brazeclient.ListCatalogItemsParams{CatalogName: catalogName}
-	items := make([]brazeclient.CatalogItem, 0, catalogItemListPageSize)
+//nolint:gocognit // Keep cursor, cancellation, and consumer termination in one pagination loop.
+func (c generatedCatalogItemClient) List(ctx context.Context, catalogName string, limit int64) iter.Seq2[brazeObjectListEntry[brazeCatalogItemModel], error] {
+	return func(yield func(brazeObjectListEntry[brazeCatalogItemModel], error) bool) {
+		params := brazeclient.ListCatalogItemsParams{CatalogName: catalogName}
+		seen := map[string]bool{}
 
-	for {
-		response, listErr := c.client.ListCatalogItems(ctx, params)
+		remaining := limit
+		for remaining > 0 {
+			err := ctx.Err()
+			if err != nil {
+				yield(brazeObjectListEntry[brazeCatalogItemModel]{}, err)
 
-		tflog.Debug(ctx, "braze_catalog_item.list", map[string]any{"params": params})
-
-		if listErr != nil {
-			return nil, fmt.Errorf("list catalog items: %w", listErr)
-		}
-
-		if response == nil {
-			return nil, errBrazeObjectEmptyResponse
-		}
-
-		pageResponse := response.GetResponse()
-
-		page := pageResponse.GetItems()
-		for _, item := range page {
-			if int64(len(items)) >= limit {
-				break
+				return
 			}
 
-			items = append(items, item)
-		}
+			response, err := c.client.ListCatalogItems(ctx, params)
+			if err != nil {
+				yield(brazeObjectListEntry[brazeCatalogItemModel]{}, fmt.Errorf("list catalog items: %w", err))
 
-		if int64(len(items)) >= limit {
-			break
-		}
+				return
+			}
 
-		nextCursor, ok := nextCursorFromLinkHeader(response.GetLink())
-		if !ok {
-			break
-		}
+			if response == nil {
+				yield(brazeObjectListEntry[brazeCatalogItemModel]{}, errBrazeObjectEmptyResponse)
 
-		params.Cursor.SetTo(nextCursor)
+				return
+			}
+
+			page := response.GetResponse()
+			for _, item := range page.GetItems() {
+				err := ctx.Err()
+				if err != nil {
+					yield(brazeObjectListEntry[brazeCatalogItemModel]{}, err)
+
+					return
+				}
+
+				model, err := newBrazeCatalogItemModelFromCatalogItem(catalogName, item)
+
+				entry := brazeObjectListEntry[brazeCatalogItemModel]{
+					ID: catalogName + "/" + item.GetID(), DisplayName: item.GetID(),
+					Identity: map[string]string{"catalog_name": catalogName, "item_id": item.GetID()}, ResourceErr: err,
+				}
+				entry.Resource = &model
+
+				remaining--
+				if !yield(entry, nil) || remaining == 0 {
+					return
+				}
+			}
+
+			next, err := nextCursorFromLinkHeader(response.GetLink())
+			if err != nil {
+				yield(brazeObjectListEntry[brazeCatalogItemModel]{}, err)
+
+				return
+			}
+
+			if next == "" {
+				return
+			}
+
+			if seen[next] {
+				yield(brazeObjectListEntry[brazeCatalogItemModel]{}, fmt.Errorf("%w: repeated cursor", errCatalogItemCursor))
+
+				return
+			}
+
+			seen[next] = true
+			params.Cursor.SetTo(next)
+		}
 	}
-
-	entries := make([]brazeObjectListEntry[brazeCatalogItemModel], 0, len(items))
-	for _, item := range items {
-		model, err := newBrazeCatalogItemModelFromCatalogItem(catalogName, item)
-
-		entry := brazeObjectListEntry[brazeCatalogItemModel]{
-			ID:          catalogName + "/" + item.GetID(),
-			DisplayName: item.GetID(),
-			Identity: map[string]string{
-				"catalog_name": catalogName,
-				"item_id":      item.GetID(),
-			},
-		}
-
-		if err != nil {
-			entry.ResourceErr = err
-		} else {
-			entry.Resource = &model
-		}
-
-		entries = append(entries, entry)
-	}
-
-	return entries, nil
 }
 
-func nextCursorFromLinkHeader(link brazeclient.OptString) (string, bool) {
-	headerValue, ok := link.Get()
-	if !ok {
-		return "", false
+func nextCursorFromLinkHeader(link brazeclient.OptString) (string, error) {
+	header, ok := link.Get()
+	if !ok || header == "" {
+		return "", nil
 	}
 
-	for entry := range strings.SplitSeq(headerValue, ",") {
-		linkTarget, linkParams, ok := strings.Cut(entry, ";")
-		if !ok {
-			continue
+	for entry := range strings.SplitSeq(header, ",") {
+		target, parameters, found := strings.Cut(strings.TrimSpace(entry), ">")
+		if !found || !strings.HasPrefix(target, "<") {
+			return "", errCatalogItemCursor
 		}
 
 		isNext := false
 
-		for section := range strings.SplitSeq(linkParams, ";") {
-			if strings.TrimSpace(section) == `rel="next"` {
-				isNext = true
-
-				break
+		for section := range strings.SplitSeq(parameters, ";") {
+			key, value, _ := strings.Cut(strings.TrimSpace(section), "=")
+			if key == "rel" {
+				for relation := range strings.FieldsSeq(strings.Trim(value, "\"")) {
+					if relation == "next" {
+						isNext = true
+					}
+				}
 			}
 		}
 
@@ -197,18 +211,18 @@ func nextCursorFromLinkHeader(link brazeclient.OptString) (string, bool) {
 			continue
 		}
 
-		rawURL := strings.Trim(strings.TrimSpace(linkTarget), "<>")
-
-		parsed, err := url.Parse(rawURL)
+		parsed, err := url.Parse(strings.TrimPrefix(target, "<"))
 		if err != nil {
-			continue
+			return "", errCatalogItemCursor
 		}
 
 		cursor := parsed.Query().Get("cursor")
-		if cursor != "" {
-			return cursor, true
+		if cursor == "" {
+			return "", errCatalogItemCursor
 		}
+
+		return cursor, nil
 	}
 
-	return "", false
+	return "", nil
 }

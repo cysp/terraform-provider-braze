@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
-	"time"
+	"iter"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -12,9 +12,9 @@ import (
 
 type emailTemplateClient interface {
 	Create(ctx context.Context, plan brazeEmailTemplateModel) (brazeEmailTemplateModel, error)
-	Read(ctx context.Context, id string) (brazeEmailTemplateModel, error)
+	Read(ctx context.Context, objectID string) (brazeEmailTemplateModel, error)
 	Update(ctx context.Context, plan brazeEmailTemplateModel) (brazeEmailTemplateModel, error)
-	List(ctx context.Context, query brazeObjectListQuery) ([]brazeObjectListEntry[brazeEmailTemplateModel], error)
+	List(ctx context.Context, query brazeObjectListQuery) iter.Seq2[brazeObjectListEntry[brazeEmailTemplateModel], error]
 }
 
 type generatedEmailTemplateClient struct {
@@ -119,27 +119,31 @@ func (c generatedEmailTemplateClient) Update(ctx context.Context, plan brazeEmai
 	return c.Read(ctx, updateResponse.GetEmailTemplateID())
 }
 
-func (c generatedEmailTemplateClient) List(ctx context.Context, query brazeObjectListQuery) ([]brazeObjectListEntry[brazeEmailTemplateModel], error) {
-	return listBrazeObjectEntries(query, func(offset, limit int) ([]emailTemplateListItem, error) {
+func (c generatedEmailTemplateClient) List(ctx context.Context, query brazeObjectListQuery) iter.Seq2[brazeObjectListEntry[brazeEmailTemplateModel], error] {
+	return listBrazeObjectEntries(ctx, query, func(offset, limit int) ([]emailTemplateListItem, error) {
 		return c.listPage(ctx, query, offset, limit)
-	}, func(id string) (brazeEmailTemplateModel, error) {
-		return c.Read(ctx, id)
+	}, func(objectID string) (brazeEmailTemplateModel, error) {
+		return c.Read(ctx, objectID)
 	})
 }
 
-//nolint:dupl // The generated list endpoint types differ; abstracting this would add callback-heavy plumbing.
+//nolint:dupl // Endpoint types differ; keep request construction explicit.
 func (c generatedEmailTemplateClient) listPage(ctx context.Context, query brazeObjectListQuery, offset, limit int) ([]emailTemplateListItem, error) {
 	params := brazeclient.ListEmailTemplatesParams{}
 
-	applyBrazeObjectListQuery(
-		query,
-		offset,
-		limit,
-		func(value int) { params.Limit = brazeclient.NewOptInt(value) },
-		func(value int) { params.Offset = brazeclient.NewOptInt(value) },
-		func(value time.Time) { params.ModifiedAfter = brazeclient.NewOptDateTime(value) },
-		func(value time.Time) { params.ModifiedBefore = brazeclient.NewOptDateTime(value) },
-	)
+	params.Limit.SetTo(limit)
+
+	if offset > 0 {
+		params.Offset.SetTo(offset)
+	}
+
+	if query.ModifiedAfter != nil {
+		params.ModifiedAfter.SetTo(*query.ModifiedAfter)
+	}
+
+	if query.ModifiedBefore != nil {
+		params.ModifiedBefore.SetTo(*query.ModifiedBefore)
+	}
 
 	listResponse, listErr := c.client.ListEmailTemplates(ctx, params)
 

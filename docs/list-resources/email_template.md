@@ -3,12 +3,12 @@
 page_title: "braze_email_template List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-
+  Discover email templates, optionally filtered by modification time. Results identify each email template by its Braze-generated ID.
 ---
 
 # braze_email_template (List Resource)
 
-
+Discover email templates, optionally filtered by modification time. Results identify each email template by its Braze-generated ID.
 
 
 
@@ -17,5 +17,5 @@ description: |-
 
 ### Optional
 
-- `modified_after` (String) Filter to email templates modified after this date/time.
-- `modified_before` (String) Filter to email templates modified before this date/time.
+- `modified_after` (String) Filter to email templates modified after this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.
+- `modified_before` (String) Filter to email templates modified before this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.

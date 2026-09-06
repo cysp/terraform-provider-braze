@@ -1,8 +1,10 @@
 package provider
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"time"
 )
 
@@ -11,6 +13,14 @@ const brazeObjectListPageLimit = 100
 var errBrazeObjectEmptyResponse = errors.New("empty Braze object response")
 
 var errBrazeObjectIdentityMismatch = errors.New("braze returned an unexpected object identity")
+
+func validateBrazeObjectID(expected, actual string) error {
+	if actual == "" || actual != expected {
+		return fmt.Errorf("%w: requested %q, received %q", errBrazeObjectIdentityMismatch, expected, actual)
+	}
+
+	return nil
+}
 
 type brazeObjectListQuery struct {
 	Limit           int64
@@ -49,103 +59,53 @@ func isBrazeObjectNotFound(err error) bool {
 	return errors.As(err, &notFound)
 }
 
-func collectBrazeObjectPages[Item any](query brazeObjectListQuery, fetch func(offset, limit int) ([]Item, error)) ([]Item, error) {
-	if query.Limit <= 0 {
-		return nil, nil
-	}
-
-	offset := 0
-	remaining := query.Limit
-	items := make([]Item, 0, min(int(query.Limit), brazeObjectListPageLimit))
-
-	for {
-		page, err := fetch(offset, brazeObjectListPageLimit)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, item := range page {
-			if remaining <= 0 {
-				return items, nil
-			}
-
-			items = append(items, item)
-			remaining--
-		}
-
-		if remaining <= 0 || len(page) < brazeObjectListPageLimit {
-			return items, nil
-		}
-
-		offset += brazeObjectListPageLimit
-	}
-}
-
-func buildBrazeObjectListEntries[Item brazeObjectListItem[Model], Model any](
-	query brazeObjectListQuery,
-	items []Item,
-	read func(id string) (Model, error),
-) []brazeObjectListEntry[Model] {
-	entries := make([]brazeObjectListEntry[Model], 0, len(items))
-	for _, item := range items {
-		entry := item.ListEntry()
-
-		if query.IncludeResource {
-			resource, err := read(entry.ID)
-			if err != nil {
-				entry.ResourceErr = err
-			} else {
-				entry.Resource = &resource
-			}
-		}
-
-		entries = append(entries, entry)
-	}
-
-	return entries
-}
-
 func listBrazeObjectEntries[Item brazeObjectListItem[Model], Model any](
+	ctx context.Context,
 	query brazeObjectListQuery,
 	fetch func(offset, limit int) ([]Item, error),
 	read func(id string) (Model, error),
-) ([]brazeObjectListEntry[Model], error) {
-	items, err := collectBrazeObjectPages(query, fetch)
-	if err != nil {
-		return nil, err
+) iter.Seq2[brazeObjectListEntry[Model], error] {
+	return func(yield func(brazeObjectListEntry[Model], error) bool) {
+		remaining := query.Limit
+		for offset := 0; remaining > 0; offset += brazeObjectListPageLimit {
+			err := ctx.Err()
+			if err != nil {
+				yield(brazeObjectListEntry[Model]{}, err)
+
+				return
+			}
+
+			page, err := fetch(offset, brazeObjectListPageLimit)
+			if err != nil {
+				yield(brazeObjectListEntry[Model]{}, err)
+
+				return
+			}
+
+			for _, item := range page {
+				err := ctx.Err()
+				if err != nil {
+					yield(brazeObjectListEntry[Model]{}, err)
+
+					return
+				}
+
+				entry := item.ListEntry()
+				if query.IncludeResource {
+					model, readErr := read(entry.ID)
+					entry.ResourceErr = readErr
+					entry.Resource = &model
+				}
+
+				remaining--
+				if !yield(entry, nil) || remaining == 0 {
+					return
+				}
+			}
+
+			if len(page) < brazeObjectListPageLimit {
+				return
+			}
+		}
 	}
-
-	return buildBrazeObjectListEntries(query, items, read), nil
-}
-
-func applyBrazeObjectListQuery(
-	query brazeObjectListQuery,
-	offset int,
-	limit int,
-	setLimit func(int),
-	setOffset func(int),
-	setModifiedAfter func(time.Time),
-	setModifiedBefore func(time.Time),
-) {
-	setLimit(limit)
-
-	if offset > 0 {
-		setOffset(offset)
-	}
-
-	if query.ModifiedAfter != nil {
-		setModifiedAfter(*query.ModifiedAfter)
-	}
-
-	if query.ModifiedBefore != nil {
-		setModifiedBefore(*query.ModifiedBefore)
-	}
-}
-
-func validateBrazeObjectID(expected, actual string) error {
-	if actual == "" || actual != expected {
-		return fmt.Errorf("%w: requested %q, received %q", errBrazeObjectIdentityMismatch, expected, actual)
-	}
-
-	return nil
 }

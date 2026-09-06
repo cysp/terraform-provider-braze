@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"iter"
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -20,13 +21,18 @@ func streamBrazeObjectListError(ctx context.Context, req list.ListRequest, summa
 func streamBrazeObjectListEntries[Model any](
 	ctx context.Context,
 	req list.ListRequest,
-	entries []brazeObjectListEntry[Model],
+	entries iter.Seq2[brazeObjectListEntry[Model], error],
 	identityAttribute string,
+	listErrorSummary string,
 	resourceErrorSummary string,
 	yield func(list.ListResult) bool,
 ) {
-	for i, entry := range entries {
-		if int64(i) >= req.Limit {
+	remaining := req.Limit
+
+	for entry, err := range entries {
+		if err != nil {
+			streamBrazeObjectListError(ctx, req, listErrorSummary, err, yield)
+
 			return
 		}
 
@@ -49,14 +55,18 @@ func streamBrazeObjectListEntries[Model any](
 		result.DisplayName = entry.DisplayName
 
 		if req.IncludeResource {
-			if entry.ResourceErr != nil {
+			switch {
+			case entry.ResourceErr != nil:
 				result.Diagnostics.AddError(resourceErrorSummary, detailFromError(entry.ResourceErr))
-			} else {
+			case entry.Resource == nil:
+				result.Diagnostics.AddError(resourceErrorSummary, "Braze returned no resource data.")
+			default:
 				result.Diagnostics.Append(result.Resource.Set(ctx, *entry.Resource)...)
 			}
 		}
 
-		if !yield(result) {
+		remaining--
+		if !yield(result) || remaining <= 0 {
 			return
 		}
 	}

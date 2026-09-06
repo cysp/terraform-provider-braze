@@ -3,12 +3,12 @@
 page_title: "braze_content_block List Resource - terraform-provider-braze"
 subcategory: ""
 description: |-
-
+  Discover content blocks, optionally filtered by modification time. Results identify each content block by its Braze-generated ID.
 ---
 
 # braze_content_block (List Resource)
 
-
+Discover content blocks, optionally filtered by modification time. Results identify each content block by its Braze-generated ID.
 
 
 
@@ -17,5 +17,5 @@ description: |-
 
 ### Optional
 
-- `modified_after` (String) Filter to content blocks modified after this date/time.
-- `modified_before` (String) Filter to content blocks modified before this date/time.
+- `modified_after` (String) Filter to content blocks modified after this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.
+- `modified_before` (String) Filter to content blocks modified before this RFC3339 timestamp, for example 2025-01-01T00:00:00Z.

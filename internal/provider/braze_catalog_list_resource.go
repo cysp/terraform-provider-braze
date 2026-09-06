@@ -27,7 +27,7 @@ func (r *brazeCatalogListResource) Metadata(_ context.Context, req resource.Meta
 }
 
 func (r *brazeCatalogListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
-	resp.Schema = schema.Schema{}
+	resp.Schema = schema.Schema{Description: "Discover catalogs in the configured Braze workspace. Results identify each catalog by name."}
 }
 
 func (r *brazeCatalogListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -42,13 +42,6 @@ func (r *brazeCatalogListResource) List(ctx context.Context, req list.ListReques
 	}
 
 	resp.Results = func(yield func(list.ListResult) bool) {
-		entries, listErr := r.providerData.catalogs.List(ctx)
-		if listErr != nil {
-			streamBrazeObjectListError(ctx, req, "Failed to list catalogs", listErr, yield)
-
-			return
-		}
-
-		streamBrazeObjectListEntries(ctx, req, entries, "name", "Failed to get catalog", yield)
+		streamBrazeObjectListEntries(ctx, req, r.providerData.catalogs.List(ctx), "name", "Failed to list catalogs", "Failed to get catalog", yield)
 	}
 }
