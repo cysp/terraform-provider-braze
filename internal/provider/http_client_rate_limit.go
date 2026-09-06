@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -45,7 +46,7 @@ func retryAfterDelay(value string, now func() time.Time) (time.Duration, bool) {
 
 	seconds, err := strconv.ParseInt(value, 10, 64)
 	if err == nil {
-		if seconds < 0 {
+		if seconds < 0 || seconds > math.MaxInt64/int64(time.Second) {
 			return 0, false
 		}
 

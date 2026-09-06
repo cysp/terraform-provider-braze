@@ -6,10 +6,8 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -130,19 +128,10 @@ func (p *brazeProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	retryableClient := retryablehttp.NewClient()
-	retryableClient.RetryWaitMin = time.Duration(1) * time.Second
-	retryableClient.RetryWaitMax = time.Duration(3) * time.Second //nolint:mnd
-	retryableClient.Backoff = brazeRateLimitBackoff
-
-	if p.httpClient != nil {
-		retryableClient.HTTPClient = p.httpClient
-	}
-
 	brazeClient, err := brazeclient.NewClient(
 		baseURL,
 		NewBrazeAPIKeySecuritySource(apiKey),
-		brazeclient.WithClient(NewHTTPClientWithUserAgent(retryableClient.StandardClient(), "terraform-provider-braze/"+p.version)),
+		brazeclient.WithClient(NewHTTPClientWithUserAgent(newBrazeHTTPClient(p.httpClient), "terraform-provider-braze/"+p.version)),
 	)
 	if err != nil {
 		resp.Diagnostics.AddError("Failed to create Braze client", "The Braze client could not be initialized. Check the provider configuration.")
