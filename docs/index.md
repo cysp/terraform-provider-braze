@@ -10,6 +10,19 @@ description: |-
 
 Manage Braze configuration.
 
+Resources and identity import require Terraform 1.12 or later. List resources and
+`terraform query` require Terraform 1.14 or later.
+
+Set `base_url` to the REST endpoint for your
+[Braze instance](https://www.braze.com/docs/api/basics/). Supply a REST API key
+through `BRAZE_API_KEY` or `api_key`; an explicit `api_key` overrides the
+environment. Empty values are rejected. The endpoint and key must be known before
+the provider can contact Braze.
+
+Use the provider configuration for the workspace that owns the objects when
+importing or managing them. An import ID or identity alone does not select a
+workspace.
+
 ## Example Usage
 
 ```terraform
@@ -34,3 +47,20 @@ provider "braze" {
 
 - `api_key` (String, Sensitive) The REST API key to use when communicating with Braze. If not provided, it will default to the value of the BRAZE_API_KEY environment variable.
 - `base_url` (String) The absolute REST API URL for your Braze instance, for example https://rest.iad-01.braze.com. This must be set; there is no default instance.
+
+## REST API permissions
+
+Grant the permissions for the operations you use. Creating templates and catalog
+items also requires read permission so the provider can retrieve the created
+object. Import and refresh require read permission only.
+
+| Surface | Manage resources | Discovery |
+| --- | --- | --- |
+| Catalogs | `catalogs.create`, `catalogs.get`, `catalogs.delete` | `catalogs.get` |
+| Catalog items | `catalogs.create_item`, `catalogs.get_item`, `catalogs.replace_item`, `catalogs.delete_item` | `catalogs.get_items` |
+| Content blocks | `content_blocks.create`, `content_blocks.info`, `content_blocks.update` | `content_blocks.list`; also `content_blocks.info` with `include_resource = true` |
+| Email templates | `templates.email.create`, `templates.email.info`, `templates.email.update` | `templates.email.list`; also `templates.email.info` with `include_resource = true` |
+
+See the [catalog endpoints](https://www.braze.com/docs/api/endpoints/catalogs)
+and [template endpoints](https://www.braze.com/docs/api/endpoints/templates)
+for Braze's permission requirements.

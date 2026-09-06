@@ -52,8 +52,21 @@ resource "braze_catalog_item" "example" {
 
 ## Import
 
-Import is supported using the following syntax:
+Use the provider configuration for the workspace that owns the object.
 
 ```shell
 terraform import braze_catalog_item.example products/product_1
+```
+
+With Terraform 1.12 or later, an identity import block can also be used:
+
+```terraform
+# Terraform 1.12 or later. Configure the provider for the owning workspace.
+import {
+  to = braze_catalog_item.example
+  identity = {
+    catalog_name = "products"
+    item_id      = "product_1"
+  }
+}
 ```

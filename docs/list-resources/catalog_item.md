@@ -10,6 +10,9 @@ description: |-
 
 Discover items in one catalog. Results identify each item by catalog_name and item_id.
 
+Requires Terraform 1.14 or later. Configure the provider for the Braze workspace
+to query and save list blocks in a `.tfquery.hcl` file.
+
 ## Example Usage
 
 ```terraform
@@ -29,3 +32,17 @@ list "braze_catalog_item" "existing" {
 ### Required
 
 - `catalog_name` (String) The catalog to list items from.
+
+## Discover and import
+
+Generate resource configuration and import blocks with:
+
+```shell
+terraform query -generate-config-out=generated.tf
+```
+
+Review the generated values and import blocks, then run `terraform plan` and
+`terraform apply` to import the objects.
+
+Set `include_resource = false` when only object identities are needed. Use `limit`
+to bound the number of results.
