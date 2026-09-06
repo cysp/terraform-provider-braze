@@ -36,9 +36,9 @@ func (c generatedCatalogItemClient) Create(ctx context.Context, plan brazeCatalo
 
 	request := brazeclient.CreateCatalogItemRequest{Items: []brazeclient.CatalogItemWrite{item}}
 	params := brazeclient.CreateCatalogItemParams{CatalogName: plan.CatalogName.ValueString(), ItemID: plan.ItemID.ValueString()}
-	response, createErr := c.client.CreateCatalogItem(ctx, &request, params)
+	_, createErr := c.client.CreateCatalogItem(ctx, &request, params)
 
-	tflog.Info(ctx, "braze_catalog_item.create", map[string]any{"params": params, "response": response, "err": createErr})
+	tflog.Debug(ctx, "braze_catalog_item.create", map[string]any{"params": params})
 
 	if createErr != nil {
 		return brazeCatalogItemModel{}, fmt.Errorf("create catalog item: %w", createErr)
@@ -51,7 +51,7 @@ func (c generatedCatalogItemClient) Read(ctx context.Context, catalogName, itemI
 	params := brazeclient.GetCatalogItemParams{CatalogName: catalogName, ItemID: itemID}
 	response, getErr := c.client.GetCatalogItem(ctx, params)
 
-	tflog.Info(ctx, "braze_catalog_item.read", map[string]any{"params": params, "response": response, "err": getErr})
+	tflog.Debug(ctx, "braze_catalog_item.read", map[string]any{"params": params})
 
 	if getErr != nil {
 		return brazeCatalogItemModel{}, classifyBrazeObjectReadError(getErr)
@@ -72,9 +72,9 @@ func (c generatedCatalogItemClient) Update(ctx context.Context, plan brazeCatalo
 
 	request := brazeclient.ReplaceCatalogItemRequest{Items: []brazeclient.CatalogItemWrite{item}}
 	params := brazeclient.ReplaceCatalogItemParams{CatalogName: plan.CatalogName.ValueString(), ItemID: plan.ItemID.ValueString()}
-	response, updateErr := c.client.ReplaceCatalogItem(ctx, &request, params)
+	_, updateErr := c.client.ReplaceCatalogItem(ctx, &request, params)
 
-	tflog.Info(ctx, "braze_catalog_item.update", map[string]any{"params": params, "response": response, "err": updateErr})
+	tflog.Debug(ctx, "braze_catalog_item.update", map[string]any{"params": params})
 
 	if updateErr != nil {
 		return brazeCatalogItemModel{}, fmt.Errorf("replace catalog item: %w", updateErr)
@@ -85,9 +85,9 @@ func (c generatedCatalogItemClient) Update(ctx context.Context, plan brazeCatalo
 
 func (c generatedCatalogItemClient) Delete(ctx context.Context, catalogName, itemID string) error {
 	params := brazeclient.DeleteCatalogItemParams{CatalogName: catalogName, ItemID: itemID}
-	response, deleteErr := c.client.DeleteCatalogItem(ctx, params)
+	_, deleteErr := c.client.DeleteCatalogItem(ctx, params)
 
-	tflog.Info(ctx, "braze_catalog_item.delete", map[string]any{"params": params, "response": response, "err": deleteErr})
+	tflog.Debug(ctx, "braze_catalog_item.delete", map[string]any{"params": params})
 
 	if deleteErr != nil {
 		return classifyBrazeObjectReadError(deleteErr)
@@ -103,7 +103,7 @@ func (c generatedCatalogItemClient) List(ctx context.Context, catalogName string
 	for {
 		response, listErr := c.client.ListCatalogItems(ctx, params)
 
-		tflog.Info(ctx, "braze_catalog_item.list", map[string]any{"params": params, "response": response, "err": listErr})
+		tflog.Debug(ctx, "braze_catalog_item.list", map[string]any{"params": params})
 
 		if listErr != nil {
 			return nil, fmt.Errorf("list catalog items: %w", listErr)

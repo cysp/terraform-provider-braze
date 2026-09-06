@@ -12,6 +12,5 @@ ErrorResponse:
             description: Error message describing what went wrong
           errors:
             type: array
-            items:
-              type: string
-            description: Array of minor error messages
+            items: {}
+            description: Endpoint-specific error details. Template endpoints return strings; catalog endpoints return objects with id, message, parameters, and parameter_values.
