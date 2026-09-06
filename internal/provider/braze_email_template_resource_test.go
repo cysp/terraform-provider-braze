@@ -141,7 +141,7 @@ func TestAccBrazeEmailTemplateCreateNameEmpty(t *testing.T) {
 			{
 				ConfigDirectory: config.TestNameDirectory(),
 				ConfigVariables: configVariables,
-				ExpectError:     regexp.MustCompile("Failed to create Email Template"),
+				ExpectError:     regexp.MustCompile("Invalid Attribute Value"),
 			},
 			{
 				ConfigDirectory: config.TestNameDirectory(),
@@ -151,7 +151,7 @@ func TestAccBrazeEmailTemplateCreateNameEmpty(t *testing.T) {
 						plancheck.ExpectResourceAction("braze_email_template.test", plancheck.ResourceActionCreate),
 					},
 				},
-				ExpectError: regexp.MustCompile("Failed to create Email Template"),
+				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})
@@ -188,7 +188,7 @@ func TestAccBrazeEmailTemplateUpdateNameEmpty(t *testing.T) {
 						plancheck.ExpectResourceAction("braze_email_template.test", plancheck.ResourceActionUpdate),
 					},
 				},
-				ExpectError: regexp.MustCompile("Failed to update Email Template"),
+				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})

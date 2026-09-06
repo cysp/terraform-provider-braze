@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	_ resource.ResourceWithModifyPlan  = (*brazeEmailTemplateResource)(nil)
 	_ resource.Resource                = (*brazeEmailTemplateResource)(nil)
 	_ resource.ResourceWithConfigure   = (*brazeEmailTemplateResource)(nil)
 	_ resource.ResourceWithIdentity    = (*brazeEmailTemplateResource)(nil)
@@ -126,4 +127,8 @@ func (r *brazeEmailTemplateResource) Delete(ctx context.Context, req resource.De
 	}
 
 	resp.Diagnostics.AddWarning("Email Template not deleted", "Braze does not provide a delete API for email templates; resource removed from Terraform state only.")
+}
+
+func (r *brazeEmailTemplateResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	modifyTemplatePlan(ctx, req, resp, "Email Template")
 }

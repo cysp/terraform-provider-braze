@@ -120,7 +120,7 @@ func TestAccBrazeContentBlockCreateNameEmpty(t *testing.T) {
 			{
 				ConfigDirectory: config.TestNameDirectory(),
 				ConfigVariables: configVariables,
-				ExpectError:     regexp.MustCompile("Failed to create Content Block"),
+				ExpectError:     regexp.MustCompile("Invalid Attribute Value"),
 			},
 			{
 				ConfigDirectory: config.TestNameDirectory(),
@@ -130,7 +130,7 @@ func TestAccBrazeContentBlockCreateNameEmpty(t *testing.T) {
 						plancheck.ExpectResourceAction("braze_content_block.test", plancheck.ResourceActionCreate),
 					},
 				},
-				ExpectError: regexp.MustCompile("Failed to create Content Block"),
+				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})
@@ -166,7 +166,7 @@ func TestAccBrazeContentBlockUpdateNameEmpty(t *testing.T) {
 						plancheck.ExpectResourceAction("braze_content_block.test", plancheck.ResourceActionUpdate),
 					},
 				},
-				ExpectError: regexp.MustCompile("Failed to update Content Block"),
+				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})
