@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -20,7 +21,7 @@ func BrazeEmailTemplateResourceIdentitySchema() identityschema.Schema {
 	}
 }
 
-func BrazeEmailTemplateResourceSchema(ctx context.Context) schema.Schema {
+func BrazeEmailTemplateResourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
 		Description: "Manage Braze Email Templates stored on the Templates & Media page.",
 		Attributes: map[string]schema.Attribute{
@@ -53,8 +54,8 @@ func BrazeEmailTemplateResourceSchema(ctx context.Context) schema.Schema {
 				Optional:    true,
 			},
 			"tags": schema.ListAttribute{
-				Description: "A list of tags to categorize the email template.",
-				CustomType:  NewTypedListNull[types.String]().CustomType(ctx),
+				Description: "Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.",
+				Validators:  []validator.List{tagsValidator{}},
 				ElementType: types.StringType,
 				Optional:    true,
 			},

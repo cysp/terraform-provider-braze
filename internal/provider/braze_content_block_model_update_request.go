@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"context"
+
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 )
 
-func (m brazeContentBlockModel) ToUpdateContentBlockRequest() brazeclient.UpdateContentBlockRequest {
+func (m brazeContentBlockModel) ToUpdateContentBlockRequest(ctx context.Context) (brazeclient.UpdateContentBlockRequest, error) {
 	req := brazeclient.UpdateContentBlockRequest{
 		ContentBlockID: m.ID.ValueString(),
 		Name:           brazeclient.NewOptString(m.Name.ValueString()),
@@ -12,12 +14,16 @@ func (m brazeContentBlockModel) ToUpdateContentBlockRequest() brazeclient.Update
 		Content:        brazeclient.NewOptString(m.Content.ValueString()),
 	}
 
-	tags := TypedListToStringSlice(m.Tags)
+	tags, err := stringListToSlice(ctx, m.Tags)
+	if err != nil {
+		return req, err
+	}
+
 	if tags != nil {
 		req.Tags.SetTo(tags)
 	} else {
 		req.Tags.SetToNull()
 	}
 
-	return req
+	return req, nil
 }

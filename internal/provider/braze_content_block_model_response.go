@@ -19,9 +19,9 @@ func NewBrazeContentBlockModelFromGetContentBlockInfoResponse(response brazeclie
 
 	tags, tagsOk := response.Tags.Get()
 	if tagsOk {
-		model.Tags = NewTypedListFromStringSlice(tags)
+		model.Tags = stringListValue(tags)
 	} else {
-		model.Tags = NewTypedListNull[types.String]()
+		model.Tags = types.ListNull(types.StringType)
 	}
 
 	return model

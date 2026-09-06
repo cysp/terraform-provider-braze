@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"context"
+
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 )
 
-func (m brazeEmailTemplateModel) ToCreateEmailTemplateRequest() brazeclient.CreateEmailTemplateRequest {
+func (m brazeEmailTemplateModel) ToCreateEmailTemplateRequest(ctx context.Context) (brazeclient.CreateEmailTemplateRequest, error) {
 	req := brazeclient.CreateEmailTemplateRequest{
 		TemplateName:  m.TemplateName.ValueString(),
 		Subject:       brazeclient.NewNilString(m.Subject.ValueString()),
@@ -17,12 +19,16 @@ func (m brazeEmailTemplateModel) ToCreateEmailTemplateRequest() brazeclient.Crea
 		req.ShouldInlineCSS.SetTo(m.ShouldInlineCSS.ValueBool())
 	}
 
-	tags := TypedListToStringSlice(m.Tags)
+	tags, err := stringListToSlice(ctx, m.Tags)
+	if err != nil {
+		return req, err
+	}
+
 	if tags != nil {
 		req.Tags.SetTo(tags)
 	} else {
 		req.Tags.SetToNull()
 	}
 
-	return req
+	return req, nil
 }

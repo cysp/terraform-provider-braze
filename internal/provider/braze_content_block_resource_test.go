@@ -171,3 +171,32 @@ func TestAccBrazeContentBlockUpdateNameEmpty(t *testing.T) {
 		},
 	})
 }
+
+func TestAccBrazeTagsRejectNullElementsDuringPlan(t *testing.T) {
+	t.Parallel()
+
+	for name, configuration := range map[string]string{
+		"content block": `resource "braze_content_block" "test" {
+name = "welcome"
+content = "Hello"
+tags = [null]
+ }`,
+		"email template": `resource "braze_email_template" "test" {
+template_name = "welcome"
+subject = "Welcome"
+body = "Hello"
+tags = [null]
+ }`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			server, _ := brazeclienttesting.NewBrazeServer()
+			BrazeProviderMockedResourceTest(t, server, resource.TestCase{Steps: []resource.TestStep{{
+				Config:      configuration,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("Invalid tags"),
+			}}})
+		})
+	}
+}

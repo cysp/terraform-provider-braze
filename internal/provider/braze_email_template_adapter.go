@@ -29,7 +29,10 @@ func newGeneratedEmailTemplateClient(client *brazeclient.Client) generatedEmailT
 }
 
 func (c generatedEmailTemplateClient) Create(ctx context.Context, plan brazeEmailTemplateModel) (brazeEmailTemplateModel, error) {
-	createRequest := plan.ToCreateEmailTemplateRequest()
+	createRequest, err := plan.ToCreateEmailTemplateRequest(ctx)
+	if err != nil {
+		return brazeEmailTemplateModel{}, err
+	}
 
 	createResponse, createErr := c.client.CreateEmailTemplate(ctx, &createRequest)
 
@@ -69,7 +72,10 @@ func (c generatedEmailTemplateClient) Read(ctx context.Context, id string) (braz
 }
 
 func (c generatedEmailTemplateClient) Update(ctx context.Context, plan brazeEmailTemplateModel) (brazeEmailTemplateModel, error) {
-	updateRequest := plan.ToUpdateEmailTemplateRequest()
+	updateRequest, err := plan.ToUpdateEmailTemplateRequest(ctx)
+	if err != nil {
+		return brazeEmailTemplateModel{}, err
+	}
 
 	updateResponse, updateErr := c.client.UpdateEmailTemplate(ctx, &updateRequest)
 
