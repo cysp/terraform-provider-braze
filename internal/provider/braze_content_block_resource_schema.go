@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -20,7 +21,7 @@ func BrazeContentBlockResourceIdentitySchema() identityschema.Schema {
 	}
 }
 
-func BrazeContentBlockResourceSchema(ctx context.Context) schema.Schema {
+func BrazeContentBlockResourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
 		Description: "Manage Braze Content Blocks, reusable snippets for messaging campaigns.",
 		Attributes: map[string]schema.Attribute{
@@ -45,8 +46,8 @@ func BrazeContentBlockResourceSchema(ctx context.Context) schema.Schema {
 				Required:    true,
 			},
 			"tags": schema.ListAttribute{
-				Description: "A list of tags to categorize the content block.",
-				CustomType:  NewTypedListNull[types.String]().CustomType(ctx),
+				Description: "Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.",
+				Validators:  []validator.List{tagsValidator{}},
 				ElementType: types.StringType,
 				Optional:    true,
 			},

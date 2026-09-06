@@ -163,7 +163,7 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 			Name:        types.StringValue("Created content block"),
 			Description: types.StringValue("created description"),
 			Content:     types.StringValue("<p>Created</p>"),
-			Tags:        NewTypedListFromStringSlice([]string{"tag2"}),
+			Tags:        stringListValue([]string{"tag2"}),
 		})
 
 		require.NoError(t, err)
@@ -171,7 +171,7 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 		assert.Equal(t, "Created content block", actual.Name.ValueString())
 		assert.Equal(t, "created description", actual.Description.ValueString())
 		assert.Equal(t, "<p>Created</p>", actual.Content.ValueString())
-		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+		assert.True(t, stringListValue([]string{"tag2"}).Equal(actual.Tags))
 	})
 
 	t.Run("update returns hydrated model", func(t *testing.T) {
@@ -188,7 +188,7 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 			Name:        types.StringValue("Updated content block"),
 			Description: types.StringValue("updated description"),
 			Content:     types.StringValue("<p>Updated</p>"),
-			Tags:        NewTypedListFromStringSlice([]string{"tag2"}),
+			Tags:        stringListValue([]string{"tag2"}),
 		})
 
 		require.NoError(t, err)
@@ -196,7 +196,7 @@ func TestGeneratedContentBlockClient(t *testing.T) {
 		assert.Equal(t, "Updated content block", actual.Name.ValueString())
 		assert.Equal(t, "updated description", actual.Description.ValueString())
 		assert.Equal(t, "<p>Updated</p>", actual.Content.ValueString())
-		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+		assert.True(t, stringListValue([]string{"tag2"}).Equal(actual.Tags))
 	})
 
 	t.Run("list hydrates resources", func(t *testing.T) {
@@ -246,7 +246,7 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 			Body:            types.StringValue("<p>Created</p>"),
 			PlaintextBody:   types.StringValue("Created"),
 			Preheader:       types.StringValue("Created preview"),
-			Tags:            NewTypedListFromStringSlice([]string{"tag2"}),
+			Tags:            stringListValue([]string{"tag2"}),
 			ShouldInlineCSS: types.BoolValue(true),
 		})
 
@@ -257,7 +257,7 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 		assert.Equal(t, "<p>Created</p>", actual.Body.ValueString())
 		assert.Equal(t, "Created", actual.PlaintextBody.ValueString())
 		assert.Equal(t, "Created preview", actual.Preheader.ValueString())
-		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+		assert.True(t, stringListValue([]string{"tag2"}).Equal(actual.Tags))
 		assert.True(t, actual.ShouldInlineCSS.ValueBool())
 	})
 
@@ -278,7 +278,7 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 			Body:            types.StringValue("<p>Updated</p>"),
 			PlaintextBody:   types.StringValue("Updated"),
 			Preheader:       types.StringValue("Updated preview"),
-			Tags:            NewTypedListFromStringSlice([]string{"tag2"}),
+			Tags:            stringListValue([]string{"tag2"}),
 			ShouldInlineCSS: types.BoolValue(false),
 		})
 
@@ -289,7 +289,7 @@ func TestGeneratedEmailTemplateClient(t *testing.T) {
 		assert.Equal(t, "<p>Updated</p>", actual.Body.ValueString())
 		assert.Equal(t, "Updated", actual.PlaintextBody.ValueString())
 		assert.Equal(t, "Updated preview", actual.Preheader.ValueString())
-		assert.Equal(t, []string{"tag2"}, TypedListToStringSlice(actual.Tags))
+		assert.True(t, stringListValue([]string{"tag2"}).Equal(actual.Tags))
 		assert.False(t, actual.ShouldInlineCSS.ValueBool())
 	})
 

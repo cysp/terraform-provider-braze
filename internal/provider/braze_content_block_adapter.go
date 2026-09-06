@@ -33,7 +33,10 @@ func newGeneratedContentBlockClient(client *brazeclient.Client) generatedContent
 }
 
 func (c generatedContentBlockClient) Create(ctx context.Context, plan brazeContentBlockModel) (brazeContentBlockModel, error) {
-	createRequest := plan.ToCreateContentBlockRequest()
+	createRequest, err := plan.ToCreateContentBlockRequest(ctx)
+	if err != nil {
+		return brazeContentBlockModel{}, err
+	}
 
 	createResponse, createErr := c.client.CreateContentBlock(ctx, &createRequest)
 
@@ -73,7 +76,10 @@ func (c generatedContentBlockClient) Read(ctx context.Context, id string) (braze
 }
 
 func (c generatedContentBlockClient) Update(ctx context.Context, plan brazeContentBlockModel) (brazeContentBlockModel, error) {
-	updateRequest := plan.ToUpdateContentBlockRequest()
+	updateRequest, err := plan.ToUpdateContentBlockRequest(ctx)
+	if err != nil {
+		return brazeContentBlockModel{}, err
+	}
 
 	updateResponse, updateErr := c.client.UpdateContentBlock(ctx, &updateRequest)
 

@@ -32,7 +32,7 @@ resource "braze_content_block" "example" {
 ### Optional
 
 - `description` (String) An optional description of the content block.
-- `tags` (List of String) A list of tags to categorize the content block.
+- `tags` (List of String) Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.
 
 ### Read-Only
 

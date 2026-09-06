@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"context"
+
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 )
 
-func (m brazeEmailTemplateModel) ToUpdateEmailTemplateRequest() brazeclient.UpdateEmailTemplateRequest {
+func (m brazeEmailTemplateModel) ToUpdateEmailTemplateRequest(ctx context.Context) (brazeclient.UpdateEmailTemplateRequest, error) {
 	req := brazeclient.UpdateEmailTemplateRequest{
 		EmailTemplateID: m.ID.ValueString(),
 		TemplateName:    brazeclient.NewOptString(m.TemplateName.ValueString()),
@@ -20,12 +22,16 @@ func (m brazeEmailTemplateModel) ToUpdateEmailTemplateRequest() brazeclient.Upda
 		req.ShouldInlineCSS.SetToNull()
 	}
 
-	tags := TypedListToStringSlice(m.Tags)
+	tags, err := stringListToSlice(ctx, m.Tags)
+	if err != nil {
+		return req, err
+	}
+
 	if tags != nil {
 		req.Tags.SetTo(tags)
 	} else {
 		req.Tags.SetToNull()
 	}
 
-	return req
+	return req, nil
 }
