@@ -16,10 +16,8 @@ func (m brazeEmailTemplateModel) ToUpdateEmailTemplateRequest(ctx context.Contex
 		Preheader:       brazeclient.NewOptNilPointerString(m.Preheader.ValueStringPointer()),
 	}
 
-	if !m.ShouldInlineCSS.IsNull() {
+	if !m.ShouldInlineCSS.IsNull() && !m.ShouldInlineCSS.IsUnknown() {
 		req.ShouldInlineCSS.SetTo(m.ShouldInlineCSS.ValueBool())
-	} else {
-		req.ShouldInlineCSS.SetToNull()
 	}
 
 	tags, err := stringListToSlice(ctx, m.Tags)

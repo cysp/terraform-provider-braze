@@ -60,7 +60,8 @@ func BrazeEmailTemplateResourceSchema(_ context.Context) schema.Schema {
 				Optional:    true,
 			},
 			"should_inline_css": schema.BoolAttribute{
-				Description: "Whether Braze should inline CSS for this template. When unset, Braze uses the App Group default.",
+				Description: "Whether Braze should inline CSS for this template. Omit on creation to use the App Group default. When omitted for an existing template, its observed value is retained. Set explicitly to manage this setting.",
+				Computed:    true,
 				Optional:    true,
 			},
 		},

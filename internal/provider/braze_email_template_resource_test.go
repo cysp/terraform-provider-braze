@@ -113,7 +113,7 @@ func TestAccBrazeEmailTemplate(t *testing.T) {
 					resource.TestCheckNoResourceAttr("braze_email_template.test", "plaintext_body"),
 					resource.TestCheckNoResourceAttr("braze_email_template.test", "preheader"),
 					resource.TestCheckNoResourceAttr("braze_email_template.test", "tags"),
-					resource.TestCheckNoResourceAttr("braze_email_template.test", "should_inline_css"),
+					resource.TestCheckResourceAttr("braze_email_template.test", "should_inline_css", "false"),
 				),
 			},
 			{

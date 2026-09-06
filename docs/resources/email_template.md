@@ -36,7 +36,7 @@ resource "braze_email_template" "example" {
 
 - `plaintext_body` (String) A plaintext version of the email template body.
 - `preheader` (String) The email preheader used to generate previews in some clients.
-- `should_inline_css` (Boolean) Whether Braze should inline CSS for this template. When unset, Braze uses the App Group default.
+- `should_inline_css` (Boolean) Whether Braze should inline CSS for this template. Omit on creation to use the App Group default. When omitted for an existing template, its observed value is retained. Set explicitly to manage this setting.
 - `tags` (List of String) Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.
 
 ### Read-Only
