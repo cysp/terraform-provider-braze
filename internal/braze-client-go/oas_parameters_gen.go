@@ -1286,6 +1286,63 @@ func decodeListEmailTemplatesParams(args [0]string, argsEscaped bool, r *http.Re
 	return params, nil
 }
 
+// ListSDKAuthenticationKeysParams is parameters of listSDKAuthenticationKeys operation.
+type ListSDKAuthenticationKeysParams struct {
+	AppID string
+}
+
+func unpackListSDKAuthenticationKeysParams(packed middleware.Parameters) (params ListSDKAuthenticationKeysParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "app_id",
+			In:   "query",
+		}
+		params.AppID = packed[key].(string)
+	}
+	return params
+}
+
+func decodeListSDKAuthenticationKeysParams(args [0]string, argsEscaped bool, r *http.Request) (params ListSDKAuthenticationKeysParams, _ error) {
+	q := uri.NewQueryDecoder(r.URL.Query())
+	// Decode query: app_id.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "app_id",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.AppID = c
+				return nil
+			}); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "app_id",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ReplaceCatalogItemParams is parameters of replaceCatalogItem operation.
 type ReplaceCatalogItemParams struct {
 	CatalogName string

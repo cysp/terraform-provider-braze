@@ -1,0 +1,19 @@
+CreateSDKAuthenticationKeyRequest:
+  type: object
+  required:
+    - app_id
+    - rsa_public_key_str
+    - description
+  properties:
+    app_id:
+      type: string
+      description: The app API identifier.
+    rsa_public_key_str:
+      type: string
+      description: The RSA public key string.
+    description:
+      type: string
+      description: The description of the SDK Authentication key.
+    make_primary:
+      type: boolean
+      description: Whether to make the key primary when it is created.
