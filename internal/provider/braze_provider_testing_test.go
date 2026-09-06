@@ -1,51 +1,113 @@
 package provider_test
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
+	"net/url"
 	"testing"
 
 	. "github.com/cysp/terraform-provider-braze/internal/provider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func BrazeProviderMockedResourceTest(t *testing.T, server http.Handler, testcase resource.TestCase) {
+func BrazeProviderMockedResourceTest(t *testing.T, handler http.Handler, testcase resource.TestCase) {
 	t.Helper()
 
-	brazeProviderMockableResourceTest(t, server, true, testcase)
+	if testcase.ProtoV6ProviderFactories != nil {
+		t.Fatal("testcase.ProtoV6ProviderFactories must be nil")
+	}
+
+	var testserver *httptest.Server
+	if handler != nil {
+		testserver = httptest.NewServer(handler)
+		t.Cleanup(testserver.Close)
+
+		if testcase.CheckDestroy == nil {
+			testcase.CheckDestroy = checkBrazeDestroy(t, testserver)
+		}
+	}
+
+	testcase.ProtoV6ProviderFactories = makeTestAccProtoV6ProviderFactories(BrazeProviderOptionsWithHTTPTestServer(testserver)...)
+	resource.Test(t, testcase)
 }
 
-func BrazeProviderMockableResourceTest(t *testing.T, server http.Handler, testcase resource.TestCase) {
+// Check the remote outcome even for APIs that intentionally retain the object.
+//
+//nolint:gocognit // Check the four distinct remote destroy contracts in one test hook.
+func checkBrazeDestroy(t *testing.T, server *httptest.Server) resource.TestCheckFunc {
 	t.Helper()
 
-	brazeProviderMockableResourceTest(t, server, false, testcase)
-}
+	return func(state *terraform.State) error {
+		for _, item := range state.RootModule().Resources {
+			var endpoint string
 
-func brazeProviderMockableResourceTest(t *testing.T, handler http.Handler, alwaysMock bool, testcase resource.TestCase) {
-	t.Helper()
+			status := http.StatusNotFound
 
-	switch {
-	case alwaysMock || os.Getenv("TF_ACC_MOCKED") != "":
-		if testcase.ProtoV6ProviderFactories != nil {
-			t.Fatal("tc.ProtoV6ProviderFactories must be nil")
+			switch item.Type {
+			case "braze_catalog":
+				endpoint = "/catalogs"
+				status = http.StatusOK
+			case "braze_catalog_item":
+				endpoint = "/catalogs/" + url.PathEscape(item.Primary.Attributes["catalog_name"]) + "/items/" + url.PathEscape(item.Primary.Attributes["item_id"])
+			case "braze_content_block":
+				endpoint = "/content_blocks/info?content_block_id=" + url.QueryEscape(item.Primary.ID)
+				status = http.StatusOK
+			case "braze_email_template":
+				endpoint = "/templates/email/info?email_template_id=" + url.QueryEscape(item.Primary.ID)
+				status = http.StatusOK
+			default:
+				continue
+			}
+
+			request, err := http.NewRequestWithContext(t.Context(), http.MethodGet, server.URL+endpoint, nil)
+			if err != nil {
+				return fmt.Errorf("build destroy check: %w", err)
+			}
+
+			request.Header.Set("Authorization", "Bearer 12345")
+
+			response, err := server.Client().Do(request)
+			if err != nil {
+				return fmt.Errorf("read remote object after destroy: %w", err)
+			}
+
+			body, readErr := io.ReadAll(response.Body)
+
+			closeErr := response.Body.Close()
+			if readErr != nil || closeErr != nil {
+				return fmt.Errorf("read destroy response: %w", errors.Join(readErr, closeErr))
+			}
+
+			if response.StatusCode != status {
+				return fmt.Errorf("%w: %s destroy expected HTTP %d, got %d", errUnexpectedDestroyOutcome, item.Type, status, response.StatusCode)
+			}
+
+			if item.Type == "braze_catalog" {
+				var result struct {
+					Catalogs []struct {
+						Name string `json:"name"`
+					} `json:"catalogs"`
+				}
+
+				err := json.Unmarshal(body, &result)
+				if err != nil {
+					return fmt.Errorf("decode catalogs after destroy: %w", err)
+				}
+
+				for _, catalog := range result.Catalogs {
+					if catalog.Name == item.Primary.Attributes["name"] {
+						return fmt.Errorf("%w: catalog %s still exists after destroy", errUnexpectedDestroyOutcome, catalog.Name)
+					}
+				}
+			}
 		}
 
-		var testserver *httptest.Server
-		if handler != nil {
-			testserver = httptest.NewServer(handler)
-			t.Cleanup(testserver.Close)
-		}
-
-		testcase.ProtoV6ProviderFactories = makeTestAccProtoV6ProviderFactories(BrazeProviderOptionsWithHTTPTestServer(testserver)...)
-		resource.Test(t, testcase)
-
-	default:
-		if testcase.ProtoV6ProviderFactories == nil {
-			testcase.ProtoV6ProviderFactories = testAccProtoV6ProviderFactories
-		}
-
-		resource.Test(t, testcase)
+		return nil
 	}
 }
 
@@ -60,3 +122,5 @@ func BrazeProviderOptionsWithHTTPTestServer(testserver *httptest.Server) []Braze
 		WithAPIKey("12345"),
 	}
 }
+
+var errUnexpectedDestroyOutcome = errors.New("unexpected remote destroy outcome")
