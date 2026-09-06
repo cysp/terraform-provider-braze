@@ -51,9 +51,10 @@ func TestAccBrazeContentBlock(t *testing.T) {
 				),
 			},
 			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ImportState:     true,
-				ResourceName:    "braze_content_block.test",
+				ConfigDirectory:   config.TestNameDirectory(),
+				ImportState:       true,
+				ImportStateVerify: true,
+				ResourceName:      "braze_content_block.test",
 			},
 			{
 				ConfigDirectory: config.TestNameDirectory(),

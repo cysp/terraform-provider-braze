@@ -33,3 +33,11 @@ resource "braze_content_block" "example" {
 - `description` (String) An optional description of the content block.
 - `id` (String, Deprecated) The Braze-generated ID. Use import to manage an existing object.
 - `tags` (List of String) Tags that already exist in Braze. Null elements are invalid; an empty list is sent as an empty array.
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import braze_content_block.example content-block-id
+```
