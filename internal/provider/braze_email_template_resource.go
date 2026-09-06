@@ -53,6 +53,10 @@ func (r *brazeEmailTemplateResource) Create(ctx context.Context, req resource.Cr
 
 	data, err := r.providerData.emailTemplates.Create(ctx, plan)
 	if err != nil {
+		if data.ID.ValueString() != "" {
+			resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
+		}
+
 		if isBrazeObjectNotFound(err) {
 			resp.Diagnostics.AddError("Email Template not found after creation", detailFromError(err))
 		} else {

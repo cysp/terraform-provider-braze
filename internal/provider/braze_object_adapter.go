@@ -2,12 +2,15 @@ package provider
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
 const brazeObjectListPageLimit = 100
 
 var errBrazeObjectEmptyResponse = errors.New("empty Braze object response")
+
+var errBrazeObjectIdentityMismatch = errors.New("braze returned an unexpected object identity")
 
 type brazeObjectListQuery struct {
 	Limit           int64
@@ -137,4 +140,12 @@ func applyBrazeObjectListQuery(
 	if query.ModifiedBefore != nil {
 		setModifiedBefore(*query.ModifiedBefore)
 	}
+}
+
+func validateBrazeObjectID(expected, actual string) error {
+	if actual == "" || actual != expected {
+		return fmt.Errorf("%w: requested %q, received %q", errBrazeObjectIdentityMismatch, expected, actual)
+	}
+
+	return nil
 }

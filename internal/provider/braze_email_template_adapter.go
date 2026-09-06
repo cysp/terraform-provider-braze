@@ -6,6 +6,7 @@ import (
 	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -46,12 +47,28 @@ func (c generatedEmailTemplateClient) Create(ctx context.Context, plan brazeEmai
 		return brazeEmailTemplateModel{}, errBrazeObjectEmptyResponse
 	}
 
-	return c.Read(ctx, createResponse.GetEmailTemplateID())
+	objectID := createResponse.GetEmailTemplateID()
+	if objectID == "" {
+		return brazeEmailTemplateModel{}, errBrazeObjectEmptyResponse
+	}
+
+	data, err := c.Read(ctx, objectID)
+	if err != nil {
+		// Preserve the accepted request and generated identity for recovery after a failed create.
+		plan.ID = types.StringValue(objectID)
+		if plan.ShouldInlineCSS.IsUnknown() {
+			plan.ShouldInlineCSS = types.BoolNull()
+		}
+
+		return plan, fmt.Errorf("created object %s but could not read it: %w", objectID, err)
+	}
+
+	return data, nil
 }
 
-func (c generatedEmailTemplateClient) Read(ctx context.Context, id string) (brazeEmailTemplateModel, error) {
+func (c generatedEmailTemplateClient) Read(ctx context.Context, objectID string) (brazeEmailTemplateModel, error) {
 	getParams := brazeclient.GetEmailTemplateInfoParams{
-		EmailTemplateID: id,
+		EmailTemplateID: objectID,
 	}
 
 	getResponse, getErr := c.client.GetEmailTemplateInfo(ctx, getParams)
@@ -66,6 +83,11 @@ func (c generatedEmailTemplateClient) Read(ctx context.Context, id string) (braz
 
 	if getResponse == nil {
 		return brazeEmailTemplateModel{}, errBrazeObjectEmptyResponse
+	}
+
+	err := validateBrazeObjectID(objectID, getResponse.GetEmailTemplateID())
+	if err != nil {
+		return brazeEmailTemplateModel{}, err
 	}
 
 	return NewBrazeEmailTemplateModelFromGetEmailTemplateInfoResponse(*getResponse), nil
@@ -87,6 +109,11 @@ func (c generatedEmailTemplateClient) Update(ctx context.Context, plan brazeEmai
 
 	if updateResponse == nil {
 		return brazeEmailTemplateModel{}, errBrazeObjectEmptyResponse
+	}
+
+	err = validateBrazeObjectID(plan.ID.ValueString(), updateResponse.GetEmailTemplateID())
+	if err != nil {
+		return brazeEmailTemplateModel{}, err
 	}
 
 	return c.Read(ctx, updateResponse.GetEmailTemplateID())

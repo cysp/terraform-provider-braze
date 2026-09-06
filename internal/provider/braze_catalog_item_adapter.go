@@ -44,7 +44,12 @@ func (c generatedCatalogItemClient) Create(ctx context.Context, plan brazeCatalo
 		return brazeCatalogItemModel{}, fmt.Errorf("create catalog item: %w", createErr)
 	}
 
-	return c.Read(ctx, plan.CatalogName.ValueString(), plan.ItemID.ValueString())
+	data, err := c.Read(ctx, plan.CatalogName.ValueString(), plan.ItemID.ValueString())
+	if err != nil {
+		return plan, fmt.Errorf("created catalog item %s but could not read it: %w", plan.ID.ValueString(), err)
+	}
+
+	return data, nil
 }
 
 func (c generatedCatalogItemClient) Read(ctx context.Context, catalogName, itemID string) (brazeCatalogItemModel, error) {
@@ -57,8 +62,13 @@ func (c generatedCatalogItemClient) Read(ctx context.Context, catalogName, itemI
 		return brazeCatalogItemModel{}, classifyBrazeObjectReadError(getErr)
 	}
 
-	if response == nil || len(response.GetItems()) == 0 {
+	if response == nil || len(response.GetItems()) != 1 {
 		return brazeCatalogItemModel{}, errBrazeObjectEmptyResponse
+	}
+
+	err := validateBrazeObjectID(itemID, response.GetItems()[0].GetID())
+	if err != nil {
+		return brazeCatalogItemModel{}, err
 	}
 
 	return newBrazeCatalogItemModelFromCatalogItem(catalogName, response.GetItems()[0])

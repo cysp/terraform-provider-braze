@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -54,6 +55,65 @@ func configureHTTPResource(t *testing.T, r resource.Resource, handler http.Handl
 	require.False(t, response.Diagnostics.HasError())
 }
 
+func TestCreateRetainsIdentityWhenReadFails(t *testing.T) {
+	t.Parallel()
+
+	for name, test := range map[string]struct {
+		r            resource.Resource
+		model        any
+		response, id string
+	}{
+		"content block": {
+			NewBrazeContentBlockResource(),
+			brazeContentBlockModel{IDIdentityModel: IDIdentityModel{ID: types.StringUnknown()}, Tags: types.ListNull(types.StringType), Name: types.StringValue("welcome"), Content: types.StringValue("Hello")},
+			`{"content_block_id":"created","liquid_tag":"welcome","created_at":"2026-09-06T00:00:00Z","message":"success"}`, "created",
+		},
+		"email template": {
+			NewBrazeEmailTemplateResource(),
+			brazeEmailTemplateModel{IDIdentityModel: IDIdentityModel{ID: types.StringUnknown()}, Tags: types.ListNull(types.StringType), TemplateName: types.StringValue("welcome"), Subject: types.StringValue("Welcome"), Body: types.StringValue("Hello"), ShouldInlineCSS: types.BoolUnknown()},
+			`{"email_template_id":"created","message":"success"}`, "created",
+		},
+		"catalog item": {
+			NewBrazeCatalogItemResource(),
+			brazeCatalogItemModel{ID: types.StringUnknown(), CatalogName: types.StringValue("products"), ItemID: types.StringValue("created"), ValuesJSON: jsontypes.NewNormalizedValue(`{"active":true}`)},
+			`{"message":"success"}`, "products/created",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			creates := 0
+
+			configureHTTPResource(t, test.r, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+
+				if r.Method == http.MethodPost {
+					creates++
+
+					w.WriteHeader(http.StatusCreated)
+					_, _ = w.Write([]byte(test.response))
+
+					return
+				}
+
+				w.WriteHeader(http.StatusForbidden)
+				_, _ = w.Write([]byte(`{"message":"permission denied"}`))
+			}))
+			plan := lifecyclePlan(t, test.r, test.model)
+			response := resource.CreateResponse{State: tfsdk.State{Schema: plan.Schema}, Identity: lifecycleIdentity(t, test.r)}
+			test.r.Create(t.Context(), resource.CreateRequest{Plan: plan}, &response)
+			assert.Equal(t, 1, creates)
+			require.True(t, response.Diagnostics.HasError())
+			require.False(t, response.State.Raw.IsNull(), "A completed create must remain recoverable after a read error")
+
+			var id types.String
+			require.False(t, response.State.GetAttribute(t.Context(), path.Root("id"), &id).HasError())
+			assert.Equal(t, test.id, id.ValueString())
+			assert.True(t, response.State.Raw.IsFullyKnown())
+		})
+	}
+}
+
 func TestReadOnlyRemovesConfirmedMissingCatalogItems(t *testing.T) {
 	t.Parallel()
 
@@ -82,6 +142,34 @@ func TestReadOnlyRemovesConfirmedMissingCatalogItems(t *testing.T) {
 			r.Read(t.Context(), resource.ReadRequest{State: state}, &response)
 			assert.Equal(t, test.missing, response.State.Raw.IsNull(), "%v", response.Diagnostics)
 			assert.Equal(t, !test.missing, response.Diagnostics.HasError(), "%v", response.Diagnostics)
+		})
+	}
+}
+
+func TestReadRejectsUnexpectedIdentity(t *testing.T) {
+	t.Parallel()
+
+	for name, test := range map[string]struct {
+		r     resource.Resource
+		model any
+		body  string
+	}{
+		"content block":  {NewBrazeContentBlockResource(), brazeContentBlockModel{IDIdentityModel: IDIdentityModel{ID: types.StringValue("expected")}, Tags: types.ListNull(types.StringType), Name: types.StringValue("welcome"), Content: types.StringValue("Hello")}, `{"content_block_id":"other","name":"welcome","content":"Hello"}`},
+		"email template": {NewBrazeEmailTemplateResource(), brazeEmailTemplateModel{IDIdentityModel: IDIdentityModel{ID: types.StringValue("expected")}, Tags: types.ListNull(types.StringType), TemplateName: types.StringValue("welcome"), Subject: types.StringValue("Welcome"), Body: types.StringValue("Hello")}, `{"email_template_id":"other","template_name":"welcome","subject":"Welcome","body":"Hello"}`},
+		"catalog item":   {NewBrazeCatalogItemResource(), brazeCatalogItemModel{ID: types.StringValue("products/expected"), CatalogName: types.StringValue("products"), ItemID: types.StringValue("expected"), ValuesJSON: jsontypes.NewNormalizedValue(`{}`)}, `{"items":[{"id":"other"}],"message":"success"}`},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			configureHTTPResource(t, test.r, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(test.body))
+			}))
+			plan := lifecyclePlan(t, test.r, test.model)
+			state := tfsdk.State(plan)
+			response := resource.ReadResponse{State: state, Identity: lifecycleIdentity(t, test.r)}
+			test.r.Read(t.Context(), resource.ReadRequest{State: state}, &response)
+			assert.True(t, response.Diagnostics.HasError())
+			assert.True(t, state.Raw.Equal(response.State.Raw), "A mismatched response must not change state")
 		})
 	}
 }
