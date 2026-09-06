@@ -1,9 +1,10 @@
 package provider
 
 type brazeProviderData struct {
-	contentBlocks         contentBlockClient
-	emailTemplates        emailTemplateClient
-	catalogs              catalogClient
-	catalogItems          catalogItemClient
-	sdkAuthenticationKeys sdkAuthenticationKeyClient
+	contentBlocks                  contentBlockClient
+	emailTemplates                 emailTemplateClient
+	catalogs                       catalogClient
+	catalogItems                   catalogItemClient
+	sdkAuthenticationKeys          sdkAuthenticationKeyClient
+	sdkAuthenticationKeyCollection sdkAuthenticationKeysClient
 }
