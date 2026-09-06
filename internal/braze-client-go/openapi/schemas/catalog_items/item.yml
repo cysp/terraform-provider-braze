@@ -2,7 +2,8 @@ CatalogItem:
   type: object
   required:
     - id
-  additionalProperties: true
+  additionalProperties:
+    x-ogen-type: encoding/json.RawMessage
   properties:
     id:
       type: string

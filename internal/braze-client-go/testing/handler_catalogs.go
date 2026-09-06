@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"sort"
 	"strconv"
 	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	"github.com/go-faster/jx"
 )
 
 const catalogItemsPageSize = 50
@@ -70,14 +70,9 @@ func (s *Server) SetCatalogItem(catalogName string, itemID string, fields map[st
 		s.handler.catalogItems[catalogName] = map[string]brazeclient.CatalogItem{}
 	}
 
-	additional := make(brazeclient.CatalogItemAdditional, len(fields))
-	for name, value := range fields {
-		additional[name] = jx.Raw(value)
-	}
-
 	s.handler.catalogItems[catalogName][itemID] = brazeclient.CatalogItem{
 		ID:              itemID,
-		AdditionalProps: additional,
+		AdditionalProps: maps.Clone(brazeclient.CatalogItemAdditional(fields)),
 	}
 }
 
