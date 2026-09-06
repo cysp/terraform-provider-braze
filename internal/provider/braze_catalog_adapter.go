@@ -40,8 +40,13 @@ func (c generatedCatalogClient) Create(ctx context.Context, plan brazeCatalogMod
 		return brazeCatalogModel{}, fmt.Errorf("create catalog: %w", createErr)
 	}
 
-	if createResponse == nil || len(createResponse.GetCatalogs()) == 0 {
+	if createResponse == nil || len(createResponse.GetCatalogs()) != 1 {
 		return brazeCatalogModel{}, errBrazeObjectEmptyResponse
+	}
+
+	err = validateBrazeObjectID(plan.Name.ValueString(), createResponse.GetCatalogs()[0].GetName())
+	if err != nil {
+		return brazeCatalogModel{}, err
 	}
 
 	return newBrazeCatalogModelFromCatalog(ctx, createResponse.GetCatalogs()[0])

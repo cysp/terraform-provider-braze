@@ -105,6 +105,10 @@ func (r *brazeCatalogItemResource) Create(ctx context.Context, req resource.Crea
 
 	data, err := r.providerData.catalogItems.Create(ctx, plan)
 	if err != nil {
+		if data.ID.ValueString() != "" {
+			resp.Diagnostics.Append(setCatalogItemIdentityAndState(ctx, resp.Identity, &resp.State, data.CatalogName.ValueString(), data.ItemID.ValueString(), &data)...)
+		}
+
 		resp.Diagnostics.AddError("Failed to create Catalog Item", detailFromError(err))
 
 		return

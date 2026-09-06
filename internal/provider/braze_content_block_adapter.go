@@ -8,6 +8,7 @@ import (
 	"time"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -50,12 +51,25 @@ func (c generatedContentBlockClient) Create(ctx context.Context, plan brazeConte
 		return brazeContentBlockModel{}, errBrazeObjectEmptyResponse
 	}
 
-	return c.Read(ctx, createResponse.GetContentBlockID())
+	objectID := createResponse.GetContentBlockID()
+	if objectID == "" {
+		return brazeContentBlockModel{}, errBrazeObjectEmptyResponse
+	}
+
+	data, err := c.Read(ctx, objectID)
+	if err != nil {
+		// Preserve the accepted request and generated identity for recovery after a failed create.
+		plan.ID = types.StringValue(objectID)
+
+		return plan, fmt.Errorf("created object %s but could not read it: %w", objectID, err)
+	}
+
+	return data, nil
 }
 
-func (c generatedContentBlockClient) Read(ctx context.Context, id string) (brazeContentBlockModel, error) {
+func (c generatedContentBlockClient) Read(ctx context.Context, objectID string) (brazeContentBlockModel, error) {
 	getParams := brazeclient.GetContentBlockInfoParams{
-		ContentBlockID: id,
+		ContentBlockID: objectID,
 	}
 
 	getResponse, getErr := c.client.GetContentBlockInfo(ctx, getParams)
@@ -70,6 +84,11 @@ func (c generatedContentBlockClient) Read(ctx context.Context, id string) (braze
 
 	if getResponse == nil {
 		return brazeContentBlockModel{}, errBrazeObjectEmptyResponse
+	}
+
+	err := validateBrazeObjectID(objectID, getResponse.GetContentBlockID())
+	if err != nil {
+		return brazeContentBlockModel{}, err
 	}
 
 	return NewBrazeContentBlockModelFromGetContentBlockInfoResponse(*getResponse), nil
@@ -94,6 +113,11 @@ func (c generatedContentBlockClient) Update(ctx context.Context, plan brazeConte
 	}
 
 	contentBlockID, err := contentBlockIDFromUpdateContentBlockResponse(updateResponse)
+	if err != nil {
+		return brazeContentBlockModel{}, err
+	}
+
+	err = validateBrazeObjectID(plan.ID.ValueString(), contentBlockID)
 	if err != nil {
 		return brazeContentBlockModel{}, err
 	}

@@ -53,6 +53,10 @@ func (r *brazeContentBlockResource) Create(ctx context.Context, req resource.Cre
 
 	data, err := r.providerData.contentBlocks.Create(ctx, plan)
 	if err != nil {
+		if data.ID.ValueString() != "" {
+			resp.Diagnostics.Append(setIdentityAndState(ctx, resp.Identity, &resp.State, data.ID.ValueString(), &data)...)
+		}
+
 		if isBrazeObjectNotFound(err) {
 			resp.Diagnostics.AddError("Content Block not found after creation", detailFromError(err))
 		} else {
