@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -57,22 +58,19 @@ func (r *brazeCatalogItemResource) ValidateConfig(ctx context.Context, req resou
 }
 
 func (r *brazeCatalogItemResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	if req.ID != "" || req.Identity == nil {
-		resp.Diagnostics.AddError(
-			"Invalid import identity",
-			"Import catalog items with an identity import block containing `catalog_name` and `item_id`.",
-		)
-
-		return
-	}
-
 	var (
 		catalogName types.String
 		itemID      types.String
 	)
 
-	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("catalog_name"), &catalogName)...)
-	resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("item_id"), &itemID)...)
+	if req.ID != "" {
+		name, id, _ := strings.Cut(req.ID, "/")
+		catalogName = types.StringValue(name)
+		itemID = types.StringValue(id)
+	} else if req.Identity != nil {
+		resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("catalog_name"), &catalogName)...)
+		resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("item_id"), &itemID)...)
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -81,7 +79,7 @@ func (r *brazeCatalogItemResource) ImportState(ctx context.Context, req resource
 	if catalogName.ValueString() == "" || itemID.ValueString() == "" {
 		resp.Diagnostics.AddError(
 			"Invalid import identity",
-			"Import catalog items with an identity import block containing non-empty `catalog_name` and `item_id`.",
+			"Use catalog_name/item_id as the import ID, or an identity import block with non-empty catalog_name and item_id attributes.",
 		)
 
 		return

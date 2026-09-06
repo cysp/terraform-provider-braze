@@ -2,11 +2,13 @@ package provider_test
 
 import (
 	"regexp"
+	"strings"
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
@@ -37,6 +39,7 @@ resource "braze_catalog_item" "test" {
   catalog_name = braze_catalog.test.name
   item_id      = "airportwest"
   values_json  = jsonencode({ name = "Airport West", active = true })
+ lifecycle { replace_triggered_by = [braze_catalog.test] }
 }
 `
 
@@ -82,7 +85,12 @@ func TestAccBrazeCatalogAndCatalogItem(t *testing.T) {
 				),
 			},
 			{
-				Config: testCatalogAndCatalogItemConfig,
+				Config: strings.ReplaceAll(testCatalogAndCatalogItemConfig, "name = \"Airport West\", active = true", "name = \"Airport West\""),
+				Check:  resource.TestCheckResourceAttr("braze_catalog_item.test", "values_json", `{"name":"Airport West"}`),
+			},
+			{
+				Config:           strings.ReplaceAll(testCatalogAndCatalogItemConfig, "Centre metadata", "Updated centre metadata"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction("braze_catalog.test", plancheck.ResourceActionDestroyBeforeCreate)}},
 			},
 		},
 	})
@@ -215,6 +223,52 @@ resource "braze_catalog_item" "test" {
 `,
 				ExpectError: regexp.MustCompile(`values_json must not include id`),
 			},
+		},
+	})
+}
+
+func TestAccBrazeCatalogIdentityImport(t *testing.T) {
+	t.Parallel()
+
+	server, _ := brazeclienttesting.NewBrazeServer()
+	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		Steps: []resource.TestStep{
+			{Config: testCatalogImportConfig},
+			{
+				Config:          testCatalogImportConfig,
+				ResourceName:    "braze_catalog.test",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+			{
+				ResourceName:                         "braze_catalog.test",
+				ImportState:                          true,
+				ImportStateId:                        "centres",
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
+			},
+			{Config: testCatalogImportConfig},
+		},
+	})
+}
+
+func TestAccBrazeCatalogItemLegacyImport(t *testing.T) {
+	t.Parallel()
+
+	server, _ := brazeclienttesting.NewBrazeServer()
+	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
+		Steps: []resource.TestStep{
+			{Config: testCatalogAndCatalogItemConfig},
+			{
+				ResourceName:      "braze_catalog_item.test",
+				ImportState:       true,
+				ImportStateId:     "centres/airportwest",
+				ImportStateVerify: true,
+			},
+			{Config: testCatalogAndCatalogItemConfig},
 		},
 	})
 }

@@ -1,0 +1,1 @@
+terraform import braze_catalog_item.example products/product_1
