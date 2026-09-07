@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -66,6 +67,9 @@ func BrazeEmailTemplateResourceSchema(_ context.Context) schema.Schema {
 				Description: "Whether Braze should inline CSS for this template. Omit on creation to use the App Group default. When omitted for an existing template, its observed value is retained. Set explicitly to manage this setting.",
 				Optional:    true,
 				Computed:    true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseNonNullStateForUnknown(),
+				},
 			},
 		},
 	}
