@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"sort"
 	"strconv"
 	"time"
@@ -136,8 +137,8 @@ func (h *Handler) ListCatalogItems(_ context.Context, params brazeclient.ListCat
 
 	if cursor, ok := params.Cursor.Get(); ok {
 		parsed, err := strconv.Atoi(cursor)
-		if err != nil {
-			return nil, fmt.Errorf("%w: %s", errInvalidCatalogItemsPageCursor, cursor)
+		if err != nil || parsed < 0 {
+			return nil, fmt.Errorf("%w: %w: %s", newStatusCodeError(http.StatusBadRequest), errInvalidCatalogItemsPageCursor, cursor)
 		}
 
 		offset = parsed
