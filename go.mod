@@ -1,6 +1,6 @@
 module github.com/cysp/terraform-provider-braze
 
-go 1.25.8
+go 1.26.8
 
 require (
 	github.com/go-faster/errors v0.8.0

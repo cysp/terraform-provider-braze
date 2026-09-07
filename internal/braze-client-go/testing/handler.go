@@ -35,8 +35,7 @@ func NewBrazeHandler() *Handler {
 func (h *Handler) NewError(_ context.Context, err error) *brazeclient.ErrorResponseStatusCode {
 	var statusCode int
 
-	var sce statusCodeError
-	if errors.As(err, &sce) {
+	if sce, ok := errors.AsType[statusCodeError](err); ok {
 		statusCode = sce.StatusCode
 	}
 

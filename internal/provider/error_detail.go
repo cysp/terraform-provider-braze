@@ -14,8 +14,7 @@ func detailFromError(err error) string {
 		return ""
 	}
 
-	var response *brazeclient.ErrorResponseStatusCode
-	if errors.As(err, &response) {
+	if response, ok := errors.AsType[*brazeclient.ErrorResponseStatusCode](err); ok {
 		codes := make([]string, 0, len(response.Response.Errors))
 		for _, raw := range response.Response.Errors {
 			var detail struct {
