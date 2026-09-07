@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
@@ -16,7 +15,7 @@ import (
 func TestAccBrazeEmailTemplateList(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	shouldInlineCSS := true
 	server.SetEmailTemplate("email-template-id", "test-email-template", "Welcome", "<p>Hello</p>", "Hello", "Preview text", []string{"tag1"}, &shouldInlineCSS)
@@ -99,7 +98,7 @@ func TestAccBrazeEmailTemplateList(t *testing.T) {
 func TestAccBrazeEmailTemplateListPagination(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	for i := range 101 {
 		id := fmt.Sprintf("email-template-pagination-%03d", i)

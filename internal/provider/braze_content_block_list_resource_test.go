@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
@@ -16,7 +15,7 @@ import (
 func TestAccBrazeContentBlockList(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	server.SetContentBlock("content-block-id", "test-content-block", "<p>This is <strong>HTML</strong> content</p>", "", []string{})
 
@@ -94,7 +93,7 @@ func TestAccBrazeContentBlockList(t *testing.T) {
 func TestAccBrazeContentBlockListPagination(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	for i := range 101 {
 		id := fmt.Sprintf("content-block-pagination-%03d", i)

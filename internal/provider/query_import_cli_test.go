@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,8 +50,7 @@ func TestAccQueryGeneratedConfigurationImportsCleanly(t *testing.T) {
 	build := exec.CommandContext(t.Context(), "go", "build", "-o", filepath.Join(pluginDir, "terraform-provider-braze"), "../..")
 	output, err := build.CombinedOutput()
 	require.NoError(t, err, "%s", output)
-	server, err := brazeclienttesting.NewBrazeServer()
-	require.NoError(t, err)
+	server := newBrazeTestServer(t)
 	server.SetCatalog("products", "Products", []brazeclient.CatalogField{{Name: "id", Type: brazeclient.CatalogFieldTypeString}, {Name: "name", Type: brazeclient.CatalogFieldTypeString}})
 	server.SetCatalogItem("products", "one", map[string]json.RawMessage{"name": json.RawMessage(`"One"`)})
 	server.SetContentBlock("block-one", "welcome", "Hello", "Welcome", []string{})

@@ -10,10 +10,22 @@ import (
 	"net/url"
 	"testing"
 
+	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	. "github.com/cysp/terraform-provider-braze/internal/provider"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
+
+func newBrazeTestServer(t *testing.T) *brazeclienttesting.Server {
+	t.Helper()
+
+	server, err := brazeclienttesting.NewBrazeServer()
+	if err != nil {
+		t.Fatalf("create Braze test server: %v", err)
+	}
+
+	return server
+}
 
 func BrazeProviderMockedResourceTest(t *testing.T, handler http.Handler, testcase resource.TestCase) {
 	t.Helper()

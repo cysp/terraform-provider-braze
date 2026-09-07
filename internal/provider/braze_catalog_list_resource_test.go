@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
@@ -18,7 +17,7 @@ import (
 func TestAccBrazeCatalogList(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 		{Name: "name", Type: brazeclient.CatalogFieldTypeString},
@@ -55,7 +54,7 @@ func TestAccBrazeCatalogList(t *testing.T) {
 func TestAccBrazeCatalogListLimitAndIdentity(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 	})
@@ -97,7 +96,7 @@ func TestAccBrazeCatalogListLimitAndIdentity(t *testing.T) {
 func TestAccBrazeCatalogListZeroLimit(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 	})
@@ -129,7 +128,7 @@ func TestAccBrazeCatalogListZeroLimit(t *testing.T) {
 func TestAccBrazeCatalogItemList(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 		{Name: "name", Type: brazeclient.CatalogFieldTypeString},
@@ -216,7 +215,7 @@ func TestAccBrazeCatalogItemList(t *testing.T) {
 func TestAccBrazeCatalogItemListPagination(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 		{Name: "name", Type: brazeclient.CatalogFieldTypeString},

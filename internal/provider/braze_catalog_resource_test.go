@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
@@ -66,7 +65,7 @@ resource "braze_catalog" "test" {
 func TestAccBrazeCatalogAndCatalogItem(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		Steps: []resource.TestStep{
@@ -99,7 +98,7 @@ func TestAccBrazeCatalogAndCatalogItem(t *testing.T) {
 func TestAccBrazeCatalogImport(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	server.SetCatalog("centres", "Centre metadata", []brazeclient.CatalogField{
 		{Name: "id", Type: brazeclient.CatalogFieldTypeString},
 		{Name: "name", Type: brazeclient.CatalogFieldTypeString},
@@ -120,7 +119,7 @@ func TestAccBrazeCatalogImport(t *testing.T) {
 func TestAccBrazeCatalogItemImport(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
@@ -143,7 +142,7 @@ func TestAccBrazeCatalogItemImport(t *testing.T) {
 func TestAccBrazeCatalogValidation(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		Steps: []resource.TestStep{
@@ -230,7 +229,7 @@ resource "braze_catalog_item" "test" {
 func TestAccBrazeCatalogIdentityImport(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 			tfversion.SkipBelow(tfversion.Version1_12_0),
@@ -258,7 +257,7 @@ func TestAccBrazeCatalogIdentityImport(t *testing.T) {
 func TestAccBrazeCatalogItemLegacyImport(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		Steps: []resource.TestStep{
 			{Config: testCatalogAndCatalogItemConfig},
