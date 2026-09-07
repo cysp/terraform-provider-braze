@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/compare"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
@@ -49,8 +48,7 @@ func TestAccBrazeSDKAuthenticationKey(t *testing.T) {
 		address = "braze_sdk_authentication_key.test"
 	)
 
-	server, err := brazeclienttesting.NewBrazeServer()
-	require.NoError(t, err)
+	server := newBrazeTestServer(t)
 
 	external := brazeclient.SDKAuthenticationKey{ID: "external", RsaPublicKey: "external public key", Description: "External key", IsPrimary: true}
 	server.SetSDKAuthenticationKey(appID, external)
@@ -143,7 +141,7 @@ func TestAccBrazeSDKAuthenticationKey(t *testing.T) {
 func TestAccBrazeSDKAuthenticationKeyRejectsPrimaryDestroy(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	primaryConfig := testSDKAuthenticationKeyPrimaryConfig("Terraform-managed SDK Authentication key")
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
@@ -171,7 +169,7 @@ func TestAccBrazeSDKAuthenticationKeyRejectsPrimaryDestroy(t *testing.T) {
 func TestAccBrazeSDKAuthenticationKeyRejectsPrimaryReplacement(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	primaryConfig := testSDKAuthenticationKeyPrimaryConfig("Terraform-managed SDK Authentication key")
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
@@ -199,7 +197,7 @@ func TestAccBrazeSDKAuthenticationKeyRejectsPrimaryReplacement(t *testing.T) {
 func TestAccBrazeSDKAuthenticationKeyRotation(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 	oldPrimary := testSDKAuthenticationKeyNamedConfig(
 		"old",
 		"Previous SDK Authentication key",
@@ -273,7 +271,7 @@ func TestAccBrazeSDKAuthenticationKeyRotation(t *testing.T) {
 func TestAccBrazeSDKAuthenticationKeyValidation(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
 		Steps: []resource.TestStep{
@@ -353,8 +351,7 @@ func testSDKAuthenticationKeyResourceBlock(name, description string, claimPrimar
 func TestAccBrazeSDKAuthenticationKeyDisappears(t *testing.T) {
 	t.Parallel()
 
-	server, err := brazeclienttesting.NewBrazeServer()
-	require.NoError(t, err)
+	server := newBrazeTestServer(t)
 
 	var oldID string
 
@@ -377,8 +374,7 @@ func TestAccBrazeSDKAuthenticationKeyDisappears(t *testing.T) {
 func TestAccBrazeSDKAuthenticationKeyCreateVerificationRecovery(t *testing.T) {
 	t.Parallel()
 
-	server, err := brazeclienttesting.NewBrazeServer()
-	require.NoError(t, err)
+	server := newBrazeTestServer(t)
 
 	var (
 		verificationUnavailable atomic.Bool
@@ -445,8 +441,7 @@ func TestAccBrazeSDKAuthenticationKeyImmutableAttributes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			server, err := brazeclienttesting.NewBrazeServer()
-			require.NoError(t, err)
+			server := newBrazeTestServer(t)
 
 			var oldID string
 

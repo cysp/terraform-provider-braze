@@ -3,7 +3,6 @@ package provider_test
 import (
 	"testing"
 
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/config"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -12,7 +11,7 @@ import (
 func TestAccBrazeEmailTemplate(t *testing.T) {
 	t.Parallel()
 
-	server, _ := brazeclienttesting.NewBrazeServer()
+	server := newBrazeTestServer(t)
 
 	configVariables1 := config.Variables{
 		"email_template_name":    config.StringVariable("test-email-template"),

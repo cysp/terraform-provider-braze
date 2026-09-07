@@ -7,11 +7,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAccBrazeInvalidNamesFailDuringPlan(t *testing.T) {
@@ -31,8 +29,7 @@ func TestAccBrazeInvalidNamesFailDuringPlan(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			server, err := brazeclienttesting.NewBrazeServer()
-			require.NoError(t, err)
+			server := newBrazeTestServer(t)
 
 			var mutations atomic.Int32
 

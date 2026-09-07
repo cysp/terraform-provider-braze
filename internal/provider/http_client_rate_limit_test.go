@@ -64,7 +64,7 @@ func TestRateLimitDelayUsesRateLimitReset(t *testing.T) {
 
 	now := time.Date(2026, time.May, 29, 10, 0, 0, 0, time.UTC)
 	header := http.Header{}
-	header.Set(rateLimitResetHeader, strconvFormatInt(now.Add(45*time.Second).Unix()))
+	header.Set(rateLimitResetHeader, strconv.FormatInt(now.Add(45*time.Second).Unix(), 10))
 
 	delay, ok := rateLimitDelay(header, func() time.Time { return now })
 	if !ok {
@@ -81,7 +81,7 @@ func TestRateLimitDelayReturnsZeroForPastReset(t *testing.T) {
 
 	now := time.Date(2026, time.May, 29, 10, 0, 0, 0, time.UTC)
 	header := http.Header{}
-	header.Set(rateLimitResetHeader, strconvFormatInt(now.Add(-time.Second).Unix()))
+	header.Set(rateLimitResetHeader, strconv.FormatInt(now.Add(-time.Second).Unix(), 10))
 
 	delay, ok := rateLimitDelay(header, func() time.Time { return now })
 	if !ok {
@@ -108,10 +108,6 @@ func TestRateLimitDelayRejectsInvalidHeaders(t *testing.T) {
 
 func fixedTime() time.Time {
 	return time.Date(2026, time.May, 29, 10, 0, 0, 0, time.UTC)
-}
-
-func strconvFormatInt(value int64) string {
-	return strconv.FormatInt(value, 10)
 }
 
 func TestRetryAfterDoesNotOverflow(t *testing.T) {
