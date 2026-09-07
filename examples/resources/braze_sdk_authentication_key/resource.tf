@@ -1,8 +1,10 @@
 variable "app_id" {
-  type = string
+  description = "The Braze app API identifier."
+  type        = string
 }
 
 variable "sdk_authentication_keys" {
+  description = "Public PEM keys and descriptions, indexed by stable logical names."
   type = map(object({
     rsa_public_key = string
     description    = string
@@ -10,7 +12,8 @@ variable "sdk_authentication_keys" {
 }
 
 variable "primary_key" {
-  type = string
+  description = "The logical name of the key to make primary."
+  type        = string
 }
 
 resource "braze_sdk_authentication_key" "this" {

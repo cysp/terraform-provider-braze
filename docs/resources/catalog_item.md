@@ -10,6 +10,14 @@ description: |-
 
 Manage a Braze catalog item using canonical JSON for arbitrary catalog item values.
 
+Updates replace all item values. Include every field you want to keep in
+`values_json`; omitting a field removes it. Use `jsonencode` for Terraform values
+and leave the Braze `id` field out of the JSON object, because `item_id` identifies
+the item.
+
+When Terraform also manages the catalog, use `replace_triggered_by` as shown
+below. Replacing a catalog deletes its items, even if its name stays the same.
+
 ## Example Usage
 
 ```terraform
@@ -52,7 +60,8 @@ resource "braze_catalog_item" "example" {
 
 ## Import
 
-Use the provider configuration for the workspace that owns the object.
+Use the provider configuration for the Braze workspace that owns the object.
+Choose either CLI import or an identity import block; they are alternatives.
 
 ```shell
 terraform import braze_catalog_item.example products/product_1

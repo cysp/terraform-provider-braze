@@ -11,7 +11,7 @@ description: |-
 Manage a Braze catalog and its field schema.
 
 ~> Changing the catalog's name, description, or fields replaces it and deletes
-all contained items. Add the catalog to each managed item's
+all contained items. Add the catalog resource to each managed item's
 `lifecycle.replace_triggered_by` to recreate those items when the catalog is
 replaced. Back up items managed outside Terraform before applying a replacement.
 
@@ -53,7 +53,8 @@ Required:
 
 ## Import
 
-Use the provider configuration for the workspace that owns the object.
+Use the provider configuration for the Braze workspace that owns the object.
+Choose either CLI import or an identity import block; they are alternatives.
 
 ```shell
 terraform import braze_catalog.products products

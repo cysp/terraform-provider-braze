@@ -24,6 +24,12 @@ resource "braze_content_block" "example" {
 }
 ```
 
+## Template content
+
+Braze Liquid is evaluated by Braze when rendering messages. In a Terraform
+quoted string or heredoc, write `$${` to pass a literal `${` to Braze. Existing
+Braze tags must be created before they are assigned through this resource.
+
 ## Optional values
 
 Omitting optional text fields or tags sends JSON null to Braze. Empty strings and
@@ -53,7 +59,8 @@ which leaves the existing object behind.
 
 ## Import
 
-Use the provider configuration for the workspace that owns the object.
+Use the provider configuration for the Braze workspace that owns the object.
+Choose either CLI import or an identity import block; they are alternatives.
 
 ```shell
 terraform import braze_content_block.example content-block-id
