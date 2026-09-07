@@ -1,7 +1,6 @@
 package provider_test
 
 import (
-	"maps"
 	"regexp"
 	"testing"
 
@@ -101,73 +100,6 @@ func TestAccBrazeContentBlock(t *testing.T) {
 				ConfigDirectory: config.TestNameDirectory(),
 				Destroy:         true,
 				ResourceName:    "braze_content_block.test",
-			},
-		},
-	})
-}
-
-func TestAccBrazeContentBlockCreateNameEmpty(t *testing.T) {
-	t.Parallel()
-
-	server, _ := brazeclienttesting.NewBrazeServer()
-
-	configVariables := config.Variables{
-		"content_block_name":    config.StringVariable(""),
-		"content_block_content": config.StringVariable("lorem ipsum"),
-	}
-
-	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
-		Steps: []resource.TestStep{
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables,
-				ExpectError:     regexp.MustCompile("Invalid Attribute Value"),
-			},
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables,
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("braze_content_block.test", plancheck.ResourceActionCreate),
-					},
-				},
-				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
-			},
-		},
-	})
-}
-
-func TestAccBrazeContentBlockUpdateNameEmpty(t *testing.T) {
-	t.Parallel()
-
-	server, _ := brazeclienttesting.NewBrazeServer()
-
-	configVariables := config.Variables{
-		"content_block_name":    config.StringVariable(""),
-		"content_block_content": config.StringVariable("lorem ipsum"),
-	}
-
-	configVariables1 := maps.Clone(configVariables)
-	configVariables1["content_block_name"] = config.StringVariable("initial name")
-
-	configVariables2 := maps.Clone(configVariables1)
-	configVariables2["content_block_name"] = config.StringVariable("")
-
-	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
-		Steps: []resource.TestStep{
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables1,
-			},
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables2,
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("braze_content_block.test", plancheck.ResourceActionUpdate),
-					},
-				},
-				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})

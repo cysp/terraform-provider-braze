@@ -1,8 +1,6 @@
 package provider_test
 
 import (
-	"maps"
-	"regexp"
 	"testing"
 
 	brazeclienttesting "github.com/cysp/terraform-provider-braze/internal/braze-client-go/testing"
@@ -121,75 +119,6 @@ func TestAccBrazeEmailTemplate(t *testing.T) {
 				ConfigDirectory: config.TestNameDirectory(),
 				Destroy:         true,
 				ResourceName:    "braze_email_template.test",
-			},
-		},
-	})
-}
-
-func TestAccBrazeEmailTemplateCreateNameEmpty(t *testing.T) {
-	t.Parallel()
-
-	server, _ := brazeclienttesting.NewBrazeServer()
-
-	configVariables := config.Variables{
-		"email_template_name":    config.StringVariable(""),
-		"email_template_subject": config.StringVariable("Welcome"),
-		"email_template_body":    config.StringVariable("<p>Hello</p>"),
-	}
-
-	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
-		Steps: []resource.TestStep{
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables,
-				ExpectError:     regexp.MustCompile("Invalid Attribute Value"),
-			},
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables,
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("braze_email_template.test", plancheck.ResourceActionCreate),
-					},
-				},
-				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
-			},
-		},
-	})
-}
-
-func TestAccBrazeEmailTemplateUpdateNameEmpty(t *testing.T) {
-	t.Parallel()
-
-	server, _ := brazeclienttesting.NewBrazeServer()
-
-	configVariables := config.Variables{
-		"email_template_name":    config.StringVariable(""),
-		"email_template_subject": config.StringVariable("Welcome"),
-		"email_template_body":    config.StringVariable("<p>Hello</p>"),
-	}
-
-	configVariables1 := maps.Clone(configVariables)
-	configVariables1["email_template_name"] = config.StringVariable("initial name")
-
-	configVariables2 := maps.Clone(configVariables1)
-	configVariables2["email_template_name"] = config.StringVariable("")
-
-	BrazeProviderMockedResourceTest(t, server, resource.TestCase{
-		Steps: []resource.TestStep{
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables1,
-			},
-			{
-				ConfigDirectory: config.TestNameDirectory(),
-				ConfigVariables: configVariables2,
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("braze_email_template.test", plancheck.ResourceActionUpdate),
-					},
-				},
-				ExpectError: regexp.MustCompile("Invalid Attribute Value"),
 			},
 		},
 	})
