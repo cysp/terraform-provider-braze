@@ -12,9 +12,18 @@ description: |-
 {{- if eq .Name "braze_catalog" }}
 
 ~> Changing the catalog's name, description, or fields replaces it and deletes
-all contained items. Add the catalog to each managed item's
+all contained items. Add the catalog resource to each managed item's
 `lifecycle.replace_triggered_by` to recreate those items when the catalog is
 replaced. Back up items managed outside Terraform before applying a replacement.
+{{- else if eq .Name "braze_catalog_item" }}
+
+Updates replace all item values. Include every field you want to keep in
+`values_json`; omitting a field removes it. Use `jsonencode` for Terraform values
+and leave the Braze `id` field out of the JSON object, because `item_id` identifies
+the item.
+
+When Terraform also manages the catalog, use `replace_triggered_by` as shown
+below. Replacing a catalog deletes its items, even if its name stays the same.
 {{- else if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") }}
 
 ~> Destroy removes Terraform state only; the remote object remains in Braze.
@@ -29,6 +38,12 @@ does not display a warning. Import an existing object to resume management.
 {{- end }}
 
 {{ if or (eq .Name "braze_content_block") (eq .Name "braze_email_template") -}}
+## Template content
+
+Braze Liquid is evaluated by Braze when rendering messages. In a Terraform
+quoted string or heredoc, write `$${` to pass a literal `${` to Braze. Existing
+Braze tags must be created before they are assigned through this resource.
+
 ## Optional values
 
 Omitting optional text fields or tags sends JSON null to Braze. Empty strings and
@@ -47,7 +62,8 @@ which leaves the existing object behind.
 
 ## Import
 
-Use the provider configuration for the workspace that owns the object.
+Use the provider configuration for the Braze workspace that owns the object.
+Choose either CLI import or an identity import block; they are alternatives.
 
 {{codefile "shell" .ImportFile }}
 
@@ -60,74 +76,4 @@ Leave `id` out of the resource configuration; use import for existing objects.
 If an existing resource configuration already sets its actual `id`, remove that
 argument while keeping the resource in state.
 {{- end }}
-{{- end }}
-{{- if eq .Name "braze_sdk_authentication_keys" }}
-
-## Initial setup and rotation
-
-For an app with no registered keys, start with one configured primary:
-
-{{tffile "examples/sdk_authentication_keys/initial/resource.tf" }}
-
-For staged rotation, add the next key as shown in Example Usage and apply.
-When appropriate, switch the primary designation while retaining both keys:
-
-{{tffile "examples/sdk_authentication_keys/promote/resource.tf" }}
-
-After migrating JWT issuers and allowing the required overlap interval, retire
-the previous key:
-
-{{tffile "examples/sdk_authentication_keys/retire/resource.tf" }}
-
-These are separate configuration snapshots for the same resource. Staging is a
-documented workflow, not an enforced rotation schedule.
-
-## Combined changes and capacity
-
-Combined changes can finish in one apply when their operation order requires no
-temporary primary. For example, starting with current (primary) and backup:
-
-{{tffile "examples/sdk_authentication_keys/combined/resource.tf" }}
-
-The provider creates next as primary, verifies the full collection, and removes
-current. If all three slots are occupied, it may first delete an omitted
-non-primary key to make space.
-
-With A primary and A, B, C registered, changing directly to B, C, D with D primary
-is rejected during planning. A cannot be deleted while primary and D cannot be
-created without a free slot. Explicitly promote B or C in a preceding apply, or
-retire another unwanted non-primary key. The provider never chooses a temporary
-primary. If unknown values prevent checking during planning, the provider checks
-again before any writes during apply.
-
-## Import and recovery
-
-Ordinary import blocks use the app ID:
-
-{{tffile "examples/sdk_authentication_keys/import/import.tf" }}
-
-Import reads the whole collection and preserves remote IDs. Configure every key
-you intend to keep. Duplicate public-key/description pairs remain observable but
-must be resolved before reconciliation. Import preserves empty remote descriptions;
-the non-empty configuration requirement means those keys need replacement with
-a description. A primary-only change may appear as removed/added set members in
-the plan; matching keys retain their Braze IDs.
-
-After a partial initial create, resolve the failure and inspect the remote keys
-and retained state. Deliberately untaint and refresh/apply, or first relinquish
-the state entry:
-
-{{tffile "examples/sdk_authentication_keys/relinquish/removed.tf" }}
-
-Then restore the resource configuration and import the app's existing collection.
-This reuses confirmed IDs. A lost create response needs manual reconciliation;
-do not assume an immediate empty list proves the request cannot take effect later.
-
-## Destroy behavior
-
-Destroy removes the management resource from Terraform state and retains every
-remote key, including the primary. Changing `app_id` leaves the old app's keys
-intact. Forced or tainted replacement of the same app retains its keys and then
-fails the non-empty-create guard; import or deliberate untainting is the recovery
-path. Remove a key from `keys` and apply when you intend to delete that member.
 {{- end }}

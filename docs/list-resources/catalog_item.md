@@ -11,7 +11,10 @@ description: |-
 Discover items in one catalog. Results identify each item by catalog_name and item_id.
 
 Requires Terraform 1.14 or later. Configure the provider for the Braze workspace
-to query and save list blocks in a `.tfquery.hcl` file.
+to query. Keep the provider configuration and `required_providers` in a `.tf`
+file and save list blocks in a `.tfquery.hcl` file in the same directory.
+Discovery reads existing objects; Terraform starts managing them only after
+an import is applied.
 
 ## Example Usage
 
@@ -35,14 +38,31 @@ list "braze_catalog_item" "existing" {
 
 ## Discover and import
 
-Generate resource configuration and import blocks with:
+Initialize the configuration, validate the query, and inspect the results:
+
+```shell
+terraform init
+terraform validate -query
+terraform query
+```
+
+Generate resource configuration and import blocks in a new file with:
 
 ```shell
 terraform query -generate-config-out=generated.tf
 ```
 
-Review the generated values and import blocks, then run `terraform plan` and
-`terraform apply` to import the objects.
+Review the generated values and import blocks, resolve any duplicate ownership
+or existing resource addresses, then run `terraform plan` and `terraform apply`
+to import the objects. Confirm the plan only imports the objects you intend to
+manage before applying.
 
-Set `include_resource = false` when only object identities are needed. Use `limit`
-to bound the number of results.
+Use `include_resource = true` when generating complete resource configuration.
+Set it to `false` when only object identities are needed. `limit` bounds the
+number of results, not the number of API requests. See HashiCorp's
+[query and bulk import workflow](https://developer.hashicorp.com/terraform/language/import/bulk).
+
+Set `config.catalog_name` to the existing catalog to inspect. Importing its items
+does not adopt the catalog schema. Generated `values_json` represents each item's
+complete values; remove a field only when you intend a subsequent apply to remove
+it in Braze.

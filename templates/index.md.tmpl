@@ -9,8 +9,12 @@ description: |-
 
 {{ .Description | trimspace }}
 
-Resources and identity import require Terraform 1.12 or later. List resources and
-`terraform query` require Terraform 1.14 or later.
+Manage catalogs, catalog items, Content Blocks, email templates, and SDK
+Authentication public keys in existing Braze workspaces and apps. Resources and
+identity import require Terraform 1.12 or later. Discovery through list resources
+and `terraform query` requires Terraform 1.14 or later. There are no data sources.
+
+## Authentication and workspace selection
 
 Set `base_url` to the REST endpoint for your
 [Braze instance](https://www.braze.com/docs/api/basics/). Supply a REST API key
@@ -20,13 +24,46 @@ the provider can contact Braze.
 
 Use the provider configuration for the workspace that owns the objects when
 importing or managing them. An import ID or identity alone does not select a
-workspace.
+workspace. The REST API key authenticates provider operations; it is distinct
+from an app API identifier and from an SDK Authentication RSA public key.
 
 {{ if .HasExample -}}
 ## Example Usage
 
 {{tffile .ExampleFile }}
 {{- end }}
+
+## Resource ownership and deletion
+
+Choose the resource whose ownership matches your workflow. Import an existing
+object before managing it, and keep each object in one Terraform state.
+
+| Resource | Ownership and destroy behavior |
+| --- | --- |
+| `braze_catalog` | Owns the catalog schema. Destroy or replacement deletes the catalog and all items, including items managed elsewhere. |
+| `braze_catalog_item` | Owns one item's complete values. Updates remove omitted fields; destroy deletes the item. |
+| `braze_content_block` | Owns a Content Block's content and settings. Destroy retains the object in Braze. |
+| `braze_email_template` | Owns an email template's content and settings. Destroy retains the template in Braze. |
+| `braze_sdk_authentication_key` | Owns one public key. Other keys remain unmanaged. Destroy deletes the key only when it is not primary. |
+| `braze_sdk_authentication_keys` | Owns one app's complete key collection. Apply deletes omitted members; destroy retains all keys and relinquishes management. |
+
+Use one SDK Authentication ownership model per app. The collection resource
+requires existing keys to be imported first. Both key resources register public
+keys only; JWT signing, private-key storage, and SDK Authentication enforcement
+remain part of your application setup.
+
+## State and credentials
+
+Use `BRAZE_API_KEY` to keep the REST API key out of configuration. If you pass it
+through a Terraform input variable, mark the variable `sensitive` and `ephemeral`
+to redact it and omit its value from saved plans and state.
+
+Resource content, catalog values, and public keys are stored in Terraform state.
+Account for confidential content when selecting state access controls and
+reviewing generated query files. Marking a value sensitive hides normal CLI
+output but does not remove it from state; see HashiCorp's
+[sensitive data guidance](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
+Never pass private-key material to `rsa_public_key`.
 
 {{ .SchemaMarkdown | trimspace }}
 
@@ -44,6 +81,7 @@ can retrieve the created object. Import and refresh require read permission only
 | Email templates | `templates.email.create`, `templates.email.info`, `templates.email.update` | `templates.email.list`; also `templates.email.info` with `include_resource = true` |
 | SDK authentication keys | `sdk_authentication.create`, `sdk_authentication.keys`, `sdk_authentication.primary`, `sdk_authentication.delete` | Not supported |
 
-See the [catalog endpoints](https://www.braze.com/docs/api/endpoints/catalogs)
-and [template endpoints](https://www.braze.com/docs/api/endpoints/templates)
+See the [catalog endpoints](https://www.braze.com/docs/api/endpoints/catalogs),
+[template endpoints](https://www.braze.com/docs/api/endpoints/templates), and
+[SDK Authentication endpoints](https://www.braze.com/docs/api/endpoints/sdk_authentication/)
 for Braze's permission requirements.
