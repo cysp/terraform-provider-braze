@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	brazeclient "github.com/cysp/terraform-provider-braze/internal/braze-client-go"
+	"github.com/ogen-go/ogen/ogenerrors"
 )
 
 type Handler struct {
@@ -33,7 +34,7 @@ func NewBrazeHandler() *Handler {
 }
 
 func (h *Handler) NewError(_ context.Context, err error) *brazeclient.ErrorResponseStatusCode {
-	var statusCode int
+	statusCode := ogenerrors.ErrorCode(err)
 
 	if sce, ok := errors.AsType[statusCodeError](err); ok {
 		statusCode = sce.StatusCode
