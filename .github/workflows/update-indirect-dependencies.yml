@@ -26,7 +26,7 @@ jobs:
 
       - name: update indirect dependencies
         run: |
-          go list -f '{{if .Indirect}}{{.Path}}{{end}}' -m all > "$RUNNER_TEMP/indirect-modules.txt"
+          go mod edit -json | jq -r '.Require[] | select(.Indirect) | .Path' > "$RUNNER_TEMP/indirect-modules.txt"
           while IFS= read -r module; do
             if [ -n "$module" ]; then
               go get -u "$module"
